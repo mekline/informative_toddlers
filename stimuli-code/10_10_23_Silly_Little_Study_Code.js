@@ -121,8 +121,9 @@ function generateProtocol(child, pastSessions) {
 	// create a random number and decide whether or not it is even/odd
 	let _RANDOM_NUM = Math.floor(Math.random() * 1001)
 	// removed the .toString bc it may not be necessary but if this doesn't work try putting it back in first
-	let even_odd = _RANDOM_NUM%2 === 0? "even" : "odd"
-	let rand_num_text = "the number is " + _RANDOM_NUM + " and it is " + even_odd
+	let _EVEN_ODD = _RANDOM_NUM%2 === 0? "even" : "odd"
+	
+	let rand_num_text = "the number is " + _RANDOM_NUM + " and it is " + _EVEN_ODD
 	
     // display the random number and whether it's even or odd
 	frames['random-number-report'] = {
