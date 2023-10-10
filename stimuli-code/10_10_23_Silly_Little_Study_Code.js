@@ -146,7 +146,7 @@ function generateProtocol(child, pastSessions) {
         	"pauseAudio": "",
         	"unpauseAudio": "",
         	"pauseVideo": "",
-        	"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/",
+        	"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
         	"audioTypes": [
             	"ogg",
             	"mp3"
