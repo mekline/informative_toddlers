@@ -1,55 +1,8 @@
-// Melissa is silly hahhahaha
-
-// no
-//another comment!
+// Lookit uses version ECMA 5 of JavaScript
 
 function generateProtocol(child, pastSessions) {
-    /*
-     * Generate the protocol for this study.
-     * 
-     * @param {Object} child 
-     *    The child currently participating in this study. Includes fields: 
-     *      givenName (string)
-     *      birthday (Date)
-     *      gender (string, 'm' / 'f' / 'o')
-     *      ageAtBirth (string, e.g. '25 weeks'. One of '40 or more weeks', 
-     *          '39 weeks' through '24 weeks', 'Under 24 weeks', or 
-     *          'Not sure or prefer not to answer')
-     *      additionalInformation (string)
-     *      languageList (string) space-separated list of languages child is 
-     *          exposed to (2-letter codes)
-     *      conditionList (string) space-separated list of conditions/characteristics
-     *          of child from registration form, as used in criteria expression
-     *          - e.g. "autism_spectrum_disorder deaf multiple_birth"
-     * 
-     *      Use child.get to access these fields: e.g., child.get('givenName') returns
-     *      the child's given name.
-     * 
-     * @param {!Array<Object>} pastSessions
-     *     List of past sessions for this child and this study, in reverse time order:
-     *     pastSessions[0] is THIS session, pastSessions[1] the previous session, 
-     *     back to pastSessions[pastSessions.length - 1] which has the very first 
-     *     session.
-     * 
-     *     Each session has the following fields, corresponding to values available
-     *     in Lookit:
-     * 
-     *     createdOn (Date)
-     *     conditions
-     *     expData
-     *     sequence
-     *     completed
-     *     globalEventTimings
-     *     completedConsentFrame (note - this list will include even "responses") 
-     *          where the user did not complete the consent form!
-     *     demographicSnapshot
-     *     isPreview
-     * 
-     * @return {Object} Protocol specification for Lookit study; object with 'frames' 
-     *    and 'sequence' keys.
-     */
     
-    // base frames that do not get changed ever
+    // base frames that do not change btwn or within participants
 
      let frames = {
         "video-config": {
@@ -160,56 +113,37 @@ function generateProtocol(child, pastSessions) {
             	"webm",
             	"mp4"
         	]
-    	},
+    	}
+	} // closing bracket for frames list object
 
-        'random-num-odd': {
-            "kind": "exp-lookit-text",
-            "showPreviousButton": true,
-            "blocks": [
-                {
-                    "emph": true,
-                    "text": "The number is ${_RANDOM_NUM} and it is odd!"
-                }
-            ]
+	// zestier frames and variables section
 
-        },
-
-		//random comment
-
-        'random-num-even':{
-            "kind": "exp-lookit-text",
-            "showPreviousButton": true,
-            "blocks": [
-                {
-                    "emph": true,
-                    "text": "The number is ${_RANDOM_NUM} and it is even!"
-                }
-            ]
-        }
+	// create a random number and decide whether or not it is even/odd
+	let _RANDOM_NUM = Math.floor(Math.random() * 1001)
+	// removed the .toString bc it may not be necessary but if this doesn't work try putting it back in first
+	let even_odd = _RANDOM_NUM%2 === 0? "even" : "odd"
+	let rand_num_text = "the number is " + _RANDOM_NUM + " and it is " + even_odd
+	
+    // display the random number and whether it's even or odd
+	frames['random-number-report'] = {
+		"kind": "exp-lookit-text",
+		"showPreviousButton": true,
+		"blocks": [
+			{
+				"emph": true,
+				"text": rand_num_text
+			}
+		]
 	}
-        let _RANDOM_NUM = Math.floor(Math.random() * 1001).toString()
-        let rand_num_text = "the number is " + _RANDOM_NUM + "and it is silly"
-        
-        frames['random-number-report'] = {
-            "kind": "exp-lookit-text",
-            "showPreviousButton": true,
-            "blocks": [
-                {
-                    "emph": true,
-                    "text": rand_num_text
-                }
-            ]
-        }
             
         
-        
-        let frame_sequence = [
-               // _RANDOM_NUM%2 === 0? "random-num-even" : "random-num-odd",
-               'random-number-report',
-                 'exit-survey']
-        var protocol = {
-            frames: frames,
-            sequence: frame_sequence
-        };
-        return protocol;
-    }
+    // this is the array of frames to be played
+	let frame_sequence = [
+			'random-number-report',
+				'exit-survey']
+	var protocol = {
+		frames: frames,
+		sequence: frame_sequence
+	};
+	return protocol;
+}
