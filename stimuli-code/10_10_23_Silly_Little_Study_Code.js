@@ -122,7 +122,6 @@ function generateProtocol(child, pastSessions) {
 	let _RANDOM_NUM = Math.floor(Math.random() * 1001)
 	// removed the .toString bc it may not be necessary but if this doesn't work try putting it back in first
 	let _EVEN_ODD = _RANDOM_NUM%2 === 0? "even" : "odd"
-	
 	let rand_num_text = "the number is " + _RANDOM_NUM + " and it is " + _EVEN_ODD
 	
     // display the random number and whether it's even or odd
@@ -136,12 +135,48 @@ function generateProtocol(child, pastSessions) {
 			}
 		]
 	}
+
+	//create a frame with 3 pictures on it and you have to click on one of the pictures
+	frames['pick-a-pic'] = {
+		"kind": "exp-lookit-images-audio",
+		"images": [
+			{
+				"id": "option1",
+				"src": "happy_remy.jpg",
+				"position": "center",
+			},
+			{
+				"id": "option2",
+				"src": "happy_zenna.jpg",
+				"position": "left",
+				"displayDelayMs": 2000
+			},
+			{
+				"id": "option3",
+				"src": "annoyed_zenna.jpg",
+				"position": "right",
+				"displayDelayMs": 2000
+			}
+		],
+		"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
+		"autoProceed": false,
+		"doRecording": true,
+		"choiceRequired": true,
+		"parentTextBlock": {
+			"text": "Choose one of the three pitctures",
+			"title": "Instructions"
+		},
+		"allowUserPause": false
+	}
             
         
     // this is the array of frames to be played
-	let frame_sequence = [
+	let frame_sequence = [ 
+		//first, try out these frames to test if they work, then add back all the admin frames 
+		//bc otherwise we can't get data for it and i can't look at that data and learn stuff from it
 			'random-number-report',
-				'exit-survey']
+			'pick-a-pic',
+			'exit-survey']
 	var protocol = {
 		frames: frames,
 		sequence: frame_sequence
