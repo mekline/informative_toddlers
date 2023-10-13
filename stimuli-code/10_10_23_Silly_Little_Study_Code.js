@@ -1,7 +1,5 @@
-// Lookit uses version ECMA 5 of JavaScript
-
 function generateProtocol(child, pastSessions) {
-    
+    // Lookit uses version ECMA 5 of JavaScript
     // base frames that do not change btwn or within participants
 
      let frames = {
@@ -116,6 +114,7 @@ function generateProtocol(child, pastSessions) {
     	}
 	} // closing bracket for frames list object
 
+
 	// zestier frames and variables section
 
 	// create a random number and decide whether or not it is even/odd
@@ -172,8 +171,11 @@ function generateProtocol(child, pastSessions) {
         
     // this is the array of frames to be played
 	let frame_sequence = [ 
-		//first, try out these frames to test if they work, then add back all the admin frames 
-		//bc otherwise we can't get data for it and i can't look at that data and learn stuff from it
+			'video-config',
+			'video-consent',
+			'study-intro',
+			'parent-notice',
+			'first-stimuli',
 			'random-number-report',
 			'pick-a-pic',
 			'exit-survey']
