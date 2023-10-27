@@ -135,7 +135,7 @@ function generateProtocol(child, pastSessions) {
 		]
 	}
 
-	//create a frame with 3 pictures on it and you have to click on one of the pictures
+	// create a frame with 3 pictures on it and you have to click on one of the pictures
 	frames['pick-a-pic'] = {
 		"kind": "exp-lookit-images-audio",
 		"images": [
@@ -167,7 +167,53 @@ function generateProtocol(child, pastSessions) {
 		},
 		"allowUserPause": false
 	}
-            
+
+	// pre-ordered counterbalancing combos
+	// combo A
+	// combo B
+
+	// FRAMES TO BE USED WHEN THERE IS NO ELMO
+	// frame used to prompt parents to close their eyes
+	frames['pre-stimuli-parent-prompt'] = { 
+		"kind": "exp-lookit-images-audio",
+		"images": [
+			{
+				"id": "placeholder" , // the corresponding image
+				"src": "placeholder", // the corresponding image
+				"position": "fill"
+			}
+		],
+		"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+		"autoProceed": false,
+		"doRecording": true,
+		"maximizeDisplay": true,
+		"pageColor": "white",
+		"backgroundColor": "white",
+		"parentTextBlock": {
+			"title": "For Parents",
+			"text": "Please tell your child that you are going to close your eyes and ears."
+		}
+
+	}
+
+	// frame used to prompt parents to open their eyes again 
+    frames["post-stimuli-parent-prompt"] = {
+		"kind": "exp-lookit-images-audio",
+		"audio": "whatever_the_chime_noise_name_is_after_upload", // placeholder, can we overlap audios?
+		"images": [
+			{
+				"id": "placeholder", // curtains?
+				"src": "placeholder", // curtains?
+				"position": "fill"
+			}
+		],
+		"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+		"autoProceed": false,
+		"doRecording": true,
+		"maximizeDisplay": true,
+		"pageColor": "white",
+		"backgroundColor": "white",
+		}
         
     // this is the array of frames to be played
 	let frame_sequence = [ 
