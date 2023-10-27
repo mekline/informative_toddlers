@@ -56,67 +56,42 @@ function generateProtocol(child, pastSessions) {
                 	"text": "After the videos, you will answer a few final questions. Then you're all done!"
             	}
         	]
-    	},
-        "parent-notice": {
-        	"kind": "exp-lookit-text",
-        	"blocks": [
-            	{
-                	"title": "Important Things to Note",
-                	"emph": true,
-                	"text": "Parents, please do not point to any object or character in the story, or repeat out loud any of the words used in the story."
-            	},
-            	{
-                	"text": "You may point at the center of the screen to  guide your child's attention and you can encourage your child generally (e.g., 'Great job!', 'Can you help Elmo?', 'Do you want to tell Elmo what you saw?')."
-            	},
-            	{
-                	"text": "You may also respond to your child's unrelated questions or needs (e.g., 'No bib.', 'See my toe?'), just please try to redirect your child's attention to the study afterwards."
-            	},
-            	{
-                	"text": "At the end of the study, we will explain what we are trying to learn and answer some common questions you may have about the study."
-            	},
-            	{
-                	"emph": true,
-                	"text": "Let's begin!"
-            	}
-        	]
-    	},
-        "first-stimuli": {
-        	"kind": "exp-lookit-video",
-        	"video": {
-            	"top": 10,
-            	"left": 10,
-            	"loop": false,
-            	"width": 115,
-            	"source": "single_slide_lookit_demo"
-        	},
-        	"backgroundColor": "white",
-        	"autoProceed": true,
-        	"parentTextBlock": {
-            	"text": "If your child needs a break, press the space bar to pause!"
-        	},
-        	"requiredDuration": 0,
-        	"requireAudioCount": 0,
-        	"requireVideoCount": 1,
-        	"doRecording": false,
-        	"frameOffsetAfterPause": 0,
-        	"pauseAudio": "",
-        	"unpauseAudio": "",
-        	"pauseVideo": "",
-        	"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
-        	"audioTypes": [
-            	"ogg",
-            	"mp3"
-        	],
-        	"videoTypes": [
-            	"webm",
-            	"mp4"
-        	]
-    	}
+    	}        
 	} // closing bracket for frames list object
 
 
 	// zestier frames and variables section
 
+	// pre-ordered counterbalancing combos
+	// combo A
+	// combo B
+
+	// Training assests
+	let training_images = { // idk why the var name is greyer than the others but that's an issue for later <3
+		"agents": [
+			"cat.png",
+		"	dog.png",
+			"baby.png"
+		]
+	
+	}
+	
+        
+    // this is the array of frames to be played
+	let frame_sequence = [ 
+			'video-config',
+			'video-consent',
+			'study-intro',
+			'exit-survey']
+	var protocol = {
+		frames: frames,
+		sequence: frame_sequence
+	}
+	return protocol
+} // closing bracket for the protocol object
+
+// experimental and out-of-date frames
+/*
 	// create a random number and decide whether or not it is even/odd
 	let _RANDOM_NUM = Math.floor(Math.random() * 1001)
 	// removed the .toString bc it may not be necessary but if this doesn't work try putting it back in first
@@ -166,68 +141,61 @@ function generateProtocol(child, pastSessions) {
 			"title": "Instructions"
 		},
 		"allowUserPause": false
-	}
-
-	// pre-ordered counterbalancing combos
-	// combo A
-	// combo B
-
-	// FRAMES TO BE USED WHEN THERE IS NO ELMO
-	// frame used to prompt parents to close their eyes
-	frames['pre-stimuli-parent-prompt'] = { 
-		"kind": "exp-lookit-images-audio",
-		"images": [
-			{
-				"id": "placeholder" , // the corresponding image
-				"src": "placeholder", // the corresponding image
-				"position": "fill"
-			}
-		],
-		"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
-		"autoProceed": false,
-		"doRecording": true,
-		"maximizeDisplay": true,
-		"pageColor": "white",
-		"backgroundColor": "white",
-		"parentTextBlock": {
-			"title": "For Parents",
-			"text": "Please tell your child that you are going to close your eyes and ears."
-		}
-
-	}
-
-	// frame used to prompt parents to open their eyes again 
-    frames["post-stimuli-parent-prompt"] = {
-		"kind": "exp-lookit-images-audio",
-		"audio": "whatever_the_chime_noise_name_is_after_upload", // placeholder, can we overlap audios?
-		"images": [
-			{
-				"id": "placeholder", // curtains?
-				"src": "placeholder", // curtains?
-				"position": "fill"
-			}
-		],
-		"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
-		"autoProceed": false,
-		"doRecording": true,
-		"maximizeDisplay": true,
-		"pageColor": "white",
-		"backgroundColor": "white",
-		}
-        
-    // this is the array of frames to be played
-	let frame_sequence = [ 
-			'video-config',
-			'video-consent',
-			'study-intro',
-			'parent-notice',
-			'first-stimuli',
-			'random-number-report',
-			'pick-a-pic',
-			'exit-survey']
-	var protocol = {
-		frames: frames,
-		sequence: frame_sequence
-	};
-	return protocol;
-}
+	} 
+	
+	"first-stimuli": {
+        	"kind": "exp-lookit-video",
+        	"video": {
+            	"top": 10,
+            	"left": 10,
+            	"loop": false,
+            	"width": 115,
+            	"source": "single_slide_lookit_demo"
+        	},
+        	"backgroundColor": "white",
+        	"autoProceed": true,
+        	"parentTextBlock": {
+            	"text": "If your child needs a break, press the space bar to pause!"
+        	},
+        	"requiredDuration": 0,
+        	"requireAudioCount": 0,
+        	"requireVideoCount": 1,
+        	"doRecording": false,
+        	"frameOffsetAfterPause": 0,
+        	"pauseAudio": "",
+        	"unpauseAudio": "",
+        	"pauseVideo": "",
+        	"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+        	"audioTypes": [
+            	"ogg",
+            	"mp3"
+        	],
+        	"videoTypes": [
+            	"webm",
+            	"mp4"
+        	]
+    	}
+		 "parent-notice": {
+        	"kind": "exp-lookit-text",
+        	"blocks": [
+            	{
+                	"title": "Important Things to Note",
+                	"emph": true,
+                	"text": "Parents, please do not point to any object or character in the story, or repeat out loud any of the words used in the story."
+            	},
+            	{
+                	"text": "You may point at the center of the screen to  guide your child's attention and you can encourage your child generally (e.g., 'Great job!', 'Can you help Elmo?', 'Do you want to tell Elmo what you saw?')."
+            	},
+            	{
+                	"text": "You may also respond to your child's unrelated questions or needs (e.g., 'No bib.', 'See my toe?'), just please try to redirect your child's attention to the study afterwards."
+            	},
+            	{
+                	"text": "At the end of the study, we will explain what we are trying to learn and answer some common questions you may have about the study."
+            	},
+            	{
+                	"emph": true,
+                	"text": "Let's begin!"
+            	}
+        	]
+    	}
+		*/
