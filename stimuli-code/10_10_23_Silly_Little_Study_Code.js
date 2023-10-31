@@ -77,8 +77,8 @@ function generateProtocol(child, pastSessions) {
 	};
 	frame_sequence.push('mvp1-intro');
 
-	// images for mvp1-train
-	let mvp1_train1_images = [
+	// images for mvp1Train1
+	let mvp1Train1Images = [
 		"dog.png",
 		'cat1.png',
 		'apple.png'
@@ -92,7 +92,7 @@ function generateProtocol(child, pastSessions) {
 			"images": [
 				{
 					"id": "train1-image",
-					"src": mvp1_train1_images[iTrial],
+					"src": mvp1Train1Images[iTrial],
 					"position": "fill"
 				}
 			],
@@ -111,7 +111,7 @@ function generateProtocol(child, pastSessions) {
 			"images": [
 				{
 					"id": "train1-image",
-					"src": mvp1_train1_images[iTrial],
+					"src": mvp1Train1Images[iTrial],
 					"position": "fill"
 				}
 			],
@@ -143,6 +143,113 @@ function generateProtocol(child, pastSessions) {
 		]
 	};
 	frame_sequence.push('mvp1-instructions');
+
+	// assests for mvp1-train2
+	let mvp1Train2Images = [
+		'ball.png',
+		'standing_bear.png',
+		'milk_with_carton.png',
+		'hd_curtains.png',
+	]
+
+	// 3 mvp1Train2 seshs
+	for (iTrial = 0; iTrial < 3; iTrial++){
+		buffer1Trial = {
+			"kind": "exp-lookit-images-audio",
+			"audio": "sample_1",
+			"images": [
+				{
+					"id": "train2-image",
+					"src": 'hd_curtains.png',
+					"position": "fill"
+				}
+			],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"pageColor": "white",
+			"audioTypes": [
+				"mp3"
+			],
+			'doRecording': true,
+			"parentTextBlock": {
+				"title": "Eyes: Open",
+				"text": "Parents: Get Ready"
+			}
+		};
+		buffer2Trial = {
+			"kind": "exp-lookit-images-audio",
+			"images": [
+				{
+					"id": "train2-image",
+					"src": 'hd_curtains.png',
+					"position": "fill"
+				}
+			],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"pageColor": "white",
+			'doRecording': true,
+			"parentTextBlock": {
+				"title": "Eyes: Closed",
+				"text": "Parents: Close your eyes"
+			}
+		};
+		thisTrial = {
+			"kind": "exp-lookit-images-audio",
+			"audio": "sample_1",
+			"images": [
+				{
+					"id": "train2-image",
+					"src": mvp1Train2Images[iTrial],
+					"position": "fill"
+				}
+			],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"pageColor": "white",
+			"audioTypes": [
+				"mp3"
+			],
+			'doRecording': true,
+			"parentTextBlock": {
+				"title": "Eyes: Closed",
+				"text": "Parents: Keep your eyes closed"
+			}
+		};
+		buffer3Trial = {
+			"kind": "exp-lookit-images-audio",
+			"audio": "sample_1",
+			"images": [
+				{
+					"id": "train2-image",
+					"src": 'hd_curtains.png',
+					"position": "fill"
+				}
+			],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"pageColor": "white",
+			"audioTypes": [
+				"mp3"
+			],
+			'doRecording': true,
+			"parentTextBlock": {
+				"title": "Eyes: Open",
+				"text": "Parents: Avoid saying [object]"
+			}
+		};
+
+		// store frame in frames and in frame_sequence
+		buffer1FrameId = 'buffer1Train2-' + (iTrial + 1)
+		buffer2FrameId = 'buffer2Train2-' + (iTrial + 1)
+		frameId = 'train2-' + (iTrial + 1)
+		buffer3FrameId = 'buffer3Train2-' + (iTrial + 1)
+		frames[buffer1FrameId] = buffer1Trial;
+		frames[buffer2FrameId] = buffer2Trial;
+		frames[frameId] = thisTrial;
+		frames[buffer3FrameId] = buffer3Trial;
+		frame_sequence.push(buffer1FrameId);
+		frame_sequence.push(buffer2FrameId);
+		frame_sequence.push(frameId);
+		frame_sequence.push(buffer3FrameId);
+	}
+
 
 	var protocol = {
 		frames: frames,
