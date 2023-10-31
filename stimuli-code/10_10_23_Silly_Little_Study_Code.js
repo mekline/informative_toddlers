@@ -56,39 +56,104 @@ function generateProtocol(child, pastSessions) {
                 	"text": "After the videos, you will answer a few final questions. Then you're all done!"
             	}
         	]
-    	}        
-	} // closing bracket for frames list object
-
-
-	// zestier frames and variables section
-
-	// pre-ordered counterbalancing combos
-	// combo A
-	// combo B
-
-	// Training assests
-	let training_images = { // idk why the var name is greyer than the others but that's an issue for later <3
-		"agents": [
-			"cat.png",
-		"	dog.png",
-			"baby.png"
-		]
-	
-	}
-	
+    	}		
+	} // closing bracket for frames list object	
         
-    // this is the array of frames to be played
-	let frame_sequence = [ 
-			'video-config',
-			'video-consent',
-			'study-intro',
-			'exit-survey']
+    // lookit frames to be played (non-lookit frames will be added via code)
+	let frame_sequence = []
+
+	// non-lookit frames and variables
+
+	//mvp1 frames and variables
+	frames["mvp1-intro"] = {
+		"kind": "exp-lookit-text",
+		"showPreviousButton": false,
+		"blocks":
+		[
+			{
+				"title": "Intro!"
+			}
+		]
+	};
+	frame_sequence.push('mvp1-intro');
+
+	// images for mvp1-train
+	let mvp1_train1_images = [
+		"dog.png",
+		'cat1.png',
+		'apple.png'
+	]
+
+	// 3 mvp1-train frames
+	for (iTrial = 0; iTrial < 3; iTrial++){
+		bufferTrial = {
+			"kind": "exp-lookit-images-audio",
+			"audio": "sample_1",
+			"images": [
+				{
+					"id": "train1-image",
+					"src": mvp1_train1_images[iTrial],
+					"position": "fill"
+				}
+			],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"pageColor": "white",
+			"audioTypes": [
+				"mp3"
+			],
+			'doRecording': true,
+			"parentTextBlock": {
+				"title": "Eyes: Open"
+			}
+		}
+		thisTrial = {
+			"kind": "exp-lookit-images-audio",
+			"images": [
+				{
+					"id": "train1-image",
+					"src": mvp1_train1_images[iTrial],
+					"position": "fill"
+				}
+			],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"pageColor": "white",
+			'doRecording': true,
+			"parentTextBlock": {
+				"title": "Eyes: Open",
+				"text": "Prompt your child to speak"
+			}
+		}
+
+		// store frame in frames and in frame_sequence
+		bufferFrameId = 'bufferTrain1-' + (iTrial + 1)
+		frameId = 'train1-' + (iTrial + 1)
+		frames[bufferFrameId] = bufferTrial;
+		frames[frameId] = thisTrial;
+		frame_sequence.push(bufferFrameId);
+		frame_sequence.push(frameId);
+	}
+
+	frames["mvp1-instructions"] = {
+		"kind": "exp-lookit-text",
+		"blocks": 
+		[
+			{
+				"title": "Instructions!"
+			}
+		]
+	};
+	frame_sequence.push('mvp1-instructions');
+
 	var protocol = {
 		frames: frames,
 		sequence: frame_sequence
 	}
 	return protocol
-} // closing bracket for the protocol object
+} // closing bracket for generateProtocol
+
+
+
+
 
 // experimental and out-of-date frames
 /*
