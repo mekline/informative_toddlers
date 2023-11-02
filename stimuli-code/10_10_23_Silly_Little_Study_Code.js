@@ -84,7 +84,8 @@ function generateProtocol(child, pastSessions) {
 		'apple.png'
 	]
 
-	// 3 mvp1-train frames
+	// 3 mvp1-train frames 
+	
 	for (iTrial = 0; iTrial < 3; iTrial++){
 		bufferTrial = {
 			"kind": "exp-lookit-images-audio",
@@ -98,10 +99,11 @@ function generateProtocol(child, pastSessions) {
 			],
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
 			"pageColor": "white",
+			"backgroundColor": "white",
 			"audioTypes": [
 				"mp3"
 			],
-			'doRecording': true,
+			'autoProceed': true,
 			"parentTextBlock": {
 				"title": "Eyes: Open"
 			}
@@ -117,7 +119,7 @@ function generateProtocol(child, pastSessions) {
 			],
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
 			"pageColor": "white",
-			'doRecording': true,
+			"backgroundColor": "white",
 			"parentTextBlock": {
 				"title": "Eyes: Open",
 				"text": "Prompt your child to speak"
@@ -144,7 +146,7 @@ function generateProtocol(child, pastSessions) {
 	};
 	frame_sequence.push('mvp1-instructions');
 
-	// assests for mvp1-train2
+	// assests for mvp1Train2
 	let mvp1Train2Images = [
 		'ball.png',
 		'standing_bear.png',
@@ -152,7 +154,7 @@ function generateProtocol(child, pastSessions) {
 		'hd_curtains.png',
 	]
 
-	// 3 mvp1Train2 seshs
+	// 3 mvp1Train2 frames
 	for (iTrial = 0; iTrial < 3; iTrial++){
 		buffer1Trial = {
 			"kind": "exp-lookit-images-audio",
@@ -166,10 +168,11 @@ function generateProtocol(child, pastSessions) {
 			],
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
 			"pageColor": "white",
+			"backgroundColor": "white",
 			"audioTypes": [
 				"mp3"
 			],
-			'doRecording': true,
+			'autoProceed': true,
 			"parentTextBlock": {
 				"title": "Eyes: Open",
 				"text": "Parents: Get Ready"
@@ -186,7 +189,8 @@ function generateProtocol(child, pastSessions) {
 			],
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
 			"pageColor": "white",
-			'doRecording': true,
+			"backgroundColor": "white",
+			'autoProceed': true,
 			"parentTextBlock": {
 				"title": "Eyes: Closed",
 				"text": "Parents: Close your eyes"
@@ -204,10 +208,10 @@ function generateProtocol(child, pastSessions) {
 			],
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
 			"pageColor": "white",
+			"backgroundColor": "white",
 			"audioTypes": [
 				"mp3"
 			],
-			'doRecording': true,
 			"parentTextBlock": {
 				"title": "Eyes: Closed",
 				"text": "Parents: Keep your eyes closed"
@@ -225,10 +229,10 @@ function generateProtocol(child, pastSessions) {
 			],
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
 			"pageColor": "white",
+			"backgroundColor": "white",
 			"audioTypes": [
 				"mp3"
 			],
-			'doRecording': true,
 			"parentTextBlock": {
 				"title": "Eyes: Open",
 				"text": "Parents: Avoid saying [object]"
@@ -248,6 +252,123 @@ function generateProtocol(child, pastSessions) {
 		frame_sequence.push(buffer2FrameId);
 		frame_sequence.push(frameId);
 		frame_sequence.push(buffer3FrameId);
+	} 
+
+	// mvp1ActualTrial assests
+	let item_order1 = [
+		'event_eat_agent_cat_dog_apple',
+		'event_drink_patient_baby_milk_juice',
+		'event_appear_common_ground_duck_ball',
+		'event_eat_patient_dog_apple_banana',
+		'event_drink_agent_bird_baby_milk',
+		'event_wear_common_ground_bear_shoes'
+	]
+	let item_order2 = [
+		'event_drink_agent_baby_bird_juice',
+		'event_eat_patient_cat_banana_apple',
+		'event_wear_common_ground_bear_shoes',
+		'event_drink_patient_bird_juice_milk',
+		'event_eat_agent_dog_cat_banana',
+		'event_appear_common_ground_duck_ball'
+	]
+	let item_orders = [item_order1, item_order2]
+	let item_order_selected = item_order1 // item_orders[Math.floor(Math.random()*item_orders.length)]
+
+	// 6 mvp1ActualTrial frames
+	for (iTrial = 0; iTrial < 6; iTrial++){
+		buffer1AcutalTrial = {
+			"kind": "exp-lookit-images-audio",
+			"audio": "sample_1",
+			"images": [
+				{
+					"id": "train2-image",
+					"src": 'hd_curtains.png',
+					"position": "fill"
+				}
+			],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"pageColor": "white",
+			"backgroundColor": "white",
+			"audioTypes": [
+				"mp3"
+			],
+			'autoProceed': true,
+			"parentTextBlock": {
+				"title": "Eyes: Open",
+				"text": "Parents: Get Ready"
+			}
+		};
+		buffer2ActualTrial = {
+			"kind": "exp-lookit-images-audio",
+			"images": [
+				{
+					"id": "train2-image",
+					"src": 'hd_curtains.png',
+					"position": "fill"
+				}
+			],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"pageColor": "white",
+			"backgroundColor": "white",
+			'autoProceed': true,
+			"parentTextBlock": {
+				"title": "Eyes: Closed",
+				"text": "Parents: Close your eyes"
+			}
+		};
+		thisActualTrial = {
+			"kind": "exp-lookit-video",
+			"video":{
+					"source": item_order1[iTrial],
+					"position": "fill"
+			},
+			"backgroundColor": "white",
+			"parentTextBlock": {
+				"title": "Eyes: Closed",
+				"text": "Parents: Keep your eyes closed"
+			},
+			'requireVideoCount': 1,
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"videoTypes": [
+				"webm",
+				"mp4"
+			]
+		};
+		buffer3ActualTrial = {
+			"kind": "exp-lookit-images-audio",
+			"audio": "sample_1",
+			"images": [
+				{
+					"id": "train2-image",
+					"src": 'hd_curtains.png',
+					"position": "fill"
+				}
+			],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"pageColor": "white",
+			"backgroundColor": "white",
+			"audioTypes": [
+				"mp3"
+			],
+			"parentTextBlock": {
+				"title": "Eyes: Open",
+				"text": "Parents: Avoid saying [object]"
+			}
+		};
+
+		// store frame in frames and in frame_sequence
+		buffer1ActualFrameId = 'buffer1ActualTrials-' + (iTrial + 1)
+		buffer2ActualFrameId = 'buffer2ActualTrials-' + (iTrial + 1)
+		frameIdActual = 'actualTrials-' + (iTrial + 1)
+		buffer3ActualFrameId = 'buffer3Actualtrials-' + (iTrial + 1)
+		frames[buffer1ActualFrameId] = buffer1AcutalTrial;
+		frames[buffer2ActualFrameId] = buffer2ActualTrial;
+		frames[frameIdActual] = thisActualTrial;
+		frames[buffer3ActualFrameId] = buffer3ActualTrial;
+		frame_sequence.push(buffer1ActualFrameId);
+		frame_sequence.push(buffer2ActualFrameId);
+		frame_sequence.push(frameIdActual);
+		frame_sequence.push(buffer3ActualFrameId);
 	}
 
 
@@ -257,9 +378,6 @@ function generateProtocol(child, pastSessions) {
 	}
 	return protocol
 } // closing bracket for generateProtocol
-
-
-
 
 
 // experimental and out-of-date frames
