@@ -87,6 +87,17 @@ function generateProtocol(child, pastSessions) {
 	// 3 mvp1-train frames 
 	
 	for (iTrial = 0; iTrial < 3; iTrial++){
+		startRecording = {
+			"kind": "exp-lookit-start-recording",
+			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
+			"videoTypes": [
+				"webm",
+				"mp4"
+			],
+			"video": "attentiongrabber",
+			"displayFullscreen": true,
+			"waitForVideoMessage": " "
+		};
 		bufferTrial = {
 			"kind": "exp-lookit-images-audio",
 			"audio": "sample_1",
@@ -125,6 +136,18 @@ function generateProtocol(child, pastSessions) {
 				"text": "Prompt your child to speak"
 			}
 		}
+		stopRecording =  {
+			"kind": "exp-lookit-stop-recording",
+			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
+			"videoTypes": [
+				"webm",
+				"mp4"
+			],
+			"video": "attentiongrabber",
+			"displayFullscreen": true,
+			"showProgressBar": true,
+			"waitForUploadMessage": " "
+		};
 
 		// store frame in frames and in frame_sequence
 		bufferFrameId = 'bufferTrain1-' + (iTrial + 1)
@@ -156,6 +179,17 @@ function generateProtocol(child, pastSessions) {
 
 	// 3 mvp1Train2 frames
 	for (iTrial = 0; iTrial < 3; iTrial++){
+		startRecording = {
+			"kind": "exp-lookit-start-recording",
+			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
+			"videoTypes": [
+				"webm",
+				"mp4"
+			],
+			"video": "attentiongrabber",
+			"displayFullscreen": true,
+			"waitForVideoMessage": " "
+		};
 		buffer1Trial = {
 			"kind": "exp-lookit-images-audio",
 			"audio": "sample_1",
@@ -237,6 +271,18 @@ function generateProtocol(child, pastSessions) {
 				"title": "Eyes: Open",
 				"text": "Parents: Avoid saying [object]"
 			}
+		}
+		stopRecording =  {
+			"kind": "exp-lookit-stop-recording",
+			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
+			"videoTypes": [
+				"webm",
+				"mp4"
+			],
+			"video": "attentiongrabber",
+			"displayFullscreen": true,
+			"showProgressBar": true,
+			"waitForUploadMessage": " "
 		};
 
 		// store frame in frames and in frame_sequence
@@ -276,6 +322,17 @@ function generateProtocol(child, pastSessions) {
 
 	// 6 mvp1ActualTrial frames
 	for (iTrial = 0; iTrial < 6; iTrial++){
+		startRecording = {
+			"kind": "exp-lookit-start-recording",
+			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
+			"videoTypes": [
+				"webm",
+				"mp4"
+			],
+			"video": "attentiongrabber",
+			"displayFullscreen": true,
+			"waitForVideoMessage": " "
+		};
 		buffer1AcutalTrial = {
 			"kind": "exp-lookit-images-audio",
 			"audio": "sample_1",
@@ -354,6 +411,18 @@ function generateProtocol(child, pastSessions) {
 				"title": "Eyes: Open",
 				"text": "Parents: Avoid saying [object]"
 			}
+		}
+		stopRecording =  {
+			"kind": "exp-lookit-stop-recording",
+			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
+			"videoTypes": [
+				"webm",
+				"mp4"
+			],
+			"video": "attentiongrabber",
+			"displayFullscreen": true,
+			"showProgressBar": true,
+			"waitForUploadMessage": " "
 		};
 
 		// store frame in frames and in frame_sequence
