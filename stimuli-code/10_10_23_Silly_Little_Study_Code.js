@@ -2,6 +2,7 @@ function generateProtocol(child, pastSessions) {
     // Lookit uses version ECMA 5 of JavaScript
     // base frames that do not change btwn or within participants
 
+	let frame_sequence = [];
      let frames = {
         "video-config": {
         	"kind": "exp-video-config",
@@ -57,10 +58,8 @@ function generateProtocol(child, pastSessions) {
             	}
         	]
     	}		
-	} // closing bracket for frames list object	
-        
-    // lookit frames to be played (non-lookit frames will be added via code)
-	let frame_sequence = []
+	}; // closing bracket for frames list object	
+    frame_sequence.push('video-consent');
 
 	// non-lookit frames and variables
 
@@ -82,21 +81,21 @@ function generateProtocol(child, pastSessions) {
 		"dog.png",
 		'cat1.png',
 		'apple.png'
-	]
+	];
 
 	// 3 mvp1-train frames 
 	
 	for (iTrial = 0; iTrial < 3; iTrial++){
-		startRecording = {
+		startRecordingTrial = {
 			"kind": "exp-lookit-start-recording",
-			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
-			"videoTypes": [
-				"webm",
-				"mp4"
-			],
-			"video": "attentiongrabber",
-			"displayFullscreen": true,
-			"waitForVideoMessage": " "
+    		"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
+    		"videoTypes": [
+        		"webm",
+        		"mp4"
+    		],
+    		"video": "attentiongrabber",
+    		"displayFullscreen": true,
+    		"waitForVideoMessage": " "
 		};
 		bufferTrial = {
 			"kind": "exp-lookit-images-audio",
@@ -118,7 +117,7 @@ function generateProtocol(child, pastSessions) {
 			"parentTextBlock": {
 				"title": "Eyes: Open"
 			}
-		}
+		};
 		thisTrial = {
 			"kind": "exp-lookit-images-audio",
 			"images": [
@@ -135,8 +134,8 @@ function generateProtocol(child, pastSessions) {
 				"title": "Eyes: Open",
 				"text": "Prompt your child to speak"
 			}
-		}
-		stopRecording =  {
+		};
+		stopRecordingTrial = {
 			"kind": "exp-lookit-stop-recording",
 			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
 			"videoTypes": [
@@ -145,17 +144,26 @@ function generateProtocol(child, pastSessions) {
 			],
 			"video": "attentiongrabber",
 			"displayFullscreen": true,
-			"showProgressBar": true,
-			"waitForUploadMessage": " "
+			"waitForVideoMessage": " "
 		};
 
-		// store frame in frames and in frame_sequence
-		bufferFrameId = 'bufferTrain1-' + (iTrial + 1)
-		frameId = 'train1-' + (iTrial + 1)
+		// make frame ids for each frame in above sequence
+		startRecordingFrameId = 'startRecordingTrain1-' + (iTrial + 1);
+		bufferFrameId = 'bufferTrain1-' + (iTrial + 1);
+		frameId = 'train1-' + (iTrial + 1);
+		stopRecordingFrameId = 'stopRecordingTrain1-' + (iTrial + 1);
+		
+		// insert the frames into the frame list using the frame ids
+		frames[startRecordingFrameId] = startRecordingTrial;
 		frames[bufferFrameId] = bufferTrial;
 		frames[frameId] = thisTrial;
+		frames[stopRecordingFrameId] = stopRecordingTrial;
+		
+		// push the frame ids into the frame sequence (determines order)
+		frame_sequence.push(startRecordingFrameId);
 		frame_sequence.push(bufferFrameId);
 		frame_sequence.push(frameId);
+		frame_sequence.push(stopRecordingFrameId);
 	}
 
 	frames["mvp1-instructions"] = {
@@ -175,20 +183,20 @@ function generateProtocol(child, pastSessions) {
 		'standing_bear.png',
 		'milk_with_carton.png',
 		'hd_curtains.png',
-	]
+	];
 
 	// 3 mvp1Train2 frames
 	for (iTrial = 0; iTrial < 3; iTrial++){
-		startRecording = {
+		startRecordingTrial2 = {
 			"kind": "exp-lookit-start-recording",
-			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
-			"videoTypes": [
-				"webm",
-				"mp4"
-			],
-			"video": "attentiongrabber",
-			"displayFullscreen": true,
-			"waitForVideoMessage": " "
+    		"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
+    		"videoTypes": [
+        		"webm",
+        		"mp4"
+    		],
+    		"video": "attentiongrabber",
+    		"displayFullscreen": true,
+    		"waitForVideoMessage": " "
 		};
 		buffer1Trial = {
 			"kind": "exp-lookit-images-audio",
@@ -271,8 +279,8 @@ function generateProtocol(child, pastSessions) {
 				"title": "Eyes: Open",
 				"text": "Parents: Avoid saying [object]"
 			}
-		}
-		stopRecording =  {
+		};
+		stopRecordingTrial2 = {
 			"kind": "exp-lookit-stop-recording",
 			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
 			"videoTypes": [
@@ -281,23 +289,32 @@ function generateProtocol(child, pastSessions) {
 			],
 			"video": "attentiongrabber",
 			"displayFullscreen": true,
-			"showProgressBar": true,
-			"waitForUploadMessage": " "
+			"waitForVideoMessage": " "
 		};
 
-		// store frame in frames and in frame_sequence
-		buffer1FrameId = 'buffer1Train2-' + (iTrial + 1)
-		buffer2FrameId = 'buffer2Train2-' + (iTrial + 1)
-		frameId = 'train2-' + (iTrial + 1)
-		buffer3FrameId = 'buffer3Train2-' + (iTrial + 1)
+		// make frame ids for each frame in above sequence
+		startRecording2FrameId = 'startRecordingTrain2-' + (iTrial + 1);
+		buffer1FrameId = 'buffer1Train2-' + (iTrial + 1);
+		buffer2FrameId = 'buffer2Train2-' + (iTrial + 1);
+		frameId = 'train2-' + (iTrial + 1);
+		buffer3FrameId = 'buffer3Train2-' + (iTrial + 1);
+		stopRecording2FrameId = 'stopRecordingTrain2-' + (iTrial + 1);
+
+		// insert the frames into the frame list using the frame ids
+		frames[startRecording2FrameId] = startRecordingTrial2;
 		frames[buffer1FrameId] = buffer1Trial;
 		frames[buffer2FrameId] = buffer2Trial;
 		frames[frameId] = thisTrial;
 		frames[buffer3FrameId] = buffer3Trial;
+		frames[stopRecording2FrameId] = stopRecordingTrial2;
+
+		// push the frame ids into the frame sequence (determines order)
+		frame_sequence.push(startRecording2FrameId);
 		frame_sequence.push(buffer1FrameId);
 		frame_sequence.push(buffer2FrameId);
 		frame_sequence.push(frameId);
 		frame_sequence.push(buffer3FrameId);
+		frame_sequence.push(stopRecording2FrameId);
 	} 
 
 	// mvp1ActualTrial assests
@@ -308,7 +325,7 @@ function generateProtocol(child, pastSessions) {
 		'event_eat_patient_dog_apple_banana',
 		'event_drink_agent_bird_baby_milk',
 		'event_wear_common_ground_bear_shoes'
-	]
+	];
 	let item_order2 = [
 		'event_drink_agent_baby_bird_juice',
 		'event_eat_patient_cat_banana_apple',
@@ -316,22 +333,22 @@ function generateProtocol(child, pastSessions) {
 		'event_drink_patient_bird_juice_milk',
 		'event_eat_agent_dog_cat_banana',
 		'event_appear_common_ground_duck_ball'
-	]
-	let item_orders = [item_order1, item_order2]
-	let item_order_selected = item_order1 // item_orders[Math.floor(Math.random()*item_orders.length)]
+	];
+	let item_orders = [item_order1, item_order2];
+	let item_order_selected = item_order1; // item_orders[Math.floor(Math.random()*item_orders.length)]
 
 	// 6 mvp1ActualTrial frames
 	for (iTrial = 0; iTrial < 6; iTrial++){
-		startRecording = {
+		startRecordingTrial3 = {
 			"kind": "exp-lookit-start-recording",
-			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
-			"videoTypes": [
-				"webm",
-				"mp4"
-			],
-			"video": "attentiongrabber",
-			"displayFullscreen": true,
-			"waitForVideoMessage": " "
+    		"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
+    		"videoTypes": [
+        		"webm",
+        		"mp4"
+    		],
+    		"video": "attentiongrabber",
+    		"displayFullscreen": true,
+    		"waitForVideoMessage": " "
 		};
 		buffer1AcutalTrial = {
 			"kind": "exp-lookit-images-audio",
@@ -411,8 +428,8 @@ function generateProtocol(child, pastSessions) {
 				"title": "Eyes: Open",
 				"text": "Parents: Avoid saying [object]"
 			}
-		}
-		stopRecording =  {
+		};
+		stopRecordingTrial3 = {
 			"kind": "exp-lookit-stop-recording",
 			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
 			"videoTypes": [
@@ -421,32 +438,45 @@ function generateProtocol(child, pastSessions) {
 			],
 			"video": "attentiongrabber",
 			"displayFullscreen": true,
-			"showProgressBar": true,
-			"waitForUploadMessage": " "
+			"waitForVideoMessage": " "
 		};
 
-		// store frame in frames and in frame_sequence
-		buffer1ActualFrameId = 'buffer1ActualTrials-' + (iTrial + 1)
-		buffer2ActualFrameId = 'buffer2ActualTrials-' + (iTrial + 1)
-		frameIdActual = 'actualTrials-' + (iTrial + 1)
-		buffer3ActualFrameId = 'buffer3Actualtrials-' + (iTrial + 1)
+		// make frameIds for each of the above frames
+		startRecording3FrameId = 'startRecording3ActualTrials-' + (iTrial + 1);
+		buffer1ActualFrameId = 'buffer1ActualTrials-' + (iTrial + 1);
+		buffer2ActualFrameId = 'buffer2ActualTrials-' + (iTrial + 1);
+		frameIdActual = 'actualTrials-' + (iTrial + 1);
+		buffer3ActualFrameId = 'buffer3Actualtrials-' + (iTrial + 1);
+		stopRecording3FrameId = 'stopRecording3ActualTrials-' + (iTrial + 1);
+
+		// insert frames into frame list using frameIds
+		frames[startRecording3FrameId] = startRecordingTrial3;
 		frames[buffer1ActualFrameId] = buffer1AcutalTrial;
 		frames[buffer2ActualFrameId] = buffer2ActualTrial;
 		frames[frameIdActual] = thisActualTrial;
 		frames[buffer3ActualFrameId] = buffer3ActualTrial;
+		frames[stopRecording3FrameId] = stopRecordingTrial3;
+
+		// push frame ids into frame sequence
+		frame_sequence.push(startRecording3FrameId);
 		frame_sequence.push(buffer1ActualFrameId);
 		frame_sequence.push(buffer2ActualFrameId);
 		frame_sequence.push(frameIdActual);
 		frame_sequence.push(buffer3ActualFrameId);
+		frame_sequence.push(stopRecording3FrameId);
 	}
 
+	frame_sequence = frame_sequence.concat(['exit-survey']);
 
 	var protocol = {
 		frames: frames,
 		sequence: frame_sequence
-	}
-	return protocol
+	};
+	return protocol;
 } // closing bracket for generateProtocol
+
+
+
 
 
 // experimental and out-of-date frames
