@@ -317,8 +317,8 @@ function generateProtocol(child, pastSessions) {
 		frame_sequence.push(stopRecording2FrameId);
 	} 
 
-	// mvp1ActualTrial assests
-	let item_order1 = [
+	// mvp1ActualTrial staging images, curtain videos, and event videos
+	let event_order1 = [
 		'event_eat_agent_cat_dog_apple',
 		'event_drink_patient_baby_milk_juice',
 		'event_appear_common_ground_duck_ball',
@@ -326,7 +326,33 @@ function generateProtocol(child, pastSessions) {
 		'event_drink_agent_bird_baby_milk',
 		'event_wear_common_ground_bear_shoes'
 	];
-	let item_order2 = [
+	let stage_order1 = [
+		'stage_eat_agent_cat_dog_apple.png',
+		'stage_drink_patient_baby_milk_juice.png',
+		'stage_appear_common_ground_duck_ball.png',
+		'stage_eat_patient_dog_apple_banana.png',
+		'stage_drink_agent_bird_baby_milk.png',
+		'stage_wear_common_ground_bear_shoes.png'
+	];
+	let curtian_open_order1 = [
+		'curtains_open_eat_agent_cat_dog_apple',
+		'curtains_open_drink_patient_baby_milk_juice',
+		'curtains_open_appear_common_ground_duck_ball',
+		'curtains_open_eat_patient_dog_apple_banana',
+		'curtains_open_drink_agent_bird_baby_milk',
+		'curtains_open_wear_common_ground_bear_shoes'
+	];
+	let curtain_close_order1 = [
+		'curtains_close_eat_agent', // the curtains_close_eat_agent vids all look the same so there is one general animation for it
+		'curtains_close_drink_patient_baby_milk_juice',
+		'curtains_close_appear_common_ground_duck_ball',
+		'curtains_close_eat_patient_dog_apple_banana',
+		'curtains_close_drink_agent_milk', // the curtains_close_agent_milk vids are the same so there is only one animation for it
+		'curtains_close_wear_common_ground_bear_shoes'
+	];
+
+	// assests for order2
+	let event_order2 = [
 		'event_drink_agent_baby_bird_juice',
 		'event_eat_patient_cat_banana_apple',
 		'event_wear_common_ground_bear_shoes',
@@ -334,8 +360,39 @@ function generateProtocol(child, pastSessions) {
 		'event_eat_agent_dog_cat_banana',
 		'event_appear_common_ground_duck_ball'
 	];
-	let item_orders = [item_order1, item_order2];
-	let item_order_selected = item_order1; // item_orders[Math.floor(Math.random()*item_orders.length)]
+	let stage_order2 = [
+		'stage_drink_agent_baby_bird_juice.png',
+		'stage_eat_patient_cat_banana_apple.png',
+		'stage_wear_common_ground_bear_shoes.png',
+		'stage_drink_patient_bird_juice_milk.png',
+		'stage_eat_agent_dog_cat_banana.png',
+		'stage_appear_common_ground_duck_ball.png'
+	];
+	let curtian_open_order2 = [
+		'curtains_open_drink_agent_baby_bird_juice',
+		'curtains_open_eat_patient_cat_banana_apple',
+		'curtains_open_wear_common_ground_bear_shoes',
+		'curtains_open_drink_patient_bird_juice_milk',
+		'curtains_open_eat_agent_dog_cat_banana',
+		'curtains_open_appear_common_ground_duck_ball'
+	];
+	let curtain_close_order2 = [
+		'curtains_close_drink_agent_baby_bird_juice',
+		'curtains_close_eat_patient_cat_banana_apple',
+		'curtains_close_wear_common_ground_bear_shoes',
+		'curtains_close_drink_patient_bird_juice_milk',
+		'curtains_close_eat_agent_dog_cat_banana',
+		'curtains_close_appear_common_ground_duck_ball'
+	];
+
+	let event_orders = [event_order1, event_order2];
+	// select an event order
+	let event_order_selected = event_order1; // item_orders[Math.floor(Math.random()*item_orders.length)]
+
+	// make stage and curtains match selected order
+	let stage_order = (event_order_selected = event_order1) ? stage_order1 : stage_order2;
+	let curtain_open_order = (event_order_selected = event_order1) ? curtian_open_order1 : curtian_open_order2;
+	let curtain_close_order = (event_order_selected = event_order1) ? curtain_close_order1 : curtain_close_order2;
 
 	// 6 mvp1ActualTrial frames
 	for (iTrial = 0; iTrial < 6; iTrial++){
@@ -350,13 +407,13 @@ function generateProtocol(child, pastSessions) {
     		"displayFullscreen": true,
     		"waitForVideoMessage": " "
 		};
-		buffer1AcutalTrial = {
+		staging_image = {
 			"kind": "exp-lookit-images-audio",
 			"audio": "sample_1",
 			"images": [
 				{
-					"id": "train2-image",
-					"src": 'hd_curtains.png',
+					"id": "staging-image",
+					"src": stage_order[iTrial],
 					"position": "fill"
 				}
 			],
@@ -372,34 +429,16 @@ function generateProtocol(child, pastSessions) {
 				"text": "Parents: Get Ready"
 			}
 		};
-		buffer2ActualTrial = {
-			"kind": "exp-lookit-images-audio",
-			"images": [
-				{
-					"id": "train2-image",
-					"src": 'hd_curtains.png',
-					"position": "fill"
-				}
-			],
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
-			"pageColor": "white",
-			"backgroundColor": "white",
-			'autoProceed': true,
-			"parentTextBlock": {
-				"title": "Eyes: Closed",
-				"text": "Parents: Close your eyes"
-			}
-		};
-		thisActualTrial = {
+		curtain_opening = {
 			"kind": "exp-lookit-video",
 			"video":{
-					"source": item_order1[iTrial],
+					"source": curtain_open_order[iTrial],
 					"position": "fill"
 			},
 			"backgroundColor": "white",
 			"parentTextBlock": {
 				"title": "Eyes: Closed",
-				"text": "Parents: Keep your eyes closed"
+				"text": "Parents: Please close your eyes."
 			},
 			'requireVideoCount': 1,
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
@@ -408,26 +447,41 @@ function generateProtocol(child, pastSessions) {
 				"mp4"
 			]
 		};
-		buffer3ActualTrial = {
-			"kind": "exp-lookit-images-audio",
-			"audio": "sample_1",
-			"images": [
-				{
-					"id": "train2-image",
-					"src": 'hd_curtains.png',
+		thisActualTrial = {
+			"kind": "exp-lookit-video",
+			"video":{
+					"source": event_order_selected[iTrial],
 					"position": "fill"
-				}
-			],
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
-			"pageColor": "white",
+			},
 			"backgroundColor": "white",
-			"audioTypes": [
-				"mp3"
-			],
+			"parentTextBlock": {
+				"title": "Eyes: Closed",
+				"text": "Parents: Please keep your eyes closed."
+			},
+			'requireVideoCount': 1,
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"videoTypes": [
+				"webm",
+				"mp4"
+			]
+		};
+		curtain_closing = {
+			"kind": "exp-lookit-video",
+			"video":{
+					"source": curtain_close_order[iTrial],
+					"position": "fill"
+			},
+			"backgroundColor": "white",
 			"parentTextBlock": {
 				"title": "Eyes: Open",
-				"text": "Parents: Avoid saying [object]"
-			}
+				"text": "Parents: AVOID SAYING [AA HOW DO I PUT THIS IN HERE]."
+			},
+			'requireVideoCount': 1,
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"videoTypes": [
+				"webm",
+				"mp4"
+			]
 		};
 		stopRecordingTrial3 = {
 			"kind": "exp-lookit-stop-recording",
@@ -443,26 +497,26 @@ function generateProtocol(child, pastSessions) {
 
 		// make frameIds for each of the above frames
 		startRecording3FrameId = 'startRecording3ActualTrials-' + (iTrial + 1);
-		buffer1ActualFrameId = 'buffer1ActualTrials-' + (iTrial + 1);
-		buffer2ActualFrameId = 'buffer2ActualTrials-' + (iTrial + 1);
+		stagingImageFrameId = 'stagingImageTrials-' + (iTrial + 1);
+		curtainOpeningFrameId = 'curtainOpeningTrials-' + (iTrial + 1);
 		frameIdActual = 'actualTrials-' + (iTrial + 1);
-		buffer3ActualFrameId = 'buffer3Actualtrials-' + (iTrial + 1);
+		curtainClosingFrameId = 'curtainClosingTrials-' + (iTrial + 1);
 		stopRecording3FrameId = 'stopRecording3ActualTrials-' + (iTrial + 1);
 
 		// insert frames into frame list using frameIds
 		frames[startRecording3FrameId] = startRecordingTrial3;
-		frames[buffer1ActualFrameId] = buffer1AcutalTrial;
-		frames[buffer2ActualFrameId] = buffer2ActualTrial;
+		frames[stagingImageFrameId] = staging_image;
+		frames[curtainOpeningFrameId] = curtain_opening;
 		frames[frameIdActual] = thisActualTrial;
-		frames[buffer3ActualFrameId] = buffer3ActualTrial;
+		frames[curtainClosingFrameId] = curtain_closing;
 		frames[stopRecording3FrameId] = stopRecordingTrial3;
 
 		// push frame ids into frame sequence
 		frame_sequence.push(startRecording3FrameId);
-		frame_sequence.push(buffer1ActualFrameId);
-		frame_sequence.push(buffer2ActualFrameId);
+		frame_sequence.push(stagingImageFrameId);
+		frame_sequence.push(curtainOpeningFrameId);
 		frame_sequence.push(frameIdActual);
-		frame_sequence.push(buffer3ActualFrameId);
+		frame_sequence.push(curtainClosingFrameId);
 		frame_sequence.push(stopRecording3FrameId);
 	}
 
