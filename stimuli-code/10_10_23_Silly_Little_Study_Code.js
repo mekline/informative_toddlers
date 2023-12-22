@@ -78,9 +78,9 @@ function generateProtocol(child, pastSessions) {
 
 	// images for mvp1Train1
 	let mvp1Train1Images = [
-		"dog.png",
-		'cat1.png',
-		'apple.png'
+		'training_dog.png',
+		'training_cat.png',
+		'training_apple.png'
 	];
 
 	// 3 mvp1-train frames 
@@ -179,9 +179,9 @@ function generateProtocol(child, pastSessions) {
 
 	// assests for mvp1Train2
 	let mvp1Train2Images = [
-		'ball.png',
-		'standing_bear.png',
-		'milk_with_carton.png',
+		'training_ball.png',
+		'training_bear.png',
+		'training_milk.png',
 		'hd_curtains.png',
 	];
 
@@ -214,7 +214,6 @@ function generateProtocol(child, pastSessions) {
 			"audioTypes": [
 				"mp3"
 			],
-			'autoProceed': true,
 			"parentTextBlock": {
 				"title": "Eyes: Open",
 				"text": "Parents: Get Ready"
