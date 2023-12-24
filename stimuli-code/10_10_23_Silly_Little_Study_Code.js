@@ -113,10 +113,11 @@ function generateProtocol(child, pastSessions) {
 			"audioTypes": [
 				"mp3"
 			],
-			'autoProceed': true,
 			"parentTextBlock": {
 				"title": "Parent's Eyes: Open"
-			}
+			},
+			'autoProceed': true,
+			'showPreviousButton':  false
 		};
 		thisTrial = {
 			"kind": "exp-lookit-images-audio",
@@ -132,8 +133,9 @@ function generateProtocol(child, pastSessions) {
 			"backgroundColor": "white",
 			"parentTextBlock": {
 				"title": "Parent's Eyes: Open",
-				"text": "Please prompt your child to speak"
-			}
+				"text": "Please prompt your child to speak."
+			},
+			'showPreviousButton':  false
 		};
 		stopRecordingTrial = {
 			"kind": "exp-lookit-stop-recording",
@@ -224,7 +226,8 @@ function generateProtocol(child, pastSessions) {
 			"parentTextBlock": {
 				"title": "Parent's Eyes: Open",
 				"text": "Parents: Get ready to close your eyes."
-			}
+			},
+			'showPreviousButton':  false
 		};
 		buffer2Trial = {
 			"kind": "exp-lookit-images-audio",
@@ -238,11 +241,12 @@ function generateProtocol(child, pastSessions) {
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
 			"pageColor": "white",
 			"backgroundColor": "white",
-			'autoProceed': true,
 			"parentTextBlock": {
 				"title": "Parent's Eyes: Closed",
-				"text": "Parents: Close your eyes"
-			}
+				"text": "Parents: Close your eyes."
+			},
+			'autoProceed': true,
+			'durationSeconds': 3
 		};
 		thisTrial = {
 			"kind": "exp-lookit-images-audio",
@@ -262,8 +266,9 @@ function generateProtocol(child, pastSessions) {
 			],
 			"parentTextBlock": {
 				"title": "Parent's Eyes: Closed",
-				"text": "Parents: Please keep your eyes closed"
-			}
+				"text": "Parents: Please keep your eyes closed."
+			},
+			'autoProceed': true,
 		};
 		buffer3Trial = {
 			"kind": "exp-lookit-images-audio",
@@ -284,7 +289,8 @@ function generateProtocol(child, pastSessions) {
 			"parentTextBlock": {
 				"title": "Parent's Eyes: Open",
 				"text": image_ans
-			}
+			},
+			'showPreviousButton':  false
 		};
 		stopRecordingTrial2 = {
 			"kind": "exp-lookit-stop-recording",
@@ -345,7 +351,7 @@ function generateProtocol(child, pastSessions) {
 		'curtains_open_drink_patient_baby_milk_juice',
 		'curtains_open_appear_common_ground_duck_ball',
 		'curtains_open_eat_patient_dog_apple_banana',
-		'curtains_open_drink_agent_bird_baby_milk',
+		'curtains_open_drink_agent_milk', // the curtains_open_drink_agent is the same when it's milk
 		'curtains_open_wear_common_ground_bear_shoes'
 	];
 	let curtain_close_order1 = [
@@ -438,7 +444,8 @@ function generateProtocol(child, pastSessions) {
 			"parentTextBlock": {
 				"title": "Parent's Eyes: Open",
 				"text": "Parents: Get ready to close your eyes. "
-			}
+			},
+			'durationSeconds': 5
 		};
 		curtain_opening = {
 			"kind": "exp-lookit-video",
@@ -492,7 +499,8 @@ function generateProtocol(child, pastSessions) {
 			"videoTypes": [
 				"webm",
 				"mp4"
-			]
+			],
+			'autoProceed': false
 		};
 		stopRecordingTrial3 = {
 			"kind": "exp-lookit-stop-recording",
