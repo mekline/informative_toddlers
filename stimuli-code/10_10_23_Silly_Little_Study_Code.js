@@ -115,7 +115,7 @@ function generateProtocol(child, pastSessions) {
 			],
 			'autoProceed': true,
 			"parentTextBlock": {
-				"title": "Eyes: Open"
+				"title": "Parent's Eyes: Open"
 			}
 		};
 		thisTrial = {
@@ -131,8 +131,8 @@ function generateProtocol(child, pastSessions) {
 			"pageColor": "white",
 			"backgroundColor": "white",
 			"parentTextBlock": {
-				"title": "Eyes: Open",
-				"text": "Prompt your child to speak"
+				"title": "Parent's Eyes: Open",
+				"text": "Please prompt your child to speak"
 			}
 		};
 		stopRecordingTrial = {
@@ -187,6 +187,13 @@ function generateProtocol(child, pastSessions) {
 
 	// 3 mvp1Train2 frames
 	for (iTrial = 0; iTrial < 3; iTrial++){
+		// parse file so you can tell parents what not to say
+		let image_name = mvp1Train2Images[iTrial];
+		let first_clean = image_name.split(".");
+		let second_clean = first_clean[0].split("_");
+		let word = second_clean[1];
+		let image_ans = "Please avoid saying '" + word + "'."; 
+
 		startRecordingTrial2 = {
 			"kind": "exp-lookit-start-recording",
     		"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
@@ -215,8 +222,8 @@ function generateProtocol(child, pastSessions) {
 				"mp3"
 			],
 			"parentTextBlock": {
-				"title": "Eyes: Open",
-				"text": "Parents: Get Ready"
+				"title": "Parent's Eyes: Open",
+				"text": "Parents: Get ready to close your eyes."
 			}
 		};
 		buffer2Trial = {
@@ -233,7 +240,7 @@ function generateProtocol(child, pastSessions) {
 			"backgroundColor": "white",
 			'autoProceed': true,
 			"parentTextBlock": {
-				"title": "Eyes: Closed",
+				"title": "Parent's Eyes: Closed",
 				"text": "Parents: Close your eyes"
 			}
 		};
@@ -254,8 +261,8 @@ function generateProtocol(child, pastSessions) {
 				"mp3"
 			],
 			"parentTextBlock": {
-				"title": "Eyes: Closed",
-				"text": "Parents: Keep your eyes closed"
+				"title": "Parent's Eyes: Closed",
+				"text": "Parents: Please keep your eyes closed"
 			}
 		};
 		buffer3Trial = {
@@ -275,8 +282,8 @@ function generateProtocol(child, pastSessions) {
 				"mp3"
 			],
 			"parentTextBlock": {
-				"title": "Eyes: Open",
-				"text": "Parents: Avoid saying [object]"
+				"title": "Parent's Eyes: Open",
+				"text": image_ans
 			}
 		};
 		stopRecordingTrial2 = {
@@ -395,6 +402,11 @@ function generateProtocol(child, pastSessions) {
 
 	// 6 mvp1ActualTrial frames
 	for (iTrial = 0; iTrial < 6; iTrial++){
+		// parse file so you can tell parents what not to say
+		let video_name = event_order_selected[iTrial];
+		let video_arr = video_name.split("_");
+		let video_ans = "Please avoid saying '" + video_arr[video_arr.length-1] + "', '" + video_arr[video_arr.length-2] + "', or '" + video_arr[video_arr.length-3] + "'.";
+
 		startRecordingTrial3 = {
 			"kind": "exp-lookit-start-recording",
     		"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
@@ -424,8 +436,8 @@ function generateProtocol(child, pastSessions) {
 			],
 			'autoProceed': true,
 			"parentTextBlock": {
-				"title": "Eyes: Open",
-				"text": "Parents: Get Ready"
+				"title": "Parent's Eyes: Open",
+				"text": "Parents: Get ready to close your eyes. "
 			}
 		};
 		curtain_opening = {
@@ -436,7 +448,7 @@ function generateProtocol(child, pastSessions) {
 			},
 			"backgroundColor": "white",
 			"parentTextBlock": {
-				"title": "Eyes: Closed",
+				"title": "Parent's Eyes: Closed",
 				"text": "Parents: Please close your eyes."
 			},
 			'requireVideoCount': 1,
@@ -454,7 +466,7 @@ function generateProtocol(child, pastSessions) {
 			},
 			"backgroundColor": "white",
 			"parentTextBlock": {
-				"title": "Eyes: Closed",
+				"title": "Parent's Eyes: Closed",
 				"text": "Parents: Please keep your eyes closed."
 			},
 			'requireVideoCount': 1,
@@ -472,8 +484,8 @@ function generateProtocol(child, pastSessions) {
 			},
 			"backgroundColor": "white",
 			"parentTextBlock": {
-				"title": "Eyes: Open",
-				"text": "Parents: AVOID SAYING [AA HOW DO I PUT THIS IN HERE]."
+				"title": "Parent's Eyes: Open",
+				"text": video_ans
 			},
 			'requireVideoCount': 1,
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
