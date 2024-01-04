@@ -84,9 +84,9 @@ function generateProtocol(child, pastSessions) {
 	];
 
 	let mvp1Train1Audio = [
-		'train-1_apple',
-		'train-1_cat',
-		'train-1_dog'
+		'train-1-1_dog',
+		'train-1-2_cat',
+		'train-1-3_apple'
 	];
 
 	// 3 mvp1-train frames 
@@ -193,8 +193,15 @@ function generateProtocol(child, pastSessions) {
 		'hd_curtains.png',
 	];
 
+	let mvp1Train2Audio = [
+		'train-2-1_ball',
+		'train-2-2_bear',
+		'train-2-3_milk'
+	];
+
 	// 3 mvp1Train2 frames
 	for (iTrial = 0; iTrial < 3; iTrial++){
+		
 		// parse file so you can tell parents what not to say
 		let image_name = mvp1Train2Images[iTrial];
 		let first_clean = image_name.split(".");
@@ -256,7 +263,7 @@ function generateProtocol(child, pastSessions) {
 		};
 		thisTrial = {
 			"kind": "exp-lookit-images-audio",
-			"audio": "sample_1",
+			"audio": mvp1Train2Audio[iTrial],
 			"images": [
 				{
 					"id": "train2-image",
