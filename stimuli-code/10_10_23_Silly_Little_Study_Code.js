@@ -351,6 +351,14 @@ function generateProtocol(child, pastSessions) {
 		'event_drink_agent_bird_baby_milk',
 		'event_wear_common_ground_bear_shoes'
 	];
+	let audio_order1 = [
+		'test-trials_long_agentpatient-1_cat-eat-apple',
+		'test-trials_long_agentpatient-2_baby-drink-milk',
+		'test-trials_long_informativity-1_duck-ball',
+		'test-trials_long_agentpatient-1_dog-eat-banana',
+		'test-trials_long_agentpatient-2_bird-drink-milk',
+		'test-trials_long_informativity-2_bear-shoes'
+	];
 	let stage_order1 = [
 		'stage_eat_agent_cat_dog_apple.png',
 		'stage_drink_patient_baby_milk_juice.png',
@@ -385,6 +393,14 @@ function generateProtocol(child, pastSessions) {
 		'event_eat_agent_dog_cat_banana',
 		'event_appear_common_ground_duck_ball'
 	];
+	let audio_order2 = [
+		'sample_1',
+		'sample_1',
+		'test-trials_long_informativity-2_bear-shoes',
+		'test-trials_long_agentpatient-2_bird-drink-juice',
+		'test-trials_long_agentpatient-1_dog-eat-banana',
+		'test-trials_long_informativity-1_duck-ball'
+	];
 	let stage_order2 = [
 		'stage_drink_agent_baby_bird_juice.png',
 		'stage_eat_patient_cat_banana_apple.png',
@@ -418,6 +434,7 @@ function generateProtocol(child, pastSessions) {
 	let stage_order = (event_order_selected = event_order1) ? stage_order1 : stage_order2;
 	let curtain_open_order = (event_order_selected = event_order1) ? curtian_open_order1 : curtian_open_order2;
 	let curtain_close_order = (event_order_selected = event_order1) ? curtain_close_order1 : curtain_close_order2;
+	let audio_order = (event_order_selected = event_order1) ? audio_order1 : audio_order2;
 
 	// 6 mvp1ActualTrial frames
 	for (iTrial = 0; iTrial < 6; iTrial++){
@@ -465,6 +482,10 @@ function generateProtocol(child, pastSessions) {
 			"video":{
 					"source": curtain_open_order[iTrial],
 					"position": "fill"
+			},
+			"audio": {
+				"loop": false,
+				"source": audio_order[iTrial]
 			},
 			"backgroundColor": "white",
 			"parentTextBlock": {
