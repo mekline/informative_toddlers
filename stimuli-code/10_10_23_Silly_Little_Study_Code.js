@@ -483,10 +483,6 @@ function generateProtocol(child, pastSessions) {
 					"source": curtain_open_order[iTrial],
 					"position": "fill"
 			},
-			"audio": {
-				"loop": false,
-				"source": audio_order[iTrial]
-			},
 			"backgroundColor": "white",
 			"parentTextBlock": {
 				"title": "Parent's Eyes: Closed",
@@ -504,6 +500,10 @@ function generateProtocol(child, pastSessions) {
 			"video":{
 					"source": event_order_selected[iTrial],
 					"position": "fill"
+			},
+			"audio": {
+				"loop": false,
+				"source": audio_order[iTrial]
 			},
 			"backgroundColor": "white",
 			"parentTextBlock": {
