@@ -83,6 +83,12 @@ function generateProtocol(child, pastSessions) {
 		'training_apple.png'
 	];
 
+	let mvp1Train1Audio = [
+		'train-1_apple',
+		'train-1_cat',
+		'train-1_dog'
+	];
+
 	// 3 mvp1-train frames 
 	
 	for (iTrial = 0; iTrial < 3; iTrial++){
@@ -99,7 +105,7 @@ function generateProtocol(child, pastSessions) {
 		};
 		bufferTrial = {
 			"kind": "exp-lookit-images-audio",
-			"audio": "sample_1",
+			"audio": mvp1Train1Audio[iTrial],
 			"images": [
 				{
 					"id": "train1-image",
