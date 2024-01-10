@@ -2,40 +2,37 @@ function generateProtocol(child, pastSessions) {
     // Lookit uses version ECMA 5 of JavaScript
     // base frames that do not change btwn or within participants
 
+	// we are taking the data hog approach
+	// original Experiment runner version (commit SHA): 51c9e97957228f7de00d2fe7e9cc3082ffb1dcf9
+
 	let frame_sequence = [];
      let frames = {
-        "video-config": {
-        	"kind": "exp-video-config",
-        	"troubleshootingIntro": "If you're having any trouble and need help, don't!"
-    	},
     	"video-consent": {
         	"kind": "exp-lookit-video-consent",
         	"template": "consent_005",
         	"PIName": "Laura Schulz",
         	"institution": "MIT",
-        	"PIContact": "Laura Schulz [LS email]",
-        	"purpose": "[UNDER CONSTRUCTION]",
-        	"procedures": "[UNDER CONSTRUCTION",
+        	"PIContact": " Lia Washington at bw18@mit.edu",
+        	"purpose": "This study is about whether children who are just beginning to talk tend to refer to things their audience doesn't already know.",
+        	"procedures": "Today we are going to show your child six ten second animated movies about ordinary events (e.g., animals eating fruit or putting on shoes). There will be a part of the movie where we ask you to cover your eyes and ears. We don't mind if you peek ;) and we know you will probably be able to hear. The idea is just to have your child believe that you don't know what happened during this part of the movie. Then we will ask your child to tell you what happened when you weren't looking.",
         	"risk_statement": "There are no expected risks if you participate in the study.",
-        	"voluntary_participation": "[UNDER CONSTRUCTION]",
-        	"payment": "[UNDER CONSTRUCTION]",
+        	"voluntary_participation": "You and your child are free to choose whether to be in this study. If you and your child choose to participate, it's okay to stop at any point during the session. Please do pause or stop the session if your child becomes very fussy or does not want to participate! If this is a study with multiple sessions, it's okay not to complete all the sessions.",
+        	"payment": "After you finish the study, we will email you a $5 Amazon gift card within three days. To be eligible for the gift card your child must be in the age range for this study, you need to submit a valid consent statement, and we need to see that there is a child with you. But we will send a gift card even if you do not finish the whole study or we are not able to use your child's data! There are no other direct benefits to you or your child from participating, but we hope you will enjoy the experience.",
         	"datause": "During the session, you and your child will be recorded by your computer's webcam and microphone. These webcam recordings, and other data like answers you enter in forms, are sent securely to the Lookit platform. You can view your past recordings on Lookit at any time.Data are stored securely on Lookit servers and by researchers, and are only shared as described in this document. However, there is always a small risk that data transmitted over the internet may be intercepted or that the security of stored data may be compromised.",
         	"include_databrary": true,
         	"additional_video_privacy_statement": "We will also ask your permission to use your videos as stimuli for other parents.",
         	"gdpr": false,
-        	"research_rights_statement": "You are not waiving any legal claims, rights or remedies because of your participation in this research study.  If you feel you have been treated unfairly, or you have questions regarding your rights as a research subject, you may contact the [IRB NAME], MIT, [ADDRESS/CONTACT]",
-        	"additional_segments": [
-            	{
-                	"title": "US Patriot Act Disclosure",
-                	"text": "[EXAMPLE ONLY, PLEASE REMOVE ADDITIONAL_SEGMENTS UNLESS YOU NEED THEM.] Lookit is a U.S. organization and all information gathered from the website is stored on servers based in the U.S. Therefore, your video recordings are subject to U.S. laws, such as the US Patriot Act. This act allows authorities access to the records of internet service providers. If you choose to participate in this study, you understand that your video recording will be stored and accessed in the USA. The security and privacy policy for Lookit can be found at the following link: <a href='https://lookit.mit.edu/privacy/' target='_blank' rel='noopener'>https://lookit.mit.edu/privacy/</a>."
-            	}
-        	]
+        	"research_rights_statement": "You are not waiving any legal claims, rights or remedies because of your participation in this research study. If you feel you have been treated unfairly, or you have questions regarding your rights as a research subject, you may contact Lia Washington at bw18@mit.edu",
+    	},
+		"video-config": {
+        	"kind": "exp-video-config",
+        	"troubleshootingIntro": ""
     	},
         "exit-survey": {
         	"kind": "exp-lookit-exit-survey",
         	"debriefing": {
-            	"text": "[UNDER CONSTRUCTION]",
-            	"title": "Thank you!"
+            	"text": "Thank you for your participation!",
+            	"title": "Exit Survey"
         	}
     	}, 
         "study-intro": {
@@ -57,7 +54,7 @@ function generateProtocol(child, pastSessions) {
 						"text": "A few seconds into each movie we will ask you as the parent to close your eyes and cover your ears."
 					},
 					{
-						"text": "When we do that, please go like this and keep your eyes closed and your ears covered for the next few seconds until you hear us say ‘now your parent can open their eyes’."
+						"text": "When we do that, please go like this and keep your eyes closed and your ears covered for the next few seconds until you hear us say \"now your parent can open their eyes\"."
 					},
 					{
 						"text": "It's actually ok to peek and listen when your eyes are covered."
@@ -66,7 +63,7 @@ function generateProtocol(child, pastSessions) {
 						"text": "But we want your child to think that only they know what happened in that period, because what we're gonna do next is ask your child to tell you what happened in the movie right then."
 					},
 					{
-						"text": "If your child is quiet and doesn't say anything at all, you can prompt them by saying ‘What happened?’, ‘I didn’t see it.’, ‘Can you tell me what you saw?’."
+						"text": "If your child is quiet and doesn't say anything at all, you can prompt them by saying \"What happened?\", \"I didn’t see it.\", \"Can you tell me what you saw?\"."
 					},
 					{
 						"text": "But, please don't repeat the names of the animals or objects mentioned in the movie."
@@ -81,7 +78,7 @@ function generateProtocol(child, pastSessions) {
 						"text": "We know that verbal responses may be rare."
 					},
 					{
-						"text": "After each movie we will ask you to type in exactly what your child said, word for word, if they said something and to type ‘nothing’ if they said nothing."
+						"text": "After each movie we will ask you to type in exactly what your child said, word for word, if they said something and to type \"nothing\" if they said nothing."
 					},
 					{
 						"text": "Then you can hit the next button to go to the next movie."
@@ -103,10 +100,50 @@ function generateProtocol(child, pastSessions) {
 			"nextButtonText": "I'm ready to make sure my webcam is connected!",
 			"title": "Study instructions",
 			"showPreviousButton": false
-    	}		
+    	},
+		"thank-you": {
+			"kind": "exp-lookit-images-audio",
+			"audio": "we_are_all_done_now",
+			"images": [{
+				'id': 'smile',
+				'src': 'smile.png',
+				'position': "fill",
+
+			}],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"autoProceed": false,
+			"parentTextBlock": {
+        		"text": "",
+        		"title": "Thank you for participating in our study!",
+				"css": {
+					"background-color": "white",
+				}
+    		},
+			"backgroundColor": "white"
+		},
+		"study-debrief" : {
+			"kind": "exp-lookit-text",
+			"blocks":[
+				{
+					"title": "Study Debrief",
+					"text": "As adults, we communicate information selectively: We mostly tell people things they don’t already know, and we avoid referring to topics that are common knowledge. What about when children first learn to speak? Young toddlers start with very limited vocabularies. At first, they only produce one or two words in each utterance. Many things might affect what toddlers decide to say, including how familiar a word is, or how interested the child is in the topic. Still, we wondered if even toddlers just learning to talk might, like adults, try  to communicate information their audience does not know."
+				},
+				{
+					"text": "Here we showed your child scenes where both you and your child both knew some things about the scene, but something interesting always happened when your eyes were closed. In two of the stories, the event that happened when your eyes were closed was entirely new (a ball bounced by a lake, or a bear put on a shoe). In those stories, we wanted to know if on average, children would refer to the new event rather than the parts of the scene you already knew (e.g., saying  \“ball\” more often than \“duck\” or \“lake\”, or \"shoe\" more often than \”bear\” or the \“room\”)."
+				},
+				{
+					"text": "In the other stories, we varied whether there were two animals (two subjects) or two foods (two objects) in the scene initially. When your eyes were closed, an animal always ate or drank a kind of food. We wanted to know whether children on average would be more likely to mention the subject (i.e., which animal ate the food) when it could have been either of two animals but mention the object (which food the animal ate) when it could have been either of two foods."
+				},
+				{
+					"text": "Depending on your child's age and mood, they might have been very quiet for all of these movies, spoken in full sentences throughout, or said something else we didn’t predict. All of that is perfectly fine! There is no one \“right\“ answer in these studies and however your child responded could make perfect sense. One of the things we often learn from studying children is that our ideas are wrong and need to change them! Thank you so much for your participation! Research on child development would be impossible without your support and we are very grateful for your time!"
+				}
+			]
+		}		
 	}; // closing bracket for frames list object
+	frame_sequence.push('video-config');
+	frame_sequence.push('video-consent');
 	frame_sequence.push('study-intro');	
-    frame_sequence.push('video-consent');
+   
 	
 	//mvp1 frames and variables
 
@@ -120,11 +157,12 @@ function generateProtocol(child, pastSessions) {
 	
 	for (iTrial = 0; iTrial < 2; iTrial++){
 
+		// parse out nono words using the file names
 		let image_name = mvp1Train1Images[iTrial];
 		let first_clean = image_name.split(".");
 		let second_clean = first_clean[0].split("_");
 		let word = second_clean[1];
-		let image_ans = "If your child doesn't answer you can ask them 'Do you know what that is?'. If they still don't answer you can say: 'That’s a '" + word + "'. Can you say '" + word + "' ?' " + "When you think your child is done (even if your child stays quiet), hit Next.";
+		let image_ans = "If your child doesn't answer you can ask them \"Do you know what that is?\". If they still don't answer you can say: \"That’s a \"" + word + "\". Can you say \"" + word + "\" ?\" " + "When you think your child is done (even if your child stays quiet), hit Next.";
 		
 		startRecordingTrial = {
 			"kind": "exp-lookit-start-recording",
@@ -153,7 +191,10 @@ function generateProtocol(child, pastSessions) {
 			],
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
 			"parentTextBlock": {
-				"text": image_ans
+				"text": image_ans,
+				"css": {
+					"background-color": "white",
+				}
 			},
 			"pageColor": "white",
 			"backgroundColor": "white",
@@ -172,6 +213,7 @@ function generateProtocol(child, pastSessions) {
 		};
 		parentTranscript = {
 			"kind": "exp-lookit-survey",
+			'displayFullscreenOverride': true,
     		"formSchema": {
 				"schema": {
 					"type": "object",
@@ -186,7 +228,7 @@ function generateProtocol(child, pastSessions) {
 					"fields": {
 						"parentResponseTranscription": {
 							"type": "text",
-							"label": "Please type here the words your child said, exactly as they said them. If your child didn't respond, please just write 'nothing'. When you have completed the text box, please hit the next button and the movies will start.",
+							"label": "Please type here the words your child said, exactly as they said them. If your child didn't respond, please just write \"nothing\". When you have completed the text box, please hit the next button and the movies will start.",
 							"placeholder": "Enter your child's response here..."
 						}
 					}
@@ -211,152 +253,83 @@ function generateProtocol(child, pastSessions) {
 		frame_sequence.push(frameId);
 		frame_sequence.push(stopRecordingFrameId);
 		frame_sequence.push(parentTranscriptFrameId);
-	}
+	} // closing bracket of for loop
 
-	/*
-	// mvp1ActualTrial staging images, curtain videos, and event videos
-	let event_order1 = [
-		'event_eat_agent_cat_dog_apple',
-		'event_drink_patient_baby_milk_juice',
-		'event_appear_common_ground_duck_ball',
-		'event_eat_patient_dog_apple_banana',
-		'event_drink_agent_bird_baby_milk',
-		'event_wear_common_ground_bear_shoes'
+	// stimuli for actual trials
+	let order1 = [
+		'common_ground_duck_ball_new',
+		'agent_bird_baby_juice',
+		'patient_dog_apple_banana',
+		'common_ground_bear_shoes_new',
+		'patient_baby_milk_juice',
+		'agent_cat_dog_banana'
 	];
-	let audio_order1 = [
-		'test-trials_long_agentpatient-1_cat-eat-apple',
-		'test-trials_long_agentpatient-2_baby-drink-milk',
-		'test-trials_long_informativity-1_duck-ball',
-		'test-trials_long_agentpatient-1_dog-eat-banana',
-		'test-trials_long_agentpatient-2_bird-drink-milk',
-		'test-trials_long_informativity-2_bear-shoes'
+	let order2 = [ // the flipped version of order1
+		'common_ground_bear_shoes_new',
+		'patient_dog_apple_banana',
+		'agent_bird_baby_juice',
+		'common_ground_duck_ball_new',
+		'agent_cat_dog_banana',
+		'patient_baby_milk_juice'
 	];
-
-	// assests for order2
-	let event_order2 = [
-		'event_drink_agent_baby_bird_juice',
-		'event_eat_patient_cat_banana_apple',
-		'event_wear_common_ground_bear_shoes',
-		'event_drink_patient_bird_juice_milk',
-		'event_eat_agent_dog_cat_banana',
-		'event_appear_common_ground_duck_ball'
+	let order3 = [ // contrast to order1
+		'common_ground_duck_ball_new',
+		'patient_bird_juice_milk',
+		'agent_dog_cat_apple',
+		'common_ground_bear_shoes_new',
+		'agent_baby_bird_milk',
+		'patient_cat_banana_apple'
 	];
-	let audio_order2 = [
-		'sample_1',
-		'sample_1',
-		'test-trials_long_informativity-2_bear-shoes',
-		'test-trials_long_agentpatient-2_bird-drink-juice',
-		'test-trials_long_agentpatient-1_dog-eat-banana',
-		'test-trials_long_informativity-1_duck-ball'
+	let order4 = [ // flipped version of order 3 AKA contrast to version 2
+		'common_ground_bear_shoes_new',
+		'agent_dog_cat_apple',
+		'patient_bird_juice_milk',
+		'common_ground_duck_ball_new',
+		'patient_cat_banana_apple',
+		'agent_baby_bird_milk'
 	];
-
-	let event_orders = [event_order1, event_order2, event_order3, event_order4];
 	
-	// select an event and audio order
-	let event_order_selected = event_order1; // item_orders[Math.floor(Math.random()*item_orders.length)]
-	let audio_order = (event_order_selected = event_order1) ? audio_order1 : audio_order2;
-
-	// 6 mvp1ActualTrial frames
+	// pick an order at random
+	let orders = [order1, order2, order3, order4];
+	let num =  Math.floor(Math.random() * 4);
+	let order_selected = orders[num];
+	
+	// for loop for actual trials
 	for (iTrial = 0; iTrial < 6; iTrial++){
-		// parse file so you can tell parents what not to say
-		let video_name = event_order_selected[iTrial];
-		let video_arr = video_name.split("_");
-		let video_ans = "Please avoid saying '" + video_arr[video_arr.length-1] + "', '" + video_arr[video_arr.length-2] + "', or '" + video_arr[video_arr.length-3] + "'.";
-
-		startRecordingTrial3 = {
+		startRecordingActualTrial = {
 			"kind": "exp-lookit-start-recording",
-    		"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
-    		"videoTypes": [
-        		"webm",
-        		"mp4"
-    		],
-    		"video": "attentiongrabber",
-    		"displayFullscreen": true,
-    		"waitForVideoMessage": " "
-		};
-		staging_image = {
-			"kind": "exp-lookit-images-audio",
-			"audio": "sample_1",
-			"images": [
-				{
-					"id": "staging-image",
-					"src": stage_order[iTrial],
-					"position": "fill"
-				}
-			],
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
-			"pageColor": "white",
-			"backgroundColor": "white",
-			"audioTypes": [
-				"mp3"
-			],
-			'autoProceed': true,
-			"parentTextBlock": {
-				"title": "Parent's Eyes: Open",
-				"text": "Parents: Get ready to close your eyes. "
-			},
-			'durationSeconds': 5
-		};
-		curtain_opening = {
-			"kind": "exp-lookit-video",
-			"video":{
-					"source": curtain_open_order[iTrial],
-					"position": "fill"
-			},
-			"backgroundColor": "white",
-			"parentTextBlock": {
-				"title": "Parent's Eyes: Closed",
-				"text": "Parents: Please close your eyes."
-			},
-			'requireVideoCount': 1,
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
 			"videoTypes": [
 				"webm",
 				"mp4"
-			]
+			],
+			"video": "attentiongrabber",
+			"displayFullscreen": true,
+			"waitForVideoMessage": " "
 		};
-		thisActualTrial = {
+		actualTrial = {
 			"kind": "exp-lookit-video",
 			"video":{
-					"source": event_order_selected[iTrial],
+					"source": order_selected[iTrial],
 					"position": "fill"
 			},
 			"audio": {
 				"loop": false,
-				"source": audio_order[iTrial]
+				"source": order_selected[iTrial]
 			},
 			"backgroundColor": "white",
-			"parentTextBlock": {
-				"title": "Parent's Eyes: Closed",
-				"text": "Parents: Please keep your eyes closed."
-			},
-			'requireVideoCount': 1,
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
-			"videoTypes": [
-				"webm",
-				"mp4"
-			]
-		};
-		curtain_closing = {
-			"kind": "exp-lookit-video",
-			"video":{
-					"source": curtain_close_order[iTrial],
-					"position": "fill"
-			},
-			"backgroundColor": "white",
-			"parentTextBlock": {
-				"title": "Parent's Eyes: Open",
-				"text": video_ans
-			},
-			'requireVideoCount': 1,
+			'requireAudioCount': 1,
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
 			"videoTypes": [
 				"webm",
 				"mp4"
 			],
-			'autoProceed': false
+			"audioTypes": [
+				"ogg",
+				"mp3"
+			]
 		};
-		stopRecordingTrial3 = {
+		stopRecordingActualTrial = {
 			"kind": "exp-lookit-stop-recording",
 			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
 			"videoTypes": [
@@ -367,34 +340,73 @@ function generateProtocol(child, pastSessions) {
 			"displayFullscreen": true,
 			"waitForVideoMessage": " "
 		};
+		parentPromptWithCurtain = {
+			"kind": "exp-lookit-images-audio",
+			"images": [{
+				'id': "curtains",
+				"src": "hd_curtains.png",
+				"position": "fill"
+			}],
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"pageColor": "white",
+			"backgroundColor": "white",
+			"parentTextBlock": {
+				"css": {
+					"background-color": "white",
+				},
+				"text": "If your child doesn't answer, you can prompt them (\"I didn't see it. What did you see?\") but please do not say any of the nouns in the scene. When you think your child is done (even if they don't talk) please hit the Next button."
+			}
+		};
+		parentTranscriptActualTrial = {
+			"kind": "exp-lookit-survey",
+			'displayFullscreenOverride': true,
+			"formSchema": {
+				"schema": {
+					"type": "object",
+					"properties": {
+						"parentResponseTranscription": {
+							"type": "string",
+							"required": true
+						}
+					}
+				},
+				"options": {
+					"fields": {
+						"parentResponseTranscription": {
+							"type": "text",
+							"label": "Please type here the words your child said, exactly as they said them. If your child didn't respond, please just write \"nothing\". When you have completed the text box, please hit the next button and the movies will start.",
+							"placeholder": "Enter your child's response here..."
+						}
+					}
+				}
+			}
+		};
 
 		// make frameIds for each of the above frames
-		startRecording3FrameId = 'startRecording3ActualTrials-' + (iTrial + 1);
-		stagingImageFrameId = 'stagingImageTrials-' + (iTrial + 1);
-		curtainOpeningFrameId = 'curtainOpeningTrials-' + (iTrial + 1);
-		frameIdActual = 'actualTrials-' + (iTrial + 1);
-		curtainClosingFrameId = 'curtainClosingTrials-' + (iTrial + 1);
-		stopRecording3FrameId = 'stopRecording3ActualTrials-' + (iTrial + 1);
-
+		startRecordingActualTrialFrameId = 'startRecordingActualTrial-' + (iTrial + 1);
+		actualTrialFrameId = 'actualTrial-' + (iTrial + 1);
+		parentPromptWithCurtainFrameId = 'parentPromptWithCurtain-' + (iTrial + 1);
+		stopRecordingActualTrialFrameId = 'stopRecordingActualTrial-' + (iTrial + 1);
+		parentTranscriptActualTrialFrameId = 'parentTranscriptActualTrial-' + (iTrial + 1);
+		
 		// insert frames into frame list using frameIds
-		frames[startRecording3FrameId] = startRecordingTrial3;
-		frames[stagingImageFrameId] = staging_image;
-		frames[curtainOpeningFrameId] = curtain_opening;
-		frames[frameIdActual] = thisActualTrial;
-		frames[curtainClosingFrameId] = curtain_closing;
-		frames[stopRecording3FrameId] = stopRecordingTrial3;
+		frames[startRecordingActualTrialFrameId] = startRecordingActualTrial;
+		frames[actualTrialFrameId] = actualTrial;
+		frames[parentPromptWithCurtainFrameId] = parentPromptWithCurtain;
+		frames[stopRecordingActualTrialFrameId] = stopRecordingActualTrial;
+		frames[parentTranscriptActualTrialFrameId] = parentTranscriptActualTrial;
 
 		// push frame ids into frame sequence
-		frame_sequence.push(startRecording3FrameId);
-		frame_sequence.push(stagingImageFrameId);
-		frame_sequence.push(curtainOpeningFrameId);
-		frame_sequence.push(frameIdActual);
-		frame_sequence.push(curtainClosingFrameId);
-		frame_sequence.push(stopRecording3FrameId);
-	}
+		frame_sequence.push(startRecordingActualTrialFrameId);
+		frame_sequence.push(actualTrialFrameId);
+		frame_sequence.push(parentPromptWithCurtainFrameId);
+		frame_sequence.push(stopRecordingActualTrialFrameId);
+		frame_sequence.push(parentTranscriptActualTrialFrameId);
+	} // closing bracket for for loop
 
+	frame_sequence = frame_sequence.concat(['thank-you']);
+	frame_sequence = frame_sequence.concat(['study-debrief']);
 	frame_sequence = frame_sequence.concat(['exit-survey']);
-*/
 	var protocol = {
 		frames: frames,
 		sequence: frame_sequence
