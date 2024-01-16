@@ -11,13 +11,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Intro
 
+Welcome to the analysis script for informative toddlers (version v1jan2024)! This script is designed to be runnable on any computer so long as (1) you have successfully downloaded the corresponding GH repository and (2) you have successfully added the data files you are trying to analyze to the data/ subfolder of your local repo following instructions in the README over there. 
+
+### Side note on using this R file 
 
 Note: This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+When you click the **Knit** button an document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r show-markdown}
 print("this is a string")
 ```
 
-
+Note that the resulting HTML file will *not* get committed when you commit changes, while updates to this Rmd file *will* be committed. We set up the GH repo on purpose this way to minimize version control issues. 
