@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Intro
 
-Welcome to the analysis script for informative toddlers (version v1jan2024)! This script is designed to be runnable on any computer so long as (1) you have successfully downloaded the corresponding GH repository and (2) you have successfully added the data files you are trying to analyze to the data/ subfolder of your local repo following instructions in the README over there. 
+Welcome to the analysis script for informative toddlers (version `v1jan2024`)! This script is designed to be runnable on any computer so long as (1) you have successfully downloaded the corresponding GH repository and (2) you have successfully added the data files you are trying to analyze to the `data/` subfolder of your local repo following instructions in the README over there. 
 
 ### Side note on using this R file 
 
