@@ -1,3 +1,21 @@
+#Kill DS Store
 .DS_Store
 */.DS_Store
 */*/.DS_Store
+
+# History files
+*.Rhistory
+*.RData
+*.RDataTmp
+
+# Example code in package build process
+*-Ex.R
+.Rproj.user
+
+
+#Dont share the data files; a user with permission to access needs to manually add to their local.
+data/*
+
+#but do share the data readme file
+!data/README.md
+
