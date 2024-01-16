@@ -19,3 +19,6 @@ data/*
 #but do share the data readme file
 !data/README.md
 
+#Don't share RMD outputs
+*.html
+
