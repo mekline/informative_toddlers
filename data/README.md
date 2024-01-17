@@ -9,8 +9,8 @@ subfolder for analysis.  Here is how to do that succesfully:
 
 0) As usual, always start from a clean GH repository - pull from the online master version, resolve any conflicts, make sure any other local work is synced up.
 
-1) Make a folder for the experiment/data subgroup you are analyzing.  Following the coding manual (see Dropbox!), you will be adding just the final
-versions of the dataset-level (step-2TOCODE) and participant-level(step-3CODED) CSVs.  Now your data directory should look like this *on your laptop*: 
+1) Make a folder for the experiment/data subgroup you are analyzing.  Following the coding manual (see Dropbox!), you will be adding just the final processing steps
+of the dataset-level (step-2TOCODE) and participant-level(step-3CODED) CSVs.  Now your data directory should look like this *on your laptop*: 
 
 
 ```

@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(here)
 library(tidyverse)
 ```
@@ -15,13 +15,13 @@ library(tidyverse)
 
 Welcome to the analysis script for informative toddlers (version `v1jan2024`)! This script is designed to be runnable on any computer so long as (1) you have successfully downloaded the corresponding GH repository and (2) you have successfully added the data files you are trying to analyze to the `data/` subfolder of your local repo following instructions in the README over there. 
 
-### Side note on using this R file 
+#### (Using this Rmd file)
 
 Note: This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
 When you click the **Knit** button an document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r show-markdown}
+```{r show-markdown, echo = TRUE}
 print("this is a string")
 ```
 
@@ -42,12 +42,14 @@ data_subfolder = 'dummytest_development'
 
 Attempt to load the resulting data files and report on what was found. Before doing this for the first time, make sure that your R session working directory is set to the informative-toddlers directory on your computer! In the menu choose Session>Set Working Directory>To Source File Location. If you knit again and get errors/are still in your default user directory, restart R, reset your working directory, and try knitting again. 
 
-```{r find-data-files}
+```{r find-data-files, echo = FALSE}
 data_location = paste0(here::here(),'/data/',data_subfolder)
-list.files(data_location, recursive=TRUE)
+print(list.files(data_location, recursive=TRUE))
 ```
 
-We tried to list all files in this directory: `r data_location`. If it worked, you should see the contents of the data subfolder above. Next we open them and stick them together into usable datasets (hopefully).
+We tried to list all files in this directory: ``r data_location``. If it worked, you should see the actual contents of that data subfolder above. 
+
+Next we open them and stick them together into usable datasets (hopefully).
 
 ```{r load-data-files}
 session_data_all = read_csv(paste0(data_location, '/study-',study_version,'_step-2TOCODE_session-all_type-combined_data.csv'), show_col_types = FALSE)
@@ -59,14 +61,148 @@ read_csv_nocols <- function(file){read_csv(file, show_col_types = FALSE, col_typ
 trial_data_all <- individual_coded_datafiles %>%
   lapply(read_csv_nocols) %>%                              # Store all files in list
   bind_rows 
+
+# Do some variable renaming for convenience/clarity
+session_data_all <- session_data_all %>%
+  rename(session_id = response__uuid,
+         family_id = participant__hashed_id,
+         child_id = child__hashed_id)
+
+trial_data_all <- trial_data_all %>%
+  rename(session_id = response_uuid,
+         child_id = child_hashed_id)
 ```
 
 Did it work? `r nrow(session_data_all)` rows in the session data, `r nrow(trial_data_all)` rows in the trial data. If either of those numbers is 0 or undefined, go back and check before proceeding. 
 
-## Sanity check the data
+#### Preliminary dataset summary
 
-How many participants do we expect to find in this data? 
+How many sessions do we expect to find in the session-level data? 
 
-* N unique responses are in the session data
+* `r length(unique(session_data_all$session_id))` unique responses are in the session-level data.
+* These come from `r length(unique(session_data_all$child_id))` unique children from `r length(unique(session_data_all$family_id))` unique families. 
 
-View(session_data_all)
+If these numbers get smaller below, we should always know why! (i.e. because we have dropped them from the analyzed dataset on purpose.)
+
+How many sessions do we actually see in the trial-level data?
+
+* `r length(unique(trial_data_all$session_id))` unique responses are in the trial-level data.
+* These come from `r length(unique(trial_data_all$child_id))` unique children.
+
+It is *okay* and *expected* for the trial-level data to have fewer responses than the session-level data at this point, because we haven't yet dealt with exclusion or not-yet-coded sessions. 
+
+## Exclude sessions from analysis
+
+It's time to intentionally exclude observations from the dataset!  As of Jan 17, this list of exclusions is considered the preregistered set of reasons (this will be copied into the prereg written document as well) to exclude data from our analysis *at the session level* (versus at the trial level). 
+
+PROCESS NOTE: It should be possible to make this determination before coding the data. Reviewing for session exclusion might require *viewing* the trial data, and determining e.g. the child isn't present for the study, but if the *results* of coding the data reveal
+a reason for excluding some/all trials, those would be trial-level exclusions! We are not doing those right now!
+
+PROCESS NOTE 2: 
+
+(Normal Lookit Reasons)
+
+* Ineligible for study filter criteria ('drive-by' family who clicked thru despite seeing messages they weren't elegible)
+* Data withdrawn by parent.
+* Birthdate reported at exit survey doesn't match birthdate reported in family's account; AND this couldn't be resolved by correspondence with the family. (This should *not* be modified in the data processing that happened prior to now, but instead updated in this next code chunk.)
+
+
+```{r standard-data-exclusions}
+# TODO - drop e.g. withdrawal, incomplete sessions if desired, etc. No cases like this present in the dummy data, will need updated for the pilot data. So, we just mark all sesions as being included by the above metrics for now!
+
+
+# TODO - make any manual "fixes" to the data (e.g. ages), here, rather than doing so in the data, to avoid losing track of what you change.  If you know something is going to change, DO record a note about this in the notes column to alert future users/yourself. 
+
+session_data_toreport <- session_data_all %>%
+  mutate(lookit_exclusion = "n")
+
+```
+
+(Manually applied/decided reasons)
+
+* "Behavioral"/human-observed reasons that the session does not represent good-faith and successful participation by the family appearing in the video. This judgement should be made sparingly and with good documentation. Examples include:
+  * Child is not actually present for the study, adult is just clicking through on their own. 
+  * Child is present but not engaged *for the entire session* (e.g. having a tantrum or off playing) - note that a child who is oriented toward the stimuli and not visibly responding counts as "engaged"!
+  * Video gives evidence that the family is not being truthful about their inclusion criteria (example: reports location as United States, but review indicates that they participated at 2am local time in broad daylight.)
+  * **IMPORTANT: Children who are silent or who make it through at least 1 warmup trial before disengaging should *NOT* be removed in this process; those are trial-level exclusions which will happen later.**  Reporting on children who participate in this study but do not speak is a key contextual factor for understanding our results!!! 
+  
+Every session that is excluded should have a reason listed below justified by least one of the preregistered criteria.
+
+```{r human-exclusions}
+session_data_manually_excluded <- session_data_toreport %>%
+  filter(to_code == 'n')
+
+print(session_data_manually_excluded$exclusion_reason)
+
+#Finally, drop the observations we aren't going to care about further! Take this part out if you want to report more details on why sessions get excluded
+session_data_toreport <- session_data_toreport %>%
+  filter(to_code == 'y' & lookit_exclusion == 'n')
+
+```
+
+#### Post-exclusion dataset summary
+
+After session-level exclusions, how many sessions do we NOW expect to find in the session-level data? 
+
+* `r length(unique(session_data_toreport$session_id))` unique responses remain in the session data that we will report on.
+* These come from `r length(unique(session_data_toreport$child_id))` unique children from `r length(unique(session_data_toreport$family_id))` unique families. 
+* `r length(unique(session_data_all$session_id)) - length(unique(session_data_toreport$session_id))` sessions were excluded for the reasons shown above, out of `r length(unique(session_data_all$session_id))` original sessions. These sessions will not be coded or included below. 
+
+Does this match the number of sessions in the trial-level data? 
+
+* `r length(unique(trial_data_all$session_id))` unique responses are in the trial-level data.
+* These come from `r length(unique(trial_data_all$child_id))` unique children.
+
+...Possibly not, if we haven't finished coding all the trial-level data yet. That's okay! Next, report on our progress.
+
+(NOTE for Lia - this next part is probably what Laura will want to see/be updated on regularly.)
+
+## Informative Toddlers - Descriptives and coding progress
+### `r data_subfolder` data from the `r study_version` version
+
+After session-level exclusions for ineligibility (kid too old or too young for the sample; kid playing in background and not attending at any point during study session; etc.), there are **`r length(unique(session_data_toreport$session_id))` unique responses from `r length(unique(session_data_toreport$child_id))` unique children.** This includes children who may or may not have spoken on key trials, but who otherwise meet all criteria for inclusion at the session level. 
+
+(TODO: Add more descriptive stats reporting on e.g. gender, age distribution of our largest reportable dataset.)
+
+* Of these `r length(unique(session_data_toreport$session_id))` sessions, `r length(unique(trial_data_all$session_id))` have had their responses coded so far. 
+  * (`r nrow(filter(session_data_toreport, is_coded == "y"))` according to the corresponding columns in the session-level data; these numbers should match!)
+* `r nrow(filter(session_data_toreport, is_coded == "n" & is_ready_for_coding == "y"))` additional sessions have data sheets ready to be coded manually. 
+
+(Note on the dummy dataset - I've simulated a dataset for the case where we are planning to code 5 responses, but haven't gotten around to coding OR preparing the coder sheets for 3 of those responses.)
+
+## Prepare trial-level data for statistics
+
+Make sure the same sessions exist in both session- and trial-level data. If this is not the case, the data merge will go poorly!
+
+```{r check-sessions}
+session_data_toanalyze <- session_data_toreport %>%
+  filter(is_coded == "y")
+
+#Note that these are asymmetrical set differences! You need both lines to find mismatches in both directions
+print(setdiff(trial_data_all$session_id, session_data_toanalyze$session_id))
+print(setdiff(session_data_toanalyze$session_id, trial_data_all$session_id))
+```
+
+If the merge went as expected, the numbers below should match. 
+
+```{r merge-data}
+trial_data_toanalyze <- session_data_toanalyze %>%
+  full_join(trial_data_all, by = c("session_id", "child_id"), suffix = c(".sessionlevel", ".triallevel"))
+  
+#Did we do an unreasonable inflation?
+print(nrow(trial_data_all))
+print(nrow(trial_data_toanalyze))
+```
+
+
+
+Next, trim down the version of the dataset we're working with to relevant columns, to make the data easier to examine (remember, this is just what's happening inside R, the data files are unaffected unless you `write_csv` to a specific file!)
+
+```{r get-useful-columns}
+trial_data_toanalyze <- trial_data_toanalyze %>%
+  select(session_id, family_id, child_id, )
+```
+
+## Descriptive statistics
+
+## Inductive statistics (hypothesis tests!) 
