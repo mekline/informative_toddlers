@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
 ```
 
 ## Intro
@@ -24,3 +26,47 @@ print("this is a string")
 ```
 
 Note that the resulting HTML file will *not* get committed when you commit changes, while updates to this Rmd file *will* be committed. We set up the GH repo on purpose this way to minimize version control issues. 
+
+## Set up and read in data files
+
+In the next chunk, update the exact set of data we want to analyze
+
+```{r choose-version-and-folder}
+
+# Study version
+study_version = 'v1jan2024'
+
+# data subfolder
+data_subfolder = 'dummytest_development'
+```
+
+Attempt to load the resulting data files and report on what was found. Before doing this for the first time, make sure that your R session working directory is set to the informative-toddlers directory on your computer! In the menu choose Session>Set Working Directory>To Source File Location. If you knit again and get errors/are still in your default user directory, restart R, reset your working directory, and try knitting again. 
+
+```{r find-data-files}
+data_location = paste0(here::here(),'/data/',data_subfolder)
+list.files(data_location, recursive=TRUE)
+```
+
+We tried to list all files in this directory: `r data_location`. If it worked, you should see the contents of the data subfolder above. Next we open them and stick them together into usable datasets (hopefully).
+
+```{r load-data-files}
+session_data_all = read_csv(paste0(data_location, '/study-',study_version,'_step-2TOCODE_session-all_type-combined_data.csv'), show_col_types = FALSE)
+
+individual_coded_datafiles = list.files(paste0(data_location, '/study-',study_version,'_step-3CODED_framedata_per_session'), pattern = '*.csv', full.names = TRUE)
+
+read_csv_nocols <- function(file){read_csv(file, show_col_types = FALSE, col_types = cols(event0_timestamp = col_character()))}
+
+trial_data_all <- individual_coded_datafiles %>%
+  lapply(read_csv_nocols) %>%                              # Store all files in list
+  bind_rows 
+```
+
+Did it work? `r nrow(session_data_all)` rows in the session data, `r nrow(trial_data_all)` rows in the trial data. If either of those numbers is 0 or undefined, go back and check before proceeding. 
+
+## Sanity check the data
+
+How many participants do we expect to find in this data? 
+
+* N unique responses are in the session data
+
+View(session_data_all)
