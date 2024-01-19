@@ -291,7 +291,7 @@ Here are the hypotheses we are preregistering:
 
 Given that the child produces an utterance relating to the trial vignette, they will be more likely to mention some informative element that is NOT derivable from the context scene (BALL, BOUNCE in the common-ground scene; DOG, EAT in the appropriate Ambiguous Patient condition) than to mention an uninformative element available in the context scene (DUCK, LAKE in the common-ground scene; APPLE, CAT in the appropriate Ambiguous Patient condition.) 
 
-For Hypothesis 1, we focus on mention of the entity or event using *any descriptor* (e.g. ball, basketball, toy, red thing; fruit, apple, food, tasting, swallowing) intended to convey reference to that entity/event. 
+For Hypothesis 1, we focus on mention of the entity or verb using *any descriptor* (e.g. ball, basketball, toy, red thing; fruit, apple, food, tasting, swallowing) intended to convey reference to that entity/event. 
 
 Hypothesis 1 will be tested across all trials in the study (two Common-Ground scenes and four Agent-Patient scenes, two in the Agent-ambiguous condition and two in the Patient-ambiguous condition.)
 
@@ -350,9 +350,9 @@ anova(model_lmm_h1, null_model_lmm_h1)
 
 Hypothesis 2 focuses on the production of the specific nouns in the target utterances, and is tested only in the Agent-Patient scenes.
 
-Agent-Patient (Hypothesis 2b): Participants will be more likely to mention the ambiguous referent (Agent-ambiguous: DOG; Patient-ambiguous: APPLE) than the unambiguous referent (Agent-ambiguous: APPLE; Patient-ambiguous: DOG)
+Prediction: Participants will be more likely to mention the ambiguous referent (Agent-ambiguous: DOG; Patient-ambiguous: APPLE) than the unambiguous referent (Agent-ambiguous: APPLE; Patient-ambiguous: DOG)
 
-In parallel to H1, we will primarily focus on inclusion of ambigous (informative) versus unambiguous (commonground) referents. However, we will also include follow-up tests for each different class of words, since for a variety of reason production of subjects (agents) might vary from production of objects (patients) 
+In parallel to H1, we will first focus on inclusion of ambiguous (informative) versus unambiguous (commonground) referents. However, we will also include follow-up tests for each different class of words, since for a variety of reason production of subjects (agents) might vary from production of objects (patients) 
 
 - Mention of the agent referent will be more likely in the Agent-ambiguous condition than the Patient-ambiguous condition
 - Mention of the patient referent will be more likely in the Patient-ambiguous condition than the Agent-ambiguous condition
