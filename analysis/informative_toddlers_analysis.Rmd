@@ -30,7 +30,7 @@ In the next chunk, update the exact set of data we want to analyze
 study_version = 'v1jan2024'
 
 # data subfolder
-data_subfolder = 'dummytest_development'
+data_subfolder = 'v1jan20204_prereg'
 ```
 
 Attempt to load the resulting data files and report on what was found. Before doing this for the first time, make sure that your R session working directory is set to the informative-toddlers directory on your computer! In the menu choose Session>Set Working Directory>To Source File Location. If you knit again and get errors/are still in your default user directory, restart R, reset your working directory, and try knitting again. 
