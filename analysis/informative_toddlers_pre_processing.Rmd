@@ -1,0 +1,405 @@
+---
+title: "Informative Toddlers Pre-Processing"
+author: "Lia Washington"
+date: "2024-02-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(kableExtra)
+library(tools)
+library(utils)
+library(knitr)
+```
+
+# Informative Toddlers Pre-Processing Script
+
+This script implements the pre-processing steps written by Melissa Kline Struhl in the Coding Manual from the pre-registration. It is important to note that there are some minor elements from the manual that are either modified or dropped; there are also completely new elements add by me (Lia Washington). It is also important to note that each of these steps produces a new file/dataframe, THE ORIGINAL FILES ARE TO BE UNEDITED.
+
+## The pre-processing steps are as follows:
+
+1. Make Step 0 Files - Copying, renaming, and relocating files
+2. Make Step 1 Dataframe - Parring the renamed files so that only viable session files (which should be like, all of them) and relevant columns remain
+3. Make Step 2 TOCODE Datframes - Parring files even further so that only columns relevant to sessions and coding remain (sessions can be excluded at this stage)
+
+## Step 1
+
+First, we must choose our study version and set the directory to wherever this file is. You can make sure you're in the right directory by executing the line `print(list.files(general_location, recursive=FALSE))`. _**Note:** if you set `recursive` to `TRUE` then R will print out all the files in all the subfolders of the directory as well._
+```{r set and check directory}
+# Study version
+study_version = 'v1jan2024'
+
+# set directories
+general_location = paste0(here::here(), "/data")
+# Note: when this has been run on Lia's computer, running here::here() sets the directory to where the data is, NOT where this script is (no idea why)
+
+raw_location = paste0(general_location, "/raw_data/")
+processed_location = paste0(general_location, "/processed_data/step1/")
+
+# use a counter variable to make sure the expected number of files has been moved
+files_moved <- 0
+
+# make a function that copies the raw data, places it in the processed_data folder, and renames all the files to the proper names
+copy_and_rename <- function(src_dir, dst_dir) {
+  # List all CSV files in the source directory
+  files <- list.files(path = src_dir, pattern = "\\.csv$", full.names = TRUE)
+  
+  for (file in files) {
+    # Extract the file name and replace "Tell-Me-About-It" with "v1jan2024"
+    file_name <- basename(file)
+    out_name <- sub("Tell-Me-About-It-", "v1jan2024-step1", file_name)
+    
+    # Construct the destination file path
+    dst_file <- file.path(dst_dir, out_name)
+    
+    # make sure the dst_file doesn't exist already
+    if(!file.exists(dst_file)){
+      # Note: we used <<- here instead of <- in order to update the global variable files_moved, if you use <- it would only update the local files_moved, which is reset everytime the for loop runs
+      files_moved <<- files_moved + 1
+      # Copy the file to the destination directory
+      file.copy(from = file, to = dst_file)
+    }
+  }
+}
+
+copy_and_rename(raw_location, processed_location)
+
+```
+
+
+## Step 2
+
+Now that we have copied, renamed, and relocated the files, we can begin editing the files themselves. But not actually! We're going to read the files into R as separate data frames and then edit the data frames. Not only is this safer in terms of data preservation, but also easier thanks to the Tidyverse! 
+```{r read in files and rename them}
+# read in all the files as dataframes
+files <- list.files(path = processed_location, pattern = "\\.csv$", full.names = TRUE)
+
+for (file in files){
+  df <- read_csv(file)
+  file_name <- tools::file_path_sans_ext(basename(file))
+  assign(file_name, df)
+}
+```
+
+Now we will edit the session-all file. This file will be used to keep track of all the sessions that have been done (completed or otherwise). If you are anything like me (or you are me), you will feel the urge to delete the original all_sessions/demographics data frames. DO NOT DO THAT!! It makes it harder if you want to change anything about the revised data frames.
+```{r session-all}
+# rename the session-all and demographic data frames
+all_sessions <- `v1jan2024-step1_all-responses-identifiable`
+# it is important to wrap the df names in `` as the - and _ throw R off
+demographics <- `v1jan2024-step1_all-demographic-snapshots`
+
+# select (and rename) the relevant columns from all_sessions
+all_sessions <- all_sessions %>% 
+  select(session_id = response__uuid,
+        family_id = participant__hashed_id,
+        child_id = child__hashed_id,
+        age_in_days = child__age_rounded,
+        gender = child__gender,
+        response_date_created = response__date_created,
+        response_completed = response__completed,
+        response_withdrawn = response__withdrawn,
+        response_eligibility = response__eligibility.0,
+        parent_feedback = response__parent_feedback,
+        birthdate_difference = response__birthdate_difference,
+        video_privacy = response__video_privacy,
+        response_databrary = response__databrary,
+        response_is_preview = response__is_preview,
+        language_list = child__language_list,
+        condition_list = child__condition_list,
+        additional_information = child__additional_information) %>% 
+  # add in blank cols, using NA will result in "NA" appearing in the file, so we use '' instead
+  mutate(session_order = '',
+         to_code = '',
+         exclusion_reason = '',
+         coder = '',
+         is_coded = '',
+         notes = '')
+
+# turn the new data frame into a csv located in the step2 folder
+write.csv(all_sessions, "v1jan2024-step2_all-responses-identifiable.csv")
+
+# relocate the file to the appropriate folder
+current_path = "C:/Users/babyg/Desktop/v1jan2024-step2_all-responses-identifiable.csv"
+step2_location = paste0(general_location, "/processed_data/step2_TOCODE/v1jan2024-step2_all-responses-identifiable.csv")
+file.rename(from = current_path, to = step2_location)
+```
+
+After deciding what sessions should not be cleaned (and later coded) and editing the v1jan2024-step2_all-responses-identifiable file, we will update the files list by removing the files of sessions that were excluded from the files list.
+```{r remove excluded sessions}
+# read in updated all sessions file
+updated_all_sessions_file <- read_csv("C:/Users/babyg/Documents/data/processed_data/step2_TOCODE/v1jan2024-step2_all-responses-identifiable.csv")
+
+# make a df of all sessions that will not be coded (just because I think it's handy to have, not very necessary)
+uncodable_sessions <- updated_all_sessions_file %>% 
+  filter(to_code == "n")
+
+# make a vector of all the codable sessions
+codable_sessions <-  updated_all_sessions_file %>% 
+  filter(is.na(to_code))
+codable_sessions <- codable_sessions$session_id
+
+# update the strings in codable_sessions so that they match the dataframes that were loaded in
+for (i in seq_along(codable_sessions)) {
+  codable_sessions[i] <- paste0("v1jan2024-step1_", codable_sessions[i], "_frames")
+}
+
+```
+
+
+With the all_session file ready, we can now create the individual step2_TOCODE files by parring the file down, rearranging old rows, and adding new rows.
+First, we will make blank data frames for the 4 session orders. This code should only really be run if this is the first time you're using the script.
+```{r make orders}
+orders = c("Order1", "Order2", "Order3", "Order4")
+for (i in seq_along(orders)){
+   df <- data.frame(matrix(ncol = 0, nrow = 0))
+   assign(paste0("Order", i), df)
+}
+```
+
+Now we will iterate of the files and transform them for coding! Warning: this is quite a large code chunk, but we're also doing a lot of transformations so...
+```{r individual file cleaning}
+for(session in codable_sessions){
+    # get the corresponding data frame
+    file_to_df <- get(session)
+    # performing the 100 necessary steps
+    df1 <- file_to_df %>% 
+      # only keep rows containing these things that will later become columns
+      filter(key %in% c("images.0.src", "videoShown", "audioPlayed", "timestamp", "formData.parentResponseTranscription")) %>%
+      # only keep rows where event_number is 0 (bc we need event0_timestamp) or NA (bc those rows contain what image/video was shown)
+      filter(event_number %in% c(0, NA)) %>% 
+      # only keep rows where frame_id contains "train/actual/Transcript"
+      filter(grepl('train|actual|Transcript', frame_id)) %>% 
+      # pivot the data frame to make the data wider
+      pivot_wider(names_from = "key", values_from = "value") %>% 
+      # (informally) coalesce the rows to fill in blanks
+      group_by(frame_id) %>%
+      fill(everything(), .direction = "downup") %>% 
+      # I personally don't know why ungrouping is important but I know that it is so it shall be done
+      ungroup() %>% 
+      # coalesce image & video to form "visualShown" column
+      mutate(visual_shown = coalesce(images.0.src, videoShown)) %>% 
+      # remove obsolete columns
+      select(-images.0.src, -videoShown, -event_number) %>% 
+      # rename some columns
+      rename(event0_timestamp = timestamp, parent_transcript = formData.parentResponseTranscription, audio_played = audioPlayed) %>% 
+      # remove duplicate rows
+      distinct() %>% 
+      # remove rows with "repeat" in them as CHS doesn't give me those videos
+      filter(!grepl('repeat', frame_id)) %>% 
+      # add in child age and gender cols
+      mutate(age = "",
+             gender = "")
+    
+    # attach transcript to appropriate trials
+    move_data <- function(df) {
+      df <- df
+      for (i in 1:6) {
+        matches <- grepl(paste0("actualtrial-", i), df$frame_id, ignore.case = TRUE)
+        start_end_indices <- which(matches)
+        if (length(start_end_indices) == 2) {
+          start <- start_end_indices[1]
+          end <- start_end_indices[2]
+          df[start, "parent_transcript"] <- df[end, "parent_transcript"]
+        }
+      }
+      
+      for (i in 1:2) {
+        matches <- grepl(paste0("1-", i), df$frame_id, ignore.case = TRUE)
+        start_end_indices <- which(matches)
+        if (length(start_end_indices) == 2) {
+          start <- start_end_indices[1]
+          end <- start_end_indices[2]
+          df[start, "parent_transcript"] <- df[end, "parent_transcript"]
+        }
+      }
+      return(df)
+    }
+    df2 = move_data(df1)
+    
+    # this is what we're going to use to sort the data into sessions
+    specific_session <- df2$visual_shown[4]
+    
+    df3 <- df2 %>% 
+    # remove the transcript rows
+      filter(!grepl('Transcript', frame_id)) %>% 
+    # rearrange the columns
+      relocate(visual_shown, .after = frame_id) %>% 
+      relocate(age, .after = child_hashed_id) %>% 
+      relocate(gender, .after = age)
+    # add columns
+      mutate(response_video = '',
+             session_order = '',
+             trial_type = '',
+             trial_num = '',
+             testtrial_type = '',
+             stimulus_set = '',
+             stimulus_subject = '',
+             stimulus_verb = '',
+             stimulus_object = '',
+             stimulus_distractor = '',
+             stimulus_targetutterance = '',
+             stimulus_condition = '',
+             informative_entities = '',
+             cg_entities = '',
+             response_exact_utterance = '',
+             response_attempted_target = '',
+             response_included_subject = '',
+             response_included_verb = '',
+             response_included_object = '',
+             response_included_distractor = '',
+             response_included_informative = '',
+             response_included_cg = '',
+             include_trial = '',
+             exclusion_reason = '',
+             trial_notes = '',
+             # assign file to session order
+             session_order = case_when(
+               grepl("agent_bird_baby_juice", specific_session) ~ "Order1",
+               grepl("patient_dog_apple_banana", specific_session) ~ "Order2",
+               grepl("patient_bird_juice_milk", specific_session) ~ "Order3",
+               grepl("agent_dog_cat_apple", specific_session) ~ "Order4",
+               .default = "Something has gone wrong!"))
+  
+    # assign data frame to a larger OrderN data frame
+    assigned_order <- df3$session_order[1]
+    
+    # check if session has already been added to a session order data frame (ugly code but nice code is too long)
+    if (sum(str_detect(Order1$response_uuid, df3$response_uuid[1])) == 0 &
+        sum(str_detect(Order2$response_uuid, df3$response_uuid[1])) == 0 &
+        sum(str_detect(Order3$response_uuid, df3$response_uuid[1])) == 0 &
+        sum(str_detect(Order1$response_uuid, df3$response_uuid[1])) == 0){
+      
+      # bind session to proper order data frame (ugly again but soo la voo)
+      if (assigned_order == "Order1"){
+        Order1 <- bind_rows(Order1, df3)
+      } else if (assigned_order == "Order2"){
+        Order2 <- bind_rows(Order2, df3)
+      } else if (assigned_order == "Order3"){
+        Order3 <- bind_rows(Order3, df3)
+      } else if (assigned_order == "Order4"){
+        Order4 <- bind_rows(Order4, df3)
+      } else {
+        print(paste0("Error: Could not bind ", df3$response_uuid[1]))
+      } 
+    } else {
+      print ("Already bound :)")
+    }
+}
+```
+
+Now we just need to save the dataframes as csv files for coding!
+```{r}
+# make a file that contains all the orders just for funsies
+all_orders <- data.frame(matrix(ncol = 0, nrow = 0))
+all_orders <- bind_rows(all_orders, Order1)
+all_orders <- bind_rows(all_orders, Order2)
+all_orders <- bind_rows(all_orders, Order3)
+all_orders <- bind_rows(all_orders, Order4)
+
+# turn all 5 dataframes into csvs
+write.csv(all_orders, "v1jan2024-step2_all_orders_TOCODE.csv")
+
+```
+
+```{r wanna delete all the data?}
+# List all objects in the environment
+objects <- ls()
+
+# Identify data objects (data frames and matrices)
+data_objects <- objects[sapply(objects, function(x) is.data.frame(get(x)) || is.matrix(get(x)))]
+
+# Identify the variables that we want to remove
+variable_objects <- objects[grep("^v1jan2024", objects)]
+
+# Remove the  objects
+rm(list = variable_objects)
+```
+
+```{r sandbox}
+
+all_kids <- length(unique(Order1$child_hashed_id)) + length(unique(Order2$child_hashed_id)) + length(unique(Order3$child_hashed_id)) + length(unique(Order4$child_hashed_id))
+```
+
+```{r defunct bits of code that may be useful someday}
+# cleaning file names so that only the file name remains
+for (files in files){
+   # remove path info from file name
+  file1 = gsub(".*/", "", file)
+  # remove file extensions from name
+  file2 =  gsub("\\..*$", "", file1)
+}
+
+library(purrr)
+original_files = files
+files2 = c()
+make_full_path <- function(path) {paste0("C:/Users/babyg/Documents/data/processed_data/step1/", path, ".csv")}
+to_remove = c(
+              #"v1jan2024-step1_12c48364-b9db-485d-82a9-9b9430a80c00_frames",
+              #"v1jan2024-step1_1d2780fe-fe8d-4200-a83d-9ac12de5df74_frames",
+              #"v1jan2024-step1_39093f12-fc0e-4ecf-ab6f-dc103d7d1557_frames",
+              #"v1jan2024-step1_39bcd10a-541e-47be-ba6b-d934867fd2db_frames",
+              #"v1jan2024-step1_4149b6c9-a6a5-49c2-9b63-c381ffb295af_frames",
+              #"v1jan2024-step1_5d10aa85-1211-4e92-91db-c74e124825c0_frames",
+              #"v1jan2024-step1_601591e2-edc7-4c8d-ab5b-6b9826db0591_frames",
+              #"v1jan2024-step1_63d2f9cf-f146-44ef-aa44-4609f28b3863_frames",
+              #"v1jan2024-step1_7dc7a301-86a7-46d3-9971-4bb2266e8f0a_frames",
+              #"v1jan2024-step1_8001f4ef-c217-42fb-bcbc-abb18824697c_frames",
+              #"v1jan2024-step1_8caaee61-1423-4f3c-81f0-6ebda53f18bc_frames",
+              #"v1jan2024-step1_8f1515a4-3b77-4712-9ee1-bfe2793e35d7_frames",
+              #"v1jan2024-step1_a28ac98d-e0f2-4719-9ccd-c33eafbe3d7a_frames",
+              #"v1jan2024-step1_a973613f-2e35-4c7f-8c97-5ee4c477b4b8_frames",
+              "v1jan2024-step1_all-demographic-snapshots",
+              "v1jan2024-step1_all-responses-identifiable"
+              #"v1jan2024-step1_c0610957-c033-4111-8961-acc5c5a17c04_frames",
+              #"v1jan2024-step1_c29ac423-7893-410c-9fe6-ddeb997bd45f_frames",
+              #v1jan2024-step1_cc6edb20-a04b-4422-a7b3-f877ea728a3d_frames",
+              #"v1jan2024-step1_da64a33c-cf8f-400e-a9b9-ad025377517f_frames"
+              )
+
+for (f in original_files) {
+  if (f %in% map_vec(to_remove, make_full_path)) {
+    #print("skipping", f)
+  }
+  else {
+    files2 = append(files2, f)
+  }
+}
+
+# all the stuff above is stuff max and i did to diagnose and eliminate the files that were breaking the code!
+ 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
