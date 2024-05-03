@@ -30,7 +30,7 @@ This script implements the pre-processing steps written by Melissa Kline Struhl 
 First, we must choose set the working directory to be wherever the data is. You can make sure you're in the right directory by executing the line `print(list.files(general_location, recursive=FALSE))`. _**Note:** if you set `recursive` to `TRUE` then R will print out all the files in all the subfolders of the directory as well._
 ```{r set and check directory}
 # set directories
-general_location = "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset"
+general_location = "C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset"
 # Note: when this has been run on Lia's computer, running here::here() sets the directory to where the data is, NOT where this script is (no idea why)
 
 raw_location = paste0(general_location, "/raw_data/framedata")
@@ -121,7 +121,7 @@ write.csv(all_sessions, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative 
 After deciding what sessions should not be cleaned (and later coded) and editing the v1jan2024-step2_all-responses-identifiable file, we will update the files list by removing the files of sessions that were excluded from the files list.
 ```{r remove excluded sessions}
 # read in updated all sessions file
-updated_all_sessions_file <- read_csv("C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step3_CODED/v1jan2024-step3_all-responses-identifiable.csv")
+updated_all_sessions_file <- read_csv("C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step3_CODED/v1jan2024-step3_all-responses-identifiable.csv")
 
 # make a df of all sessions that will not be coded (just because I think it's handy to have, not very necessary)
 uncodable_sessions <- updated_all_sessions_file %>% 
@@ -219,7 +219,7 @@ for(session in codable_sessions){
     # rearrange the columns
       relocate(visual_shown, .after = frame_id) %>% 
       relocate(age, .after = child_hashed_id) %>% 
-      relocate(gender, .after = age)
+      relocate(gender, .after = age) %>% 
     # add columns
       mutate(response_video = '',
              session_order = '',
@@ -291,7 +291,7 @@ all_orders <- bind_rows(all_orders, Order3)
 all_orders <- bind_rows(all_orders, Order4)
 
 # turn all 5 dataframes into csvs
-write.csv(all_orders, "v1jan2024-step2_all_orders_TOCODE.csv")
+write.csv(all_orders, "C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step2_TOCODE/v1jan2024-step2_all_orders_TOCODE.csv")
 
 ```
 
