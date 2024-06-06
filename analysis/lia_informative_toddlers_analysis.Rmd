@@ -46,12 +46,12 @@ Attempt to load the resulting data files and report on what was found. Before do
 We tried to list all files in this directory: ``r data_location``. If it worked, you should see the actual contents of that data subfolder above. 
 
 ```{r}
-session_data_all = read_csv("C:/Users/babyg/Documents/data/processed_data/step2_TOCODE/v1jan2024-step2_all-responses-identifiable.csv", show_col_types = FALSE)
+session_data_all = read_csv("C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step3_CODED/v1jan2024-step3_all-responses-identifiable.csv")
 ```
 
 ```{r loading-in-files}
 #setwd("C:/Users/babyg/Documents/GitHub/informative_toddlers/data/v1jan2024_preregistered_dataset")
-raw_df <- read_csv("C:/Users/babyg/Documents/study-v1jan2024_coding_all_orders_3_11_data.csv", show_col_types = FALSE)
+raw_df <- read_csv("C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step3_CODED/v1jan2024-step3_all_orders_CODED.csv")
 
 # Do some variable renaming for convenience/clarity
 raw_df <- raw_df %>%
@@ -94,15 +94,6 @@ PROCESS NOTE 2:
 * Data withdrawn by parent.
 * Birthdate reported at exit survey doesn't match birthdate reported in family's account; AND this couldn't be resolved by correspondence with the family. (This should *not* be modified in the data processing that happened prior to now, but instead updated in this next code chunk.)
 * Atypical development or some other criteria reported by the family that isn't captured in the age criteria statement. 
-```{r standard-data-exclusions}
-# TODO - drop e.g. withdrawal etc. No cases like this present in the dummy data, will need updated for the pilot data. So, we just mark all sessions as being included by the above metrics for now!
-
-# TODO - make any manual "fixes" to the data (e.g. ages), here, rather than doing so in the data, to avoid losing track of what you change.  If you know something is going to change, DO record a note about this in the notes column of the data to alert future users/yourself. 
-
-session_data_toreport <- session_data_all %>%
-  mutate(lookit_exclusion = "n")
-# LW: I do not understand the purpose of this code chunk as it does not do anything except add a new column
-```
 
 (Manually applied/decided reasons)
 
@@ -110,13 +101,13 @@ session_data_toreport <- session_data_all %>%
 
 Every session that is excluded should have a reason listed below justified by least one of the preregistered criteria. If any lines are blank/NA, go back and find out why this participant is being session-level excluded from analysis!
 ```{r human-exclusions}
-session_data_manually_excluded <- session_data_toreport %>%
+session_data_manually_excluded <- session_data_all %>%
   filter(to_code == 'n')
 
 print(session_data_manually_excluded$exclusion_reason)
 
 #Finally, drop the observations we aren't going to care about further! Take this part out if you want to report more details on why sessions get excluded
-session_data_toreport <- session_data_toreport %>%
+session_data_toreport <- session_data_all %>%
   filter(is.na(to_code)) # we left the to_code col blank if it was good to code 
 
 ```
@@ -202,9 +193,12 @@ trial_data_toanalyze <- trial_data_toanalyze %>%
          response_included_informative, response_included_uninformative,
          include_trial, exclusion_reason, trial_notes)
 
-string_to_replace <- "\\[NA\\]"
+# replace all NAs in the "included..." columns with just "n"
+trial_data_toanalyze <- trial_data_toanalyze %>%
+  mutate_at(vars(contains("included")), ~replace_na(na_if(., NA), "n"))
 
 # Use mutate_all() and str_replace_all() to rename all occurrences
+string_to_replace <- "\\[NA\\]"
 trial_data_toanalyze <- trial_data_toanalyze %>%
   mutate_all(~ifelse(str_detect(., string_to_replace), NA, .))
 
@@ -230,7 +224,8 @@ trial_data_toanalyze <- trial_data_toanalyze %>%
          response_included_object = yesno_tf(response_included_object), 
          response_included_informative = yesno_tf(response_included_informative), 
          response_included_uninformative = yesno_tf(response_included_uninformative), 
-         include_trial = yesno_tf(include_trial))
+         include_trial = yesno_tf(include_trial),
+         response_included_distractor = yesno_tf(response_included_distractor))
 ```
 
 Column definitions can all be found in the Data Coding Manual!
@@ -284,6 +279,7 @@ kable(summarize_utterances, col.names = c("session", "included trials", "spoke",
 
 ```
 
+
 NOTE: Something I did *not* do in any of the above was look at either parent transcriptions, OR sanity checking programmatically on whether the listed utterances in fact have the expected strings for e.g. `response_included_subject`. This would be a good error-checking section to add. 
 
 ## Inductive statistics (hypothesis tests!) 
@@ -305,7 +301,10 @@ Hypothesis 1 will be tested across all trials in the study (two Common-Ground sc
 trial_data_h1 <- trial_data_toanalyze %>%
   filter(response_attempted_target == "TRUE") %>% #Only include trials where child tried to describe some part of the trial vignette
   filter(stimulus_condition %in% c("commonground","agent_ambig","patient_ambig")) %>% # Include commonground, agent-ambiguous, and patient-ambiguous trials, but not warmups
-  select(session_id, child_id, stimulus_condition, trial_num, stimulus_set, response_included_informative, response_included_uninformative)
+  select(session_id, child_id, stimulus_condition, trial_num, stimulus_set, uninformative_entities, response_exact_utterance, response_included_informative, response_included_uninformative) %>% 
+  mutate(trial_id = paste0(session_id, trial_num))
+
+write.csv(trial_data_h1, "trial_data_h1.csv")
 ```
 
 What we actually want to do is compare the `include_informative` rate to the `include_uninformative` rate - this is a test of difference between two dependent proportions (whether a child who can only speak a few words at a time says a CG word in the utterance is NOT independent of whether they say an INF word!), where the discordant observations are the ones that are informative about the question we're interested in. Given this table:
@@ -353,7 +352,8 @@ model_lmm_h1 <- glmer(inf_uninformative_diff ~ response_included_informative  + 
 #Control model
 null_model_lmm_h1 <- glmer(inf_uninformative_diff ~ 1  + (1|stimulus_set) + (1|child_id/session_id) + (1|trial_num), data=trial_data_h1, family="binomial")
 
-anova(model_lmm_h1, null_model_lmm_h1)
+anova(model_lmm_h1_uninformative, null_model_lmm_h1)
+summary(model_lmm_h1)
 
 ```
 #### Hypothesis 2
@@ -377,8 +377,9 @@ Select the columns and rows for testing Hypothesis 2:
 trial_data_h2 <- trial_data_toanalyze %>%
   filter(response_attempted_target == "TRUE") %>% # Only include trials where child tried to describe some part of the trial vignette
   filter(stimulus_condition %in% c("agent_ambig","patient_ambig")) %>% # Include agent-ambiguous, and patient-ambiguous trials only for 2b
-  select(session_id, child_id, trial_num, stimulus_condition, stimulus_set, response_exact_utterance, response_included_subject, response_included_object)
-trial_data_h2
+  select(session_id, child_id, trial_num, stimulus_condition, stimulus_set, uninformative_entities, response_exact_utterance, response_included_subject, response_included_object) %>% 
+  mutate(trial_id = paste0(session_id, trial_num))
+
 ```
 
 In parallel to H1, we add new columns that re-code (agent, patient) into (informative, uninformative) depending on the condition present, and then create the table for the McNemar test. (NOTE: This differs from H1 by focusing on just the nouns of the target utterance, not the verb or distractor entity.)
@@ -389,8 +390,10 @@ trial_data_h2 <- trial_data_h2 %>%
                                                   stimulus_condition == "patient_ambig" ~ response_included_object),
          response_included_uninformative_noun = case_when(stimulus_condition == "agent_ambig" ~ response_included_object,
                                                   stimulus_condition == "patient_ambig" ~ response_included_subject))
-trial_data_h2
+
+#write.csv(trial_data_h2, "trial_data_h2.csv")
 ```
+
 
 ```{r describe-h2}
 h2_xtabs_table <- table(select(trial_data_h2, response_included_info_noun, response_included_uninformative_noun))
@@ -398,6 +401,21 @@ h2_xtabs_table <- table(select(trial_data_h2, response_included_info_noun, respo
 print(h2_xtabs_table)
 
 # trial_data_h2[(trial_data_h2$stimulus_condition %in% c("agent_ambig","patient_ambig")) & (trial_data_h2$response_included_info_noun == FALSE) & (trial_data_h2$response_included_uninformative_noun == FALSE),]
+```
+
+
+These numbers are not giving so I need to see why 
+```{r}
+# make a unique trial id
+trial_data_h1 <- trial_data_h1 %>% 
+  mutate(trial_id = paste0(child_id, trial_num))
+trial_data_h2 <- trial_data_h2 %>% 
+  mutate(trial_id = paste0(child_id, trial_num))
+# trials that are in h1 table but not h2
+setdiff(trial_data_h1$trial_id, trial_data_h2$trial_id)
+
+# trials that are in h2 but not in h1 THIS SHOULD BE BLANK
+setdiff(trial_data_h2$trial_id, trial_data_h1$trial_id)
 ```
 
 We want to test the hypothesis that the number of cases where CG=FALSE and Informative=TRUE is greater than the number of cases where CG=TRUE and Informative=FALSE. 
@@ -416,7 +434,7 @@ trial_data_h2 <- trial_data_h2 %>%
   mutate(inf_uninformative_diff = case_when(response_included_info_noun == response_included_uninformative_noun ~ 0,
                                  response_included_info_noun != response_included_uninformative_noun ~ 1))
 
-trial_data_h2
+#trial_data_h2
 #Maximal random effects
 #model_lmm_h2 <- glmer(inf_uninformative_diff ~ response_included_info_noun  + (response_included_info_noun|stimulus_set) + (response_included_info_noun|child_id/session_id) + (response_included_info_noun|trial_num), data=trial_data_h2, family="binomial")
 
@@ -424,8 +442,8 @@ trial_data_h2
 model_lmm_h2 <- glmer(inf_uninformative_diff ~ response_included_info_noun  + (1|stimulus_set) + (1|child_id/session_id), data=trial_data_h2, family="binomial")
 summary(model_lmm_h2)
 
-model_lmm_h2_uninformative <- glmer(inf_uninformative_diff ~ response_included_uninformative_noun  + (1|stimulus_set) + (1|child_id/session_id), data=trial_data_h2, family="binomial")
-summary(model_lmm_h2_uninformative)
+#model_lmm_h2_uninformative <- glmer(inf_uninformative_diff ~ response_included_uninformative_noun  + (1|stimulus_set) + (1|child_id/session_id), data=trial_data_h2, family="binomial")
+#summary(model_lmm_h2_uninformative)
 
 #Control model
 # null_model_lmm_h2 <- glmer(inf_uninformative_diff ~ 1  + (1|stimulus_set) + (1|child_id/session_id) + (1|trial_num), data=trial_data_h2, family="binomial")
@@ -445,14 +463,13 @@ And here is the specification for the follow-up tests, which we use LMMs for.
 trial_data_h2 <- trial_data_h2 %>%
   mutate(response_included_subject = case_when(response_included_subject == "TRUE" ~ TRUE, 
                                                response_included_subject == "FALSE" ~ FALSE))
-trial_data_h2
 
 #Maximal random effects
 #model_lmm_h2_agent <- glmer(response_included_subject ~ stimulus_condition  + (response_included_subject|stimulus_set) + (response_included_subject|child_id/session_id) + (response_included_subject|trial_num), data=trial_data_h2, family="binomial")
 
 #Likelier to actually converge
 model_lmm_h2_agent <- glmer(response_included_subject ~ stimulus_condition  + (1|stimulus_set) + (1|session_id) + (1|trial_num), data=trial_data_h2, family="binomial", control=glmerControl(optimizer = "Nelder_Mead", optCtrl = list(maxfun = 100000)))
-summary(model_lmm_h2_agent)
+
 
 # model_lmm_h2_agent <- glmer(response_included_subject ~ stimulus_condition  + (1|stimulus_set) + (1|child_id/session_id), data=trial_data_h2, family="binomial", control=glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)))
 #Control model
@@ -467,7 +484,7 @@ anova(model_lmm_h2_agent, null_model_lmm_h2_agent)
 - Mention of the patient referent will be more likely in the Patient-ambiguous condition than the Agent-ambiguous condition
 
 
-```{r h2-agent}
+```{r h2-patient}
 #Recode TRUE/FALSE to boolean
 trial_data_h2 <- trial_data_h2 %>%
   mutate(response_included_object = case_when(response_included_object == "TRUE" ~ TRUE, 
@@ -486,14 +503,21 @@ anova(model_lmm_h2_patient, null_model_lmm_h2_patient)
 
 ```
 
-Okay now I am going to do a few somewhat random things for my talk and revised CogSci Submission
+# Okay now I am going to do a few somewhat random things for my talk and revised CogSci Submission
 
 ```{r}
 # gather all the test trials where the kids says something about the stimuli
 test_trials_to_analyze <- trial_data_toanalyze %>% 
-  filter(trial_type == "test_trial",
-         response_attempted_target == TRUE,
-         !is.na(response_exact_utterance))
+  filter(trial_type == "test_trial")
+
+# SEARCHING FOR SPECIFIC UTTERANCES
+specific_utterances <- test_trials_to_analyze %>% 
+  filter(
+    stimulus_target_utterance == "The cat ate the banana",
+    stimulus_condition == "patient_ambig",
+    #response_included_uninformative == TRUE
+    response_attempted_target == FALSE
+    )
 ```
 
 Trying to make graph for H1
@@ -689,8 +713,8 @@ print(kids_in_raw_df_not_in_reportable_sessions)
 Time for some descriptive statistics!
 ```{r descriptive stats}
 # done on raw coding file data
-raw_mean_age = mean_age = mean(raw_df$child__age_rounded)/31
-raw_gender_counts = table(raw_df$child__gender)
+raw_mean_age = mean_age = mean(trial_data_toanalyze$child_age_in_days)/30
+raw_gender_counts = table(trial_data_toanalyze$child_gender)
 raw_percent_female <- (raw_gender_counts["f"] / sum(raw_gender_counts)) * 100
 ```
 
