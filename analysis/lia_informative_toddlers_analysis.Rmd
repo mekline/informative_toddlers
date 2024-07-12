@@ -587,45 +587,6 @@ ggplot(inf_vs_cg_nouns_data, aes(x = Category, y = counts, fill = Category)) +
   theme(panel.background = element_blank())
 
 ```
-THIS GRAPH DOES NOT ADDRESS THIS QUESTION Now I will try to make a graph for "Agent is more likely to be referenced in the agent ambiguous scenes"
-
-```{r}
-inf_agent_count <- sum(trial_data_h2$response_included_info_noun == TRUE &
-                         trial_data_h2$stimulus_condition == "agent_ambig")
-cg_agent_count <- sum(trial_data_h2$response_included_uninformative_noun == TRUE &
-                         trial_data_h2$stimulus_condition == "agent_ambig")
-
-inf_vs_cg_agent_data <- data.frame(
-  Category = c("Informative Agent", "Common Ground Agent"),
-  counts = c(inf_agent_count, cg_agent_count)
-)
-
-ggplot(inf_vs_cg_agent_data, aes(x = Category, y = counts, fill = Category)) +
-  geom_bar(stat = "identity") +
-  labs(y = "Number of Utterances", x = "Agent Type") + 
-  theme(panel.background = element_blank())
-
-```
-
-THIS GRAPH DOES NOT ADDRESS THIS QUESTION And finally, a graph for "Patient more likely to be referenced in the patient ambiguous scene" 
-
-```{r}
-inf_patient_count <- sum(trial_data_h2$response_included_info_noun == TRUE &
-                         trial_data_h2$stimulus_condition == "patient_ambig")
-cg_patient_count <- sum(trial_data_h2$response_included_uninformative_noun == TRUE &
-                         trial_data_h2$stimulus_condition == "patient_ambig")
-
-inf_vs_cg_patient_data <- data.frame(
-  Category = c("Informative Patient", "Common Ground Patient"),
-  counts = c(inf_patient_count, cg_patient_count)
-)
-
-ggplot(inf_vs_cg_patient_data, aes(x = Category, y = counts, fill = Category)) +
-  geom_bar(stat = "identity") +
-  labs(y = "Number of Utterances", x = "Patient Type") + 
-  theme(panel.background = element_blank())
-
-```
 
 - Mention of the agent referent will be more likely in the Agent-ambiguous condition than the Patient-ambiguous condition graph
 
@@ -680,7 +641,7 @@ ggplot(patient_in_agent_ambig_patient_ambig, aes(x = Category, y = counts, fill 
 
 Note for Lia: If you're going to include a percentage or a proportion in a graph then you are legally required to include error bars or someone will beat you up.
 
-Here's a large code chunk of me just making sure that everything lines up in terms of sessoins and what not.
+Here's a large code chunk of me just making sure that everything lines up in terms of sessions and what not.
 ```{r checking that everything matches and is up to code}
 reportable_session_ids <- session_data_toreport$session_id
 raw_df_response_uuids <- raw_df$response_uuid
@@ -799,6 +760,45 @@ ggplot(inf_and_cg_vs_inf_vs_cg_data, aes(x = type, y = counts, fill = type)) +
   theme(panel.background = element_blank())
 ```
 
+THIS GRAPH DOES NOT ADDRESS THIS QUESTION Now I will try to make a graph for "Agent is more likely to be referenced in the agent ambiguous scenes"
+
+```{r}
+inf_agent_count <- sum(trial_data_h2$response_included_info_noun == TRUE &
+                         trial_data_h2$stimulus_condition == "agent_ambig")
+cg_agent_count <- sum(trial_data_h2$response_included_uninformative_noun == TRUE &
+                         trial_data_h2$stimulus_condition == "agent_ambig")
+
+inf_vs_cg_agent_data <- data.frame(
+  Category = c("Informative Agent", "Common Ground Agent"),
+  counts = c(inf_agent_count, cg_agent_count)
+)
+
+ggplot(inf_vs_cg_agent_data, aes(x = Category, y = counts, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(y = "Number of Utterances", x = "Agent Type") + 
+  theme(panel.background = element_blank())
+
+```
+
+THIS GRAPH DOES NOT ADDRESS THIS QUESTION And finally, a graph for "Patient more likely to be referenced in the patient ambiguous scene" 
+
+```{r}
+inf_patient_count <- sum(trial_data_h2$response_included_info_noun == TRUE &
+                         trial_data_h2$stimulus_condition == "patient_ambig")
+cg_patient_count <- sum(trial_data_h2$response_included_uninformative_noun == TRUE &
+                         trial_data_h2$stimulus_condition == "patient_ambig")
+
+inf_vs_cg_patient_data <- data.frame(
+  Category = c("Informative Patient", "Common Ground Patient"),
+  counts = c(inf_patient_count, cg_patient_count)
+)
+
+ggplot(inf_vs_cg_patient_data, aes(x = Category, y = counts, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(y = "Number of Utterances", x = "Patient Type") + 
+  theme(panel.background = element_blank())
+
+```
 
 ```{r sandbox}
 
