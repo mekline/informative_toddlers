@@ -46,12 +46,12 @@ Attempt to load the resulting data files and report on what was found. Before do
 We tried to list all files in this directory: ``r data_location``. If it worked, you should see the actual contents of that data subfolder above. 
 
 ```{r}
-session_data_all = read_csv("C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step3_CODED/v1jan2024-step3_all-responses-identifiable.csv")
+session_data_all = read_csv("C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step3_CODED/v1jan2024-step3_all-responses-identifiable.csv")
 ```
 
 ```{r loading-in-files}
 #setwd("C:/Users/babyg/Documents/GitHub/informative_toddlers/data/v1jan2024_preregistered_dataset")
-raw_df <- read_csv("C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step3_CODED/v1jan2024-step3_all_orders_CODED.csv")
+raw_df <- read_csv("C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step3_CODED/v1jan2024-step3_all_orders_CODED.csv")
 
 # Do some variable renaming for convenience/clarity
 raw_df <- raw_df %>%
@@ -304,7 +304,7 @@ trial_data_h1 <- trial_data_toanalyze %>%
   select(session_id, child_id, stimulus_condition, trial_num, stimulus_set, uninformative_entities, response_exact_utterance, response_included_informative, response_included_uninformative) %>% 
   mutate(trial_id = paste0(session_id, trial_num))
 
-write.csv(trial_data_h1, "trial_data_h1.csv")
+# write.csv(trial_data_h1, "trial_data_h1.csv")
 ```
 
 What we actually want to do is compare the `include_informative` rate to the `include_uninformative` rate - this is a test of difference between two dependent proportions (whether a child who can only speak a few words at a time says a CG word in the utterance is NOT independent of whether they say an INF word!), where the discordant observations are the ones that are informative about the question we're interested in. Given this table:
@@ -522,25 +522,28 @@ specific_utterances <- test_trials_to_analyze %>%
 
 Trying to make graph for H1
 ```{r}
-# number of children included in this graph
-temp <- relevant_test_trials %>% 
-  filter(response_attempted_target == TRUE,
-         response_included_informative == TRUE,
-         response_included_uninformative == FALSE)
-temp2 <- relevant_test_trials %>% 
-  filter(response_attempted_target == TRUE,
-         response_included_informative == FALSE,
-         response_included_uninformative == TRUE)
+# I need to know how many kids are in this graph for my presentation
 
-ans = length(unique(temp$child_id)) + length(unique(temp2$child_id))
+# all the info only kids in h1
+h1_kids_inf <- trial_data_h1 %>% 
+  filter(response_included_informative == TRUE,
+         response_included_uninformative == FALSE)
+# all the cg kids in h1
+h1_kids_cg <- trial_data_h1 %>% 
+  filter(response_included_informative == FALSE,
+         response_included_uninformative == TRUE)
+# identify all the unique kids of those sets
+h1_kids_inf_unique <- unique(h1_kids_inf$child_id)
+h1_kids_cg_unique <- unique(h1_kids_cg$child_id)
+# combine the vectors and count all the unique kids in this new 'mega' vector
+h1_graph_kids = length(unique(c(h1_kids_inf_unique, h1_kids_cg_unique)))
 
 # only informative utterances
-informative_only_count <- sum(
-  relevant_test_trials$response_attempted_target == TRUE & relevant_test_trials$response_included_informative == TRUE & relevant_test_trials$response_included_uninformative == FALSE)
-
+informative_only_count <- sum(trial_data_h1$response_included_informative == TRUE & 
+                                trial_data_h1$response_included_uninformative == FALSE)
 # only cg utterances
-cg_only_count <- sum(
-  relevant_test_trials$response_attempted_target == TRUE & relevant_test_trials$response_included_informative == FALSE & relevant_test_trials$response_included_uninformative == TRUE)
+cg_only_count <- sum(trial_data_h1$response_included_informative == FALSE & 
+                       trial_data_h1$response_included_uninformative == TRUE)
 
 # make a graph
 # make a data frame containing the stuff we want to turn into a graph
@@ -557,25 +560,74 @@ ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
   labs(y = "Number of Utterances", x = "Utterance Type") + 
   theme(panel.background = element_blank())
 ```
+Making a graph for H2b 
+```{r}
+# make a new df to hold H1b data
+trial_data_h1b <- trial_data_h1 %>% 
+  # remove common ground trials
+  filter(!grepl('common', stimulus_condition))
+
+# inf only kids
+h1b_kids_inf <- trial_data_h1b %>% 
+  filter(response_included_informative == TRUE,
+         response_included_uninformative == FALSE)
+# cg only kids
+h1b_kids_cg <- trial_data_h1b %>% 
+  filter(response_included_informative == FALSE,
+         response_included_uninformative == TRUE)
+
+# identify all the unique kids of those sets
+h1b_kids_inf_unique <- unique(h1b_kids_inf$child_id)
+h1b_kids_cg_unique <- unique(h1b_kids_cg$child_id)
+# combine the vectors and count all the unique kids in this new 'mega' vector
+h1b_graph_kids = length(unique(c(h1b_kids_inf_unique, h1b_kids_cg_unique)))
+
+# only informative utterances
+h1b_informative_only_count <- sum(trial_data_h1b$response_included_informative == TRUE & 
+                       trial_data_h1b$response_included_uninformative == FALSE)
+# only cg utterances
+h1b_cg_only_count <- sum(trial_data_h1b$response_included_informative == FALSE & 
+                       trial_data_h1b$response_included_uninformative == TRUE)
+
+# make a graph
+# make a data frame containing the stuff we want to turn into a graph
+inf_vs_cg_data <- data.frame(
+  Category = c("Only Informative", "Only Common Ground"),
+  counts = c(h1b_informative_only_count, h1b_cg_only_count)
+)
+# had to do this bc for whatever reason the graph kept coming out with the "relevant" bar first and I hate it
+inf_vs_cg_data$Category <- factor(inf_vs_cg_data$Category, levels = c("Only Informative", "Only Common Ground"))
+
+# make a da graph
+ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(y = "Number of Utterances", x = "Utterance Type") + 
+  theme(panel.background = element_blank())
+```
+
 
 Try to make a graph for H2a
 ```{r}
-# going to use the data set melissa made for H2 model
-
-# number of children included in this graph
-temp3 <- trial_data_h2 %>% 
+# info only kids
+h2_kids_inf <- trial_data_h2 %>% 
   filter(response_included_info_noun == TRUE,
          response_included_uninformative_noun == FALSE)
-temp4 <- trial_data_h2 %>% 
+# cg only kids
+h2_kids_cg <- trial_data_h2 %>% 
   filter(response_included_info_noun == FALSE,
          response_included_uninformative_noun == TRUE)
+# figure out who's unique 
+h2_kids_inf_unique <- unique(h2_kids_inf$child_id)
+h2_kids_cg_unique <- unique(h2_kids_cg$child_id)
 
-ans2 = length(unique(temp3$child_id)) + length(unique(temp4$child_id))
+h2_graph_kids = length(unique(c(h2_kids_inf_unique, h2_kids_cg_unique)))
 
-inf_noun_count <- sum(trial_data_h2$response_included_info_noun == TRUE & trial_data_h2$response_included_uninformative_noun == FALSE)
+# prepare dat for graph
+inf_noun_count <- sum(trial_data_h2$response_included_info_noun == TRUE & 
+                        trial_data_h2$response_included_uninformative_noun == FALSE)
 cg_noun_count <- sum(trial_data_h2$response_included_uninformative_noun == TRUE &
                        trial_data_h2$response_included_info_noun == FALSE)
-
+# make graph
 inf_vs_cg_nouns_data <- data.frame(
   Category = c("Mentioned only ambiguous referent", "Mentioned only unambiguous referent"),
   counts = c(inf_noun_count, cg_noun_count)
