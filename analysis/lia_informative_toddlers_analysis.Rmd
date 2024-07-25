@@ -503,7 +503,7 @@ anova(model_lmm_h2_patient, null_model_lmm_h2_patient)
 
 ```
 
-# Okay now I am going to do a few somewhat random things for my talk and revised CogSci Submission
+Okay now I am going to do a few somewhat random things for my talk and revised CogSci Submission
 
 ```{r}
 # gather all the test trials where the kids says something about the stimuli
@@ -520,7 +520,7 @@ specific_utterances <- test_trials_to_analyze %>%
     )
 ```
 
-Trying to make graph for H1
+Graph for H1
 ```{r}
 # I need to know how many kids are in this graph for my presentation
 
@@ -559,15 +559,15 @@ ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
   geom_bar(stat = "identity") +
   labs(y = "Number of Utterances", x = "Utterance Type") + 
   theme_bw() +
+  theme(panel.border = element_blank()) +
   scale_y_continuous(
     breaks = seq(0, 100, by = 10),
     limits = c(0, 100)) + 
-  theme(
-      axis.text.x = element_blank(),
-      axis.ticks.x = element_blank()
-    )
+  theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank())
 ```
-Making a graph for H2b 
+
+Making a graph for H1b 
 ```{r}
 # make a new df to hold H1b data
 trial_data_h1b <- trial_data_h1 %>% 
@@ -609,18 +609,16 @@ inf_vs_cg_data$Category <- factor(inf_vs_cg_data$Category, levels = c("Only Info
 ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
   geom_bar(stat = "identity") +
   labs(y = "Number of Utterances", x = "Utterance Type") + 
-  theme_bw()+
+  theme_bw() +
+   theme(panel.border = element_blank()) +
   scale_y_continuous(
     breaks = seq(0, 100, by = 10),
     limits = c(0, 100)) + 
-  theme(
-      axis.text.x = element_blank(),
-      axis.ticks.x = element_blank()
-    )
+  theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank())
 ```
 
-
-Try to make a graph for H2a
+Graph for H2a
 ```{r}
 # info only kids
 h2_kids_inf <- trial_data_h2 %>% 
@@ -651,15 +649,79 @@ ggplot(inf_vs_cg_nouns_data, aes(x = Category, y = counts, fill = Category)) +
   geom_bar(stat = "identity") +
   labs(y = "Number of Utterances", x = "Utterance Type") + 
   theme_bw() +
+   theme(panel.border = element_blank()) +
   scale_y_continuous(
     breaks = seq(0, 100, by = 10),
     limits = c(0, 100)) + 
-  theme(
-      axis.text.x = element_blank(),
-      axis.ticks.x = element_blank()
-    )
+  theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank())
 
 ```
+
+Bonus graph of all kids
+```{r}
+# all the info only kids in h1
+all_kids_inf <- trial_data_h1 %>% 
+  filter(response_included_informative == TRUE,
+         response_included_uninformative == FALSE)
+# all the cg kids in h1
+all_kids_cg <- trial_data_h1 %>% 
+  filter(response_included_informative == FALSE,
+         response_included_uninformative == TRUE)
+# the non-selective kids
+all_kids_unselective <- trial_data_h1 %>% 
+  filter(response_included_informative == TRUE,
+         response_included_uninformative == TRUE)
+
+# identify all the unique kids of those sets
+all_kids_inf_unique <- unique(all_kids_inf$child_id)
+all_kids_cg_unique <- unique(all_kids_cg$child_id)
+all_kids_unselective_unique <- unique(all_kids_unselective$child_id)
+
+# combine the vectors and count all the unique kids in this new 'mega' vector
+all_graph_kids = length(unique(c(all_kids_inf_unique, all_kids_cg_unique, all_kids_unselective_unique)))
+
+# only informative utterances
+informative_only_count <- sum(trial_data_h1$response_included_informative == TRUE & 
+                                trial_data_h1$response_included_uninformative == FALSE)
+# only cg utterances
+cg_only_count <- sum(trial_data_h1$response_included_informative == FALSE & 
+                       trial_data_h1$response_included_uninformative == TRUE)
+# unselective responses
+unselective_count <- sum(trial_data_h1$response_included_informative == TRUE &
+                           trial_data_h1$response_included_uninformative == TRUE)
+
+# make a data frame containing the stuff we want to turn into a graph
+inf_vs_cg_data <- data.frame(
+  Category = c("Only Informative", "Only Common Ground", "Informative and Common Ground"),
+  counts = c(informative_only_count, cg_only_count, unselective_count)
+)
+# had to do this bc for whatever reason the graph kept coming out with the "relevant" bar first and I hate it
+inf_vs_cg_data$Category <- factor(inf_vs_cg_data$Category, levels = c("Only Informative", "Only Common Ground", "Informative and Common Ground"))
+
+# make a da graph
+ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(y = "Number of Utterances", x = "Utterance Type") + 
+  theme_bw() +
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank())
+```
+
+
+
+
+
+
+
+# Everything Below This Point is Lia Stuff (that we probably don't need)
+
+Note for Lia: If you're going to include a percentage or a proportion in a graph then you are legally required to include error bars or someone will beat you up.
+
 
 - Mention of the agent referent will be more likely in the Agent-ambiguous condition than the Patient-ambiguous condition graph
 
@@ -697,22 +759,6 @@ ggplot(patient_in_agent_ambig_patient_ambig, aes(x = Category, y = counts, fill 
   labs(y = "Number of Utterances Mentioning Patient", x = "Context Type") + 
   theme(panel.background = element_blank())
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Everything Below This Point is Lia Stuff (that we probably don't need)
-
-Note for Lia: If you're going to include a percentage or a proportion in a graph then you are legally required to include error bars or someone will beat you up.
 
 Here's a large code chunk of me just making sure that everything lines up in terms of sessions and what not.
 ```{r checking that everything matches and is up to code}
