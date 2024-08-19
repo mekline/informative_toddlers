@@ -1,7 +1,8 @@
 # Changelog
 1. We are no longer calculating frameDuration: The point of calculating frameDuration is to know when coders can start coding the responses of the participants. The issue is that this only works if the child waits until the red curtain frame to start responding.
+2. We are now using an R script to do the preprocessing - see analysis folder.
 
-*** Below is the original version of this file. ***
+# *** Below is the original version of this file. ***
 
 # informative_toddlers
 
