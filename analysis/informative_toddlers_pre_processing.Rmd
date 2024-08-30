@@ -34,7 +34,7 @@ general_location = "C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Todd
 # Note: when this has been run on Lia's computer, running here::here() sets the directory to where the data is, NOT where this script is (no idea why)
 
 raw_location = paste0(general_location, "/raw_data/framedata")
-processed_location = paste0(general_location, "/processed_data/v1jan2024_step1/framedata")
+processed_location = paste0(general_location, "/processed_data/v1_jan2024_step1/framedata")
 
 # use a counter variable to make sure the expected number of files has been moved
 files_moved <- 0
@@ -47,7 +47,7 @@ copy_and_rename <- function(src_dir, dst_dir) {
   for (file in files) {
     # Extract the file name and replace "Tell-Me-About-It" with "v1jan2024"
     file_name <- basename(file)
-    out_name <- sub("Tell-Me-About-It-", "v1jan2024-step1", file_name)
+    out_name <- sub("Tell-Me-About-It-", "v1_jan2024-step1", file_name)
     
     # Construct the destination file path
     dst_file <- file.path(dst_dir, out_name)
