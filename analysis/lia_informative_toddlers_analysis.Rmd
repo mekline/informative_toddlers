@@ -37,7 +37,7 @@ data_subfolder = 'v1_jan2024_complete'
 Attempt to load the resulting data files and report on what was found. Before doing this for the first time, make sure that your R session working directory is set to the informative-toddlers directory on your computer! In the menu choose Session>Set Working Directory>To Source File Location. If you knit again and get errors/are still in your default user directory, restart R, reset your working directory, and try knitting again. 
 
 ```{r find-data-files, echo = FALSE}
-data_location = paste0(here::here(),'/data/',data_subfolder)
+data_location = paste0(here(),'/data/',data_subfolder)
 print(list.files(data_location, recursive=TRUE))
 ```
 
@@ -65,7 +65,7 @@ Did it work? There are `r nrow(session_data_all)` rows in the session data, and 
 
 How many sessions do we expect to find in the session-level data? 
 
-* There are `r length(unique(session_data_all$session_id))` unique responses are in the session-level data.
+* There are `r length(unique(session_data_all$session_id))` unique responses in the session-level data.
 * These come from `r length(unique(session_data_all$child_id))` unique children from `r length(unique(session_data_all$family_id))` unique families. 
 
 If these numbers get smaller below, we should always know why! (i.e. because we have dropped them from the analyzed dataset on purpose.)
@@ -134,7 +134,7 @@ TODO: Add report on family choices about data sharing - publicity level and Data
 ## Informative Toddlers - Descriptives and coding progress
 ### `r data_subfolder` data from the `r study_version` version
 
-After session-level exclusions for ineligibility (kid too old or too young for the sample; kid playing in background and not attending at any point during study session; etc.), there are ** `r length(unique(session_data_toreport$session_id))` unique responses from `r length(unique(session_data_toreport$child_id))` unique children.** This includes children who may or may not have spoken on key trials, but who otherwise meet all criteria for inclusion at the session level. 
+After session-level exclusions for ineligibility (kid too old or too young for the sample; kid playing in background and not attending at any point during study session; etc.), there are **`r length(unique(session_data_toreport$session_id))` unique responses from `r length(unique(session_data_toreport$child_id))` unique children.** This includes children who may or may not have spoken on key trials, but who otherwise meet all criteria for inclusion at the session level. 
 
 Let's take a gander at the demographics of these participants!
 
@@ -145,7 +145,7 @@ raw_gender_counts = table(trial_data_all$gender)
 raw_percent_female <- (raw_gender_counts["f"] / sum(raw_gender_counts)) * 100
 ```
 
-Of these `r length(unique(session_data_toreport$session_id))` sessions, `r length(unique(trial_data_all$session_id))` have had their responses coded so far. (`r nrow(filter(is.na(to_code)))` according to the corresponding columns in the session-level data; these numbers should match!)
+Of these `r length(unique(session_data_toreport$session_id))` sessions, `r length(unique(trial_data_all$session_id))` have had their responses coded so far. 
 
 (Note on the dummy dataset - I've simulated a dataset for the case where we are planning to code 5 responses, but haven't gotten around to coding OR preparing the coder sheets for 3 of those responses.)
 
