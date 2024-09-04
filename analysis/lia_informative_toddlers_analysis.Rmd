@@ -37,7 +37,7 @@ data_subfolder = 'v1_jan2024_complete'
 Attempt to load the resulting data files and report on what was found. Before doing this for the first time, make sure that your R session working directory is set to the informative-toddlers directory on your computer! In the menu choose Session>Set Working Directory>To Source File Location. If you knit again and get errors/are still in your default user directory, restart R, reset your working directory, and try knitting again. 
 
 ```{r find-data-files, echo = FALSE}
-data_location = paste0(here(),'/data/',data_subfolder)
+data_location = paste0(here::here(),'/data/',data_subfolder)
 print(list.files(data_location, recursive=TRUE))
 ```
 
@@ -145,7 +145,7 @@ raw_gender_counts = table(trial_data_all$gender)
 raw_percent_female <- (raw_gender_counts["f"] / sum(raw_gender_counts)) * 100
 ```
 
-Of these `r length(unique(session_data_toreport$session_id))` sessions, `r length(unique(trial_data_all$session_id))` have had their responses coded so far. 
+Of these `r length(unique(session_data_toreport$session_id))` sessions, `r length(unique(trial_data_all$session_id))` have had their responses coded so far.
 
 (Note on the dummy dataset - I've simulated a dataset for the case where we are planning to code 5 responses, but haven't gotten around to coding OR preparing the coder sheets for 3 of those responses.)
 
@@ -175,7 +175,7 @@ print(nrow(trial_data_toanalyze))
 print(length(unique(trial_data_all$session_id)))
 print(length(unique(session_data_toanalyze$session_id)))
 ```
-** As it stands there are 9 more session_ids in the session data than the trial data but all of these sessions look weird - Lia will investigate! **
+**As it stands there are 9 more session_ids in the session data than the trial data but all of these sessions look weird - Lia will investigate!**
 
 Next, trim down the version of the dataset we're working with to relevant columns, to make the data easier to examine (remember, this is just what's happening inside R, the data files are unaffected unless you `write_csv` to a specific file!)
 
@@ -235,7 +235,7 @@ For fun, here is a spreadsheet of all the utterances produced (warmup and critic
 utterance_summary_table = trial_data_toanalyze %>%
   select(stimulus_target_utterance, stimulus_condition, informative_entities, uninformative_entities, response_exact_utterance, response_attempted_target, include_trial)
 
-kable(utterance_summary_table, col.names = c("target", "condition", "informative", "uninformative", "utterance", "attempted_target", "include"))
+kable(head(utterance_summary_table, col.names = c("target", "condition", "informative", "uninformative", "utterance", "attempted_target", "include")))
 ```
 
 
@@ -244,7 +244,7 @@ utterance_coding_table = trial_data_toanalyze %>%
   filter(response_attempted_target == "TRUE") %>%
   select(stimulus_target_utterance, stimulus_condition, response_exact_utterance, response_included_subject, response_included_object, response_included_informative, response_included_uninformative, trial_notes, include_trial)
 
-kable(utterance_coding_table, col.names = c("target", "condition", "utterance", "subject", "object", "informative", "uninformative", "notes", "include"))
+kable(head(utterance_coding_table, col.names = c("target", "condition", "utterance", "subject", "object", "informative", "uninformative", "notes", "include")))
 ```
 
 Trial-level exclusions: Trials are excluded from analysis only if there is a reason that those trials should not be considered a successful measurement. That is, the CONTENT of what the child says (or doesn't say) does not determine this, only adult speech (e.g. that gave away the right answer) or child behavior (inattentive for this trial).  These decisions are made during coding and the full list of preregistered reasons can be found in the coding manual. There should be a reason listed below for every trial that is excluded!
@@ -271,7 +271,7 @@ summarize_utterances <- trial_data_toanalyze %>%
             n_spoke = sum(response_child_spoke == "TRUE"),
             n_attempted_target = sum(response_attempted_target == "TRUE"))
 
-kable(summarize_utterances, col.names = c("session", "included trials", "spoke", "attempted description"))
+kable(head(summarize_utterances, col.names = c("session", "included trials", "spoke", "attempted description")))
 
 ```
 
@@ -345,15 +345,6 @@ h1_kids <- trial_data_h1 %>%
 h1_kids$inform <- as.factor(h1_kids$inform) # we have to do this so we can use the binomial family - no idea why we didn't need to do this previously but whatever ig? ask brain
 h1_kids_model <- glmer(inform ~ 1 + (1|child_id), family = "binomial", data = h1_kids)
 summary(h1_kids_model)
-
-# log odds of the error bars
-confint(h1_kids_model, method = "Wald") 
-# making tables to put into the plots, the estimate is the beta val from summary and the cis are from the confint above - Lia will change this later bc I hate hardcoded stuff omg
-# this data will be used to plot the model in the visuals section
-plot_data_h1 <- tibble(val = "Selective kids",
-                    estimate = log.odds.to.prob(-0.8342),
-                    lower.ci = log.odds.to.prob(-1.274363),
-                    upper.ci = log.odds.to.prob(-0.3940703))
 ```
 
 #### Hypothesis 2
@@ -424,12 +415,6 @@ h2a_kids <- trial_data_h2 %>%
 h2a_kids$inform <- as.factor(h2a_kids$inform)
 h2a_kids_model <- glmer(inform ~ 1 + (1|child_id), family = "binomial", data = h2a_kids)
 summary(h2a_kids_model)
-
-confint(h2a_kids_model, method = "Wald") 
-plot_data_h2a <- tibble(val = "Selective kids",
-                        estimate = log.odds.to.prob(-0.3814),
-                        lower.ci = log.odds.to.prob(-0.8618767),
-                        upper.ci = log.odds.to.prob(0.09914156))
 ```
 
 And here is the specification for the follow-up tests, which we use LMMs for. 
@@ -449,12 +434,6 @@ h2b_kids <- trial_data_h2 %>%
 h2b_kids$response_included_subject <- as.factor(h2b_kids$response_included_subject)
 h2b_kids_model <- glmer(response_included_subject ~ 1 + stimulus_condition + (1|child_id), family = "binomial", data = h2b_kids)
 summary(h2b_kids_model)
-
-confint(h2b_kids_model, method = "Wald")
-plot_data_h2b <- tibble(val = "Selective kids",
-                        estimate = log.odds.to.prob(9.163e-01),
-                        lower.ci = log.odds.to.prob(0.08474831),
-                        upper.ci = log.odds.to.prob(1.7478331))
 ```
 
 - Mention of the patient referent will be more likely in the Patient-ambiguous condition than the Agent-ambiguous condition
@@ -472,19 +451,13 @@ h2c_kids <- trial_data_h2 %>%
 h2c_kids$response_included_object <- as.factor(h2c_kids$response_included_object)
 h2c_kids_model <- glmer(response_included_object ~ 1 + stimulus_condition + (1|child_id), family = "binomial", data = h2c_kids)
 summary(h2c_kids_model)
-
-confint(h2c_kids_model, method = "Wald") 
-plot_data_h2c <- tibble(val = "Selective kids",
-                        estimate = log.odds.to.prob(-0.2699),
-                        lower.ci = log.odds.to.prob(-1.160630),
-                        upper.ci = log.odds.to.prob(0.6207853))
 ```
 
 # Visuals!
-
+### It is now time to visualize all of our data! We we be plotting count data as well as the models shown above.
 ## Count Data Graphs
 
-Graph for H1
+### Graph for H1
 
 ```{r}
 # I need to know how many kids are in this graph for my presentation
@@ -532,7 +505,7 @@ ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
       axis.ticks.x = element_blank())
 ```
 
-Making a graph for H1b 
+### Making a graph for H1b 
 
 ```{r}
 # make a new df to hold H1b data
@@ -584,7 +557,7 @@ ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
       axis.ticks.x = element_blank())
 ```
 
-Graph for H2a - Nothing came out of this so we didn't do graphs for H2b or H2c
+### Graph for H2a - Nothing came out of this hypothesis so we didn't do graphs for H2b or H2c
 
 ```{r}
 # info only kids
@@ -625,7 +598,7 @@ ggplot(inf_vs_cg_nouns_data, aes(x = Category, y = counts, fill = Category)) +
 
 ```
 
-Bonus graph of all kids
+### Bonus graph of all kids
 
 ```{r}
 # all the info only kids in h1
@@ -682,9 +655,21 @@ ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
 
 ## Model Graphs
 
-H1
+### H1
 
-```{r}
+```{r h1 model plot}
+# getting error bars for the confidence intervals
+h1_ci <- confint(h1_kids_model, method = "Wald") 
+# saving the intercepts of that confint data
+h1_intercept_ci <- h1_ci["(Intercept)", ]
+
+# making some plot data slay
+plot_data_h1 <- tibble(val = "Selective kids",
+                    estimate = log.odds.to.prob(fixef(h1_kids_model)["(Intercept)"]),
+                    lower.ci = log.odds.to.prob(h1_intercept_ci[1]),
+                    upper.ci = log.odds.to.prob(h1_intercept_ci[2]))
+
+# plotting, scheeming even
 ggplot(plot_data_h1, aes(x = val, y = estimate)) +
   geom_errorbar(aes(ymin = lower.ci,
                     ymax = upper.ci), width = .05) +
@@ -694,9 +679,17 @@ ggplot(plot_data_h1, aes(x = val, y = estimate)) +
   labs(x = "", y = "Probability of being informative (among selective kids)") +
   theme(text = element_text(size = 14))
 ```
-H2a
+### H2a
 
-```{r}
+```{r h2a model plot}
+h2a_ci <- confint(h2a_kids_model, method = "Wald") 
+h2a_intercept_ci <- h2a_ci["(Intercept)", ]
+
+plot_data_h2a <- tibble(val = "Selective kids",
+                        estimate = log.odds.to.prob(fixef(h2a_kids_model)["(Intercept)"]),
+                        lower.ci = log.odds.to.prob(h2a_intercept_ci[1]),
+                        upper.ci = log.odds.to.prob(h2a_intercept_ci[2]))
+
 ggplot(plot_data_h2a, aes(x = val, y = estimate)) +
   geom_errorbar(aes(ymin = lower.ci,
                     ymax = upper.ci), width = .05) +
@@ -707,8 +700,16 @@ ggplot(plot_data_h2a, aes(x = val, y = estimate)) +
   theme(text = element_text(size = 14))
 ```
 
-H2b
-```{r}
+### H2b
+```{r h2b model plot}
+h2b_ci <- confint(h2b_kids_model, method = "Wald")
+h2b_intercept_ci <- h2b_ci["(Intercept)", ]
+
+plot_data_h2b <- tibble(val = "Selective kids",
+                        estimate = log.odds.to.prob(fixef(h2b_kids_model)["(Intercept)"]),
+                        lower.ci = log.odds.to.prob(h2b_intercept_ci[1]),
+                        upper.ci = log.odds.to.prob(h2b_intercept_ci[2]))
+
 ggplot(plot_data_h2b, aes(x = val, y = estimate)) +
   geom_errorbar(aes(ymin = lower.ci,
                     ymax = upper.ci), width = .05) +
@@ -719,8 +720,16 @@ ggplot(plot_data_h2b, aes(x = val, y = estimate)) +
   theme(text = element_text(size = 14))
 ```
 
-H2c
+### H2c
 ```{r}
+h2c_ci <- confint(h2c_kids_model, method = "Wald") 
+h2c_intercept_ci <- h2c_ci["(Intercept)", ]
+
+plot_data_h2c <- tibble(val = "Selective kids",
+                        estimate = log.odds.to.prob(fixef(h2c_kids_model)["(Intercept)"]),
+                        lower.ci = log.odds.to.prob(h2c_intercept_ci[1]),
+                        upper.ci = log.odds.to.prob(h2c_intercept_ci[2]))
+
 ggplot(plot_data_h2c, aes(x = val, y = estimate)) +
   geom_errorbar(aes(ymin = lower.ci,
                     ymax = upper.ci), width = .05) +
@@ -733,6 +742,7 @@ ggplot(plot_data_h2c, aes(x = val, y = estimate)) +
 
 
 # Troubleshooting!
+In this section I have included some code to help diagnose the most common issues I ran into.
 
 Number of session ids not matching between trial_data_all and session_data_to_analyze? Use this code to investigate!
 
