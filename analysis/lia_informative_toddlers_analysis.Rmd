@@ -15,6 +15,7 @@ library(kableExtra)
 library(lme4)
 library(lmerTest)
 library(ggplot2)
+library(emmeans)
 ```
 
 ## Intro
@@ -175,7 +176,6 @@ print(nrow(trial_data_toanalyze))
 print(length(unique(trial_data_all$session_id)))
 print(length(unique(session_data_toanalyze$session_id)))
 ```
-**As it stands there are 9 more session_ids in the session data than the trial data but all of these sessions look weird - Lia will investigate!**
 
 Next, trim down the version of the dataset we're working with to relevant columns, to make the data easier to examine (remember, this is just what's happening inside R, the data files are unaffected unless you `write_csv` to a specific file!)
 
@@ -317,9 +317,17 @@ mcnemar.test(h1_xtabs_table)
 ```
 For the first version of this study our preregistered analyses is different from what we are about to do for this second version. If you would like to see the original analysis plan, look at the "informative_toddlers_analysis.rmd" file on GitHub. The analyses included here were used in tandem with the original analysis plan for the final CogSci submission. 
 
-** Lia does NOT understand the following and will meet with Brian Leahy to elucidate what this is about! **
+**We're going to use this method in order to compare of the log-odds of being informative to 0, where log-odds of 0 is the same as probability = .5. A significant result here tells you that the probability of being informative is not .5. _This pertains to the intercept_**
 
-*We're going to use this method in order to compare of the log-odds of being informative to 0, where log-odds of 0 is the same as probability = .5. A significant result here tells you that the probability of being informative is not .5.*
+_Log odds explained:_
+* Probability is essentially just "odds" expressed in slightly different ways with probability being a number between 0 and 1 and odds being any number above 0. 
+* Linear regression functions on the assumption that your metric response can range from negative infinity to positive infinity. 
+* We use log odds as it ranges from negative infinity to positive infinity, with numbers approaching 0 having a more negative log (ex: ln(0.00000000001) = -25)
+* Log odds is essentially a transformation
+* A negative log-odds result just means that there is a _less than 50% chance_ of "the thing" happening
+* (in the case of our study) the intercept represents baseline performance (AKA when our independent variables are not in play)
+* the slope/value of an IV in the summary indicates the amount change in DV as a result/function of the IV
+* the slope can't be easily translated as it is a **rate** (as opposed to the intercept which is a singular stationary number) which is why we need the log odds ratio
 
 ```{r A secret mousekatool for later}
 log.odds.to.prob <- function(x){
@@ -702,23 +710,33 @@ ggplot(plot_data_h2a, aes(x = val, y = estimate)) +
 
 ### H2b
 ```{r h2b model plot}
-h2b_ci <- confint(h2b_kids_model, method = "Wald")
-h2b_intercept_ci <- h2b_ci["(Intercept)", ]
+h2b.kids.plot <- emmeans(h2b_kids_model, specs = "stimulus_condition", type = "response") %>%
+  as_tibble()
 
-plot_data_h2b <- tibble(val = "Selective kids",
-                        estimate = log.odds.to.prob(fixef(h2b_kids_model)["(Intercept)"]),
-                        lower.ci = log.odds.to.prob(h2b_intercept_ci[1]),
-                        upper.ci = log.odds.to.prob(h2b_intercept_ci[2]))
-
-ggplot(plot_data_h2b, aes(x = val, y = estimate)) +
-  geom_errorbar(aes(ymin = lower.ci,
-                    ymax = upper.ci), width = .05) +
+ggplot(h2b.kids.plot %>% filter(stimulus_condition == "agent_ambig"), aes(x = stimulus_condition, y = prob)) +
+  geom_errorbar(aes(ymin = asymp.LCL,
+                    ymax = asymp.UCL), width = .05) +
   geom_point(size = 5, shape = 23, fill = "white") +
   ylim(0,1) +
   theme_bw() +
   labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
   theme(text = element_text(size = 14))
 ```
+### Older H2b
+```{r}
+h2b.kids.plot <- emmeans(h2b_kids_model, specs = "stimulus_condition", type = "response") %>%
+  as_tibble()
+
+ggplot(h2b.kids.plot %>% filter(stimulus_condition == "patient_ambig"), aes(x = stimulus_condition, y = prob)) +
+  geom_errorbar(aes(ymin = asymp.LCL,
+                    ymax = asymp.UCL), width = .05) +
+  geom_point(size = 5, shape = 23, fill = "white") +
+  ylim(0,1) +
+  theme_bw() +
+  labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
+  theme(text = element_text(size = 14))
+```
+
 
 ### H2c
 ```{r}
