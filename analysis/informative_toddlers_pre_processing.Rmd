@@ -32,7 +32,7 @@ Also, since I keep all the raw data on Dropbox instead of GitHub (subject to cha
 
 ```{r set and check directory}
 # set directories
-general_location = "C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset"
+general_location = "C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1_jan2024_complete_dataset"
 
 raw_location = paste0(general_location, "/raw_data/framedata")
 processed_location = paste0(general_location, "/processed_data/v1_jan2024_step1/framedata")
@@ -48,7 +48,7 @@ copy_and_rename <- function(src_dir, dst_dir) {
   for (file in files) {
     # Extract the file name and replace "Tell-Me-About-It" with "v1jan2024"
     file_name <- basename(file)
-    out_name <- sub("Tell-Me-About-It-", "v1_jan2024-step1", file_name)
+    out_name <- sub("Tell-Me-About-It-", "v1_jan2024_step1", file_name)
     
     # Construct the destination file path
     dst_file <- file.path(dst_dir, out_name)
@@ -118,14 +118,14 @@ all_sessions <- all_sessions %>%
          notes = '')
 
 # turn the new data frame into a csv located in the step2 folder
-write.csv(all_sessions, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step2_TOCODE/v1jan2024-step2_all-responses-identifiable.csv")
+write.csv(all_sessions, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v1_jan2024_complete_dataset/processed_data/v1_jan2024_step2_TOCODE/v1_jan2024_step2_all-sessions.csv")
 ```
 
 After deciding what sessions should not be cleaned (and later coded) and editing the v1jan2024-step2_all-responses-identifiable file, we will update the files list by removing the files of sessions that were excluded from the files list.
 
 ```{r remove excluded sessions}
 # read in updated all sessions file
-updated_all_sessions_file <- read_csv("C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step3_CODED/v1jan2024-step3_all-responses-identifiable.csv")
+updated_all_sessions_file <- read_csv("C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1_jan2024_complete_dataset/processed_data/v1_jan2024_step3_CODED/v1_jan2024_step3_all-sessions.csv")
 
 # make a df of all sessions that will not be coded (just because I think it's handy to have, not very necessary)
 uncodable_sessions <- updated_all_sessions_file %>% 
@@ -138,7 +138,7 @@ codable_sessions <- codable_sessions$session_id
 
 # update the strings in codable_sessions so that they match the dataframes that were loaded in
 for (i in seq_along(codable_sessions)) {
-  codable_sessions[i] <- paste0("v1jan2024-step1_", codable_sessions[i], "_frames")
+  codable_sessions[i] <- paste0("v1_jan2024_step1_", codable_sessions[i], "_frames")
 }
 
 ```
@@ -300,7 +300,7 @@ all_orders <- bind_rows(all_orders, Order3)
 all_orders <- bind_rows(all_orders, Order4)
 
 # turn all_orders into a single csv
-write.csv(all_orders, "C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1jan2024_complete_dataset/processed_data/v1jan2024_step2_TOCODE/v1jan2024-step2_all_orders_TOCODE.csv")
+write.csv(all_orders, "C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1_jan2024_complete_dataset/processed_data/v1_jan2024_step2_TOCODE/v1_jan2024_step2_all-orders_TOCODE.csv")
 
 ```
 
@@ -315,7 +315,7 @@ objects <- ls()
 data_objects <- objects[sapply(objects, function(x) is.data.frame(get(x)) || is.matrix(get(x)))]
 
 # Identify the variables that we want to remove
-variable_objects <- objects[grep("^v1jan2024", objects)]
+variable_objects <- objects[grep("^v1_jan2024", objects)]
 
 # Remove the  objects
 rm(list = variable_objects)
