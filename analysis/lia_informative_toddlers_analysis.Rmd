@@ -297,7 +297,7 @@ Hypothesis 1 will be tested across all trials in the study (two Common-Ground sc
 trial_data_h1 <- trial_data_toanalyze %>%
   filter(response_attempted_target == "TRUE") %>% #Only include trials where child tried to describe some part of the trial vignette
   filter(stimulus_condition %in% c("commonground","agent_ambig","patient_ambig")) %>% # Include commonground, agent-ambiguous, and patient-ambiguous trials, but not warmups
-  select(session_id, child_id, stimulus_condition, trial_num, stimulus_set, uninformative_entities, response_exact_utterance, response_included_informative, response_included_uninformative) %>% 
+  select(session_id, child_id, stimulus_condition, trial_num, stimulus_set, uninformative_entities, response_exact_utterance, response_included_informative, response_included_uninformative, age_in_days) %>% 
   mutate(trial_id = paste0(session_id, trial_num))
 ```
 
@@ -376,7 +376,7 @@ Select the columns and rows for testing Hypothesis 2:
 trial_data_h2 <- trial_data_toanalyze %>%
   filter(response_attempted_target == "TRUE") %>% # Only include trials where child tried to describe some part of the trial vignette
   filter(stimulus_condition %in% c("agent_ambig","patient_ambig")) %>% # Include agent-ambiguous, and patient-ambiguous trials only for 2b
-  select(session_id, child_id, trial_num, stimulus_condition, stimulus_set, uninformative_entities, response_exact_utterance, response_included_subject, response_included_object) %>% 
+  select(session_id, child_id, trial_num, stimulus_condition, stimulus_set, uninformative_entities, response_exact_utterance, response_included_subject, response_included_object, age_in_days) %>% 
   mutate(trial_id = paste0(session_id, trial_num))
 
 ```
@@ -466,23 +466,18 @@ summary(h2c_kids_model)
 ## Count Data Graphs
 
 ### Graph for H1
+```{r}
+
+
+```
 
 ```{r}
-# I need to know how many kids are in this graph for my presentation
-
-# all the info only kids in h1
-h1_kids_inf <- trial_data_h1 %>% 
-  filter(response_included_informative == TRUE,
-         response_included_uninformative == FALSE)
-# all the cg kids in h1
-h1_kids_cg <- trial_data_h1 %>% 
-  filter(response_included_informative == FALSE,
-         response_included_uninformative == TRUE)
-# identify all the unique kids of those sets
-h1_kids_inf_unique <- unique(h1_kids_inf$child_id)
-h1_kids_cg_unique <- unique(h1_kids_cg$child_id)
-# combine the vectors and count all the unique kids in this new 'mega' vector
-h1_graph_kids = length(unique(c(h1_kids_inf_unique, h1_kids_cg_unique)))
+# all of the distinct kids that apply to this hypothesis
+# we do not use this for analysis/charts - we're using this to determine N, mean age, and age range!!!
+ h1_kids<- trial_data_h1 %>% 
+  filter(!(response_included_informative == TRUE & 
+         response_included_uninformative == TRUE)) %>% 
+  distinct(child_id, .keep_all = TRUE)
 
 # only informative utterances
 informative_only_count <- sum(trial_data_h1$response_included_informative == TRUE & 
@@ -516,25 +511,18 @@ ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
 ### Making a graph for H1b 
 
 ```{r}
+# all of the distinct kids that apply to this hypothesis
+# we do not use this for analysis/charts - we're using this to determine N, mean age, and age range!!!
+h1b_kids<- trial_data_h1 %>% 
+  filter(!(response_included_informative == TRUE & 
+         response_included_uninformative == TRUE)) %>% 
+   filter(!grepl('common', stimulus_condition)) %>% 
+  distinct(child_id, .keep_all = TRUE)
+
 # make a new df to hold H1b data
 trial_data_h1b <- trial_data_h1 %>% 
   # remove common ground trials
   filter(!grepl('common', stimulus_condition))
-
-# inf only kids
-h1b_kids_inf <- trial_data_h1b %>% 
-  filter(response_included_informative == TRUE,
-         response_included_uninformative == FALSE)
-# cg only kids
-h1b_kids_cg <- trial_data_h1b %>% 
-  filter(response_included_informative == FALSE,
-         response_included_uninformative == TRUE)
-
-# identify all the unique kids of those sets
-h1b_kids_inf_unique <- unique(h1b_kids_inf$child_id)
-h1b_kids_cg_unique <- unique(h1b_kids_cg$child_id)
-# combine the vectors and count all the unique kids in this new 'mega' vector
-h1b_graph_kids = length(unique(c(h1b_kids_inf_unique, h1b_kids_cg_unique)))
 
 # only informative utterances
 h1b_informative_only_count <- sum(trial_data_h1b$response_included_informative == TRUE & 
@@ -568,19 +556,14 @@ ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
 ### Graph for H2a - Nothing came out of this hypothesis so we didn't do graphs for H2b or H2c
 
 ```{r}
-# info only kids
-h2_kids_inf <- trial_data_h2 %>% 
-  filter(response_included_info_noun == TRUE,
-         response_included_uninformative_noun == FALSE)
-# cg only kids
-h2_kids_cg <- trial_data_h2 %>% 
-  filter(response_included_info_noun == FALSE,
-         response_included_uninformative_noun == TRUE)
-# figure out who's unique 
-h2_kids_inf_unique <- unique(h2_kids_inf$child_id)
-h2_kids_cg_unique <- unique(h2_kids_cg$child_id)
-
-h2_graph_kids = length(unique(c(h2_kids_inf_unique, h2_kids_cg_unique)))
+# all of the distinct kids that apply to this hypothesis
+# we do not use this for analysis/charts - we're using this to determine N, mean age, and age range!!!
+ h2_kids<- trial_data_h2 %>% 
+  filter(!(response_included_info_noun == TRUE & 
+         response_included_uninformative_noun == TRUE)) %>% 
+  filter(!(response_included_info_noun == FALSE & 
+         response_included_uninformative_noun == FALSE)) %>% 
+  distinct(child_id, .keep_all = TRUE)
 
 # prepare dat for graph
 inf_noun_count <- sum(trial_data_h2$response_included_info_noun == TRUE & 
