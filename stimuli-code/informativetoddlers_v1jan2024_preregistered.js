@@ -38,7 +38,7 @@ function generateProtocol(child, pastSessions) {
         "study-intro": {
 			"kind": "exp-lookit-instruction-video",
 			"instructionsVideo": [{
-					"src": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/mp4/parent_intro_compressed.mp4",
+					"src": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v1_jan2024/mp4/parent_intro_compressed.mp4",
 					"type": "video/mp4"
 				}],
 			"introText": "Welcome to the study! Please watch this video to get started. \n(Or you can read the summary to the right if you prefer.)",
@@ -110,7 +110,7 @@ function generateProtocol(child, pastSessions) {
 				'position': "fill",
 
 			}],
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v1_jan2024/",
 			"autoProceed": false,
 			"parentTextBlock": {
         		"text": "",
@@ -189,7 +189,7 @@ function generateProtocol(child, pastSessions) {
 				"mp3",
 				"ogg"
 			],
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v1_jan2024/",
 			"parentTextBlock": {
 				"text": image_ans,
 				"css": {
@@ -319,7 +319,7 @@ function generateProtocol(child, pastSessions) {
 			},
 			"backgroundColor": "white",
 			'requireAudioCount': 1,
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v1_jan2024/",
 			"videoTypes": [
 				"webm",
 				"mp4"
@@ -347,7 +347,7 @@ function generateProtocol(child, pastSessions) {
 				"src": "hd_curtains.png",
 				"position": "fill"
 			}],
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v1_jan2024/",
 			"pageColor": "white",
 			"backgroundColor": "white",
 			"parentTextBlock": {
