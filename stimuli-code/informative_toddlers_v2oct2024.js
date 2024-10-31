@@ -14,7 +14,7 @@ function generateProtocol(child, pastSessions) {
         	"institution": "MIT",
         	"PIContact": " Lia Washington at bw18@mit.edu",
         	"purpose": "This study is about whether children who are just beginning to talk tend to refer to things their audience doesn't already know.",
-        	"procedures": "Today we are going to show your child four 30 second animated movies about ordinary events (e.g., animals eating fruit or putting on shoes). There will be a part of the movie where we ask you to cover your eyes and ears. We don't mind if you peek ;) and we know you will probably be able to hear. The idea is just to have your child believe that you don't know what happened during this part of the movie. Then we will ask your child to tell you what happened when you weren't looking.",
+        	"procedures": "Today we are going to show your child four 30 second animated movies about ordinary events (e.g., animals entering a park). There will be a part of the movie where we ask you to cover your eyes and ears. We don't mind if you peek ;) and we know you will probably be able to hear. The idea is just to have your child believe that you don't know what happened during this part of the movie. Then we will ask your child to tell you what happened when you weren't looking.",
         	"risk_statement": "There are no expected risks if you participate in the study.",
         	"voluntary_participation": "You and your child are free to choose whether to be in this study. If you and your child choose to participate, it's okay to stop at any point during the session. Please do pause or stop the session if your child becomes very fussy or does not want to participate! If this is a study with multiple sessions, it's okay not to complete all the sessions.",
         	"payment": "After you finish the study, we will email you a $5 Amazon gift card within three days. To be eligible for the gift card your child must be in the age range for this study, you need to submit a valid consent statement, and we need to see that there is a child with you. But we will send a gift card even if you do not finish the whole study or we are not able to use your child's data! There are no other direct benefits to you or your child from participating, but we hope you will enjoy the experience.",
@@ -38,7 +38,7 @@ function generateProtocol(child, pastSessions) {
         "study-intro": {
 			"kind": "exp-lookit-instruction-video",
 			"instructionsVideo": [{
-					"src": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v1_jan2024/mp4/parent_intro_compressed.mp4",
+					"src": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v2_oct2024/mp4/parent_intro_compressed.mp4",
 					"type": "video/mp4"
 				}],
 			"introText": "Welcome to the study! Please watch this video to get started. \n(Or you can read the summary to the right if you prefer.)",
@@ -284,7 +284,7 @@ function generateProtocol(child, pastSessions) {
 	let order_selected = orders[num];
 	
 	// for loop for actual trials
-	for (iTrial = 0; iTrial < 6; iTrial++){
+	for (iTrial = 0; iTrial < 4; iTrial++){
 		startRecordingActualTrial = {
 			"kind": "exp-lookit-start-recording",
 			"baseDir": "https://www.mit.edu/~kimscott/placeholderstimuli/",
@@ -302,12 +302,9 @@ function generateProtocol(child, pastSessions) {
 					"source": order_selected[iTrial],
 					"position": "fill"
 			},
-			"audio": {
-				"loop": false,
-				"source": order_selected[iTrial]
-			},
 			"backgroundColor": "white",
-			'requireAudioCount': 1,
+			"autoProceed": true,
+			'requireVideoCount': 1,
 			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v2_oct2024",
 			"videoTypes": [
 				"webm",
@@ -381,8 +378,8 @@ function generateProtocol(child, pastSessions) {
 		// insert frames into frame list using frameIds
 		frames[startRecordingActualTrialFrameId] = startRecordingActualTrial;
 		frames[actualTrialFrameId] = actualTrial;
-		frames[parentPromptWithCurtainFrameId] = parentPromptWithCurtain;
 		frames[stopRecordingActualTrialFrameId] = stopRecordingActualTrial;
+		frames[parentPromptWithCurtainFrameId] = parentPromptWithCurtain;
 		frames[parentTranscriptActualTrialFrameId] = parentTranscriptActualTrial;
 
 		// push frame ids into frame sequence
