@@ -14,7 +14,7 @@ function generateProtocol(child, pastSessions) {
         	"institution": "MIT",
         	"PIContact": " Lia Washington at bw18@mit.edu",
         	"purpose": "This study is about whether children who are just beginning to talk tend to refer to things their audience doesn't already know.",
-        	"procedures": "Today we are going to show your child six ten second animated movies about ordinary events (e.g., animals eating fruit or putting on shoes). There will be a part of the movie where we ask you to cover your eyes and ears. We don't mind if you peek ;) and we know you will probably be able to hear. The idea is just to have your child believe that you don't know what happened during this part of the movie. Then we will ask your child to tell you what happened when you weren't looking.",
+        	"procedures": "Today we are going to show your child four 30 second animated movies about ordinary events (e.g., animals eating fruit or putting on shoes). There will be a part of the movie where we ask you to cover your eyes and ears. We don't mind if you peek ;) and we know you will probably be able to hear. The idea is just to have your child believe that you don't know what happened during this part of the movie. Then we will ask your child to tell you what happened when you weren't looking.",
         	"risk_statement": "There are no expected risks if you participate in the study.",
         	"voluntary_participation": "You and your child are free to choose whether to be in this study. If you and your child choose to participate, it's okay to stop at any point during the session. Please do pause or stop the session if your child becomes very fussy or does not want to participate! If this is a study with multiple sessions, it's okay not to complete all the sessions.",
         	"payment": "After you finish the study, we will email you a $5 Amazon gift card within three days. To be eligible for the gift card your child must be in the age range for this study, you need to submit a valid consent statement, and we need to see that there is a child with you. But we will send a gift card even if you do not finish the whole study or we are not able to use your child's data! There are no other direct benefits to you or your child from participating, but we hope you will enjoy the experience.",
@@ -48,7 +48,7 @@ function generateProtocol(child, pastSessions) {
 						"text": "Hi, parents.Thank you so much for participating in our study."
 					},
 					{
-						"text": "You and your child will watch six 10 second animated movies today depicting ordinary events like an animal eating a piece of fruit or getting dressed."
+						"text": "You and your child will watch four 30 second animated movies today depicting ordinary events like an animal eating a piece of fruit or getting dressed."
 					},
 					{
 						"text": "A few seconds into each movie we will ask you as the parent to close your eyes and cover your ears."
@@ -129,10 +129,7 @@ function generateProtocol(child, pastSessions) {
 					"text": "As adults, we communicate information selectively: We mostly tell people things they don’t already know, and we avoid referring to topics that are common knowledge. What about when children first learn to speak? Young toddlers start with very limited vocabularies. At first, they only produce one or two words in each utterance. Many things might affect what toddlers decide to say, including how familiar a word is, or how interested the child is in the topic. Still, we wondered if even toddlers just learning to talk might, like adults, try  to communicate information their audience does not know."
 				},
 				{
-					"text": "Here we showed your child scenes where both you and your child both knew some things about the scene, but something interesting always happened when your eyes were closed. In two of the stories, the event that happened when your eyes were closed was entirely new (a ball bounced by a lake, or a bear put on a shoe). In those stories, we wanted to know if on average, children would refer to the new event rather than the parts of the scene you already knew (e.g., saying  \“ball\” more often than \“duck\” or \“lake\”, or \"shoe\" more often than \”bear\” or the \“room\”)."
-				},
-				{
-					"text": "In the other stories, we varied whether there were two animals (two subjects) or two foods (two objects) in the scene initially. When your eyes were closed, an animal always ate or drank a kind of food. We wanted to know whether children on average would be more likely to mention the subject (i.e., which animal ate the food) when it could have been either of two animals but mention the object (which food the animal ate) when it could have been either of two foods."
+					"text": "Here we showed your child scenes where both you and your child both knew some things about the scene, but something interesting always happened when your eyes were closed. In those stories, we wanted to know if on average, children would refer to the new event rather than the parts of the scene you already knew (i.e, the events that took place while your eyes were open)."
 				},
 				{
 					"text": "Depending on your child's age and mood, they might have been very quiet for all of these movies, spoken in full sentences throughout, or said something else we didn’t predict. All of that is perfectly fine! There is no one \“right\“ answer in these studies and however your child responded could make perfect sense. One of the things we often learn from studying children is that our ideas are wrong and need to change them! Thank you so much for your participation! Research on child development would be impossible without your support and we are very grateful for your time!"
@@ -150,7 +147,7 @@ function generateProtocol(child, pastSessions) {
 	// images for mvp1Train1
 	let mvp1Train1Images = [
 		'training_bunny.png',
-		'training_car_red.png'
+		'training_apple.png'
 	];
 
 	// 2 mvp1-train frames 
@@ -189,7 +186,7 @@ function generateProtocol(child, pastSessions) {
 				"mp3",
 				"ogg"
 			],
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v2_oct2024",
 			"parentTextBlock": {
 				"text": image_ans,
 				"css": {
@@ -257,36 +254,28 @@ function generateProtocol(child, pastSessions) {
 
 	// stimuli for actual trials
 	let order1 = [
-		'common_ground_duck_ball_new',
-		'agent_bird_baby_juice',
-		'patient_dog_apple_banana',
-		'common_ground_bear_shoes_new',
-		'patient_baby_milk_juice',
-		'agent_cat_dog_banana'
+		'bear_cow_bear_before_cow',
+		'ball_hat_hat_after_ball',
+		'cat_dog_cat_before_dog',
+		'balloon_car_car_after_balloon'
 	];
-	let order2 = [ // the flipped version of order1
-		'common_ground_bear_shoes_new',
-		'patient_dog_apple_banana',
-		'agent_bird_baby_juice',
-		'common_ground_duck_ball_new',
-		'agent_cat_dog_banana',
-		'patient_baby_milk_juice'
+	let order2 = [
+		'hat_ball_hat_before_ball',
+		'dog_cat_cat_after_dog',
+		'car_balloon_car_before_balloon',
+		'cow_bear_bear_after_cow'
 	];
 	let order3 = [ // contrast to order1
-		'common_ground_duck_ball_new',
-		'patient_bird_juice_milk',
-		'agent_dog_cat_apple',
-		'common_ground_bear_shoes_new',
-		'agent_baby_bird_milk',
-		'patient_cat_banana_apple'
+		'cow_bear_cow_before_bear',
+		'hat_ball_ball_after_hat',
+		'dog_cat_dog_before_cat',
+		'car_balloon_balloon_after_car'
 	];
-	let order4 = [ // flipped version of order 3 AKA contrast to version 2
-		'common_ground_bear_shoes_new',
-		'agent_dog_cat_apple',
-		'patient_bird_juice_milk',
-		'common_ground_duck_ball_new',
-		'patient_cat_banana_apple',
-		'agent_baby_bird_milk'
+	let order4 = [ // contrast to order2
+		'ball_hat_ball_before_hat',
+		'cat_dog_dog_after_cat',
+		'balloon_car_balloon_before_car',
+		'bear_cow_cow_after_bear'
 	];
 	
 	// pick an order at random
@@ -319,7 +308,7 @@ function generateProtocol(child, pastSessions) {
 			},
 			"backgroundColor": "white",
 			'requireAudioCount': 1,
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v2_oct2024",
 			"videoTypes": [
 				"webm",
 				"mp4"
@@ -347,7 +336,7 @@ function generateProtocol(child, pastSessions) {
 				"src": "hd_curtains.png",
 				"position": "fill"
 			}],
-			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/",
+			"baseDir": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v2_oct2024",
 			"pageColor": "white",
 			"backgroundColor": "white",
 			"parentTextBlock": {
