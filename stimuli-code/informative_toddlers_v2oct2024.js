@@ -3,7 +3,7 @@ function generateProtocol(child, pastSessions) {
     // base frames that do not change btwn or within participants
 
 	// we are taking the data hog approach
-	// original Experiment runner version (commit SHA): 51c9e97957228f7de00d2fe7e9cc3082ffb1dcf9
+	// original Experiment runner version (commit SHA): afb2fda97f9325476da70e2bc0e4602816011c60
 
 	let frame_sequence = [];
      let frames = {
@@ -38,7 +38,7 @@ function generateProtocol(child, pastSessions) {
         "study-intro": {
 			"kind": "exp-lookit-instruction-video",
 			"instructionsVideo": [{
-					"src": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v2_oct2024/mp4/parent_intro_compressed.mp4",
+					"src": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v2_oct2024/mp4/parent_intro_v2.mp4",
 					"type": "video/mp4"
 				}],
 			"introText": "Welcome to the study! Please watch this video to get started. \n(Or you can read the summary to the right if you prefer.)",
@@ -48,7 +48,7 @@ function generateProtocol(child, pastSessions) {
 						"text": "Hi, parents.Thank you so much for participating in our study."
 					},
 					{
-						"text": "You and your child will watch four 30 second animated movies today depicting ordinary events like an animal eating a piece of fruit or getting dressed."
+						"text": "You and your child will watch four 30 second animated movies today depicting ordinary events like an animal entering a park."
 					},
 					{
 						"text": "A few seconds into each movie we will ask you as the parent to close your eyes and cover your ears."
