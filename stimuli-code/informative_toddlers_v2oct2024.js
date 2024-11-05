@@ -38,7 +38,7 @@ function generateProtocol(child, pastSessions) {
         "study-intro": {
 			"kind": "exp-lookit-instruction-video",
 			"instructionsVideo": [{
-					"src": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v2_oct2024/mp4/parent_intro_v2.mp4",
+					"src": "https://raw.githubusercontent.com/mekline/informative_toddlers/master/stimuli/v2_oct2024/mp4/v2_intro.mp4",
 					"type": "video/mp4"
 				}],
 			"introText": "Welcome to the study! Please watch this video to get started. \n(Or you can read the summary to the right if you prefer.)",
