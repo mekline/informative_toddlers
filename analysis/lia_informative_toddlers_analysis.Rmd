@@ -1,7 +1,7 @@
 ---
 title: "analysis-informative-toddlers"
-author: "Melissa Kline Struhl"
-date: "1/16/2024"
+author: "Melissa Kline Struhl & Lia Washington"
+date: "10/16/2024"
 output:
   html_document: default
   pdf_document: default
@@ -20,7 +20,7 @@ library(emmeans)
 
 ## Intro
 
-Welcome to the analysis script for informative toddlers (version `v1jan2024`)! This script is designed to be runnable on any computer so long as (1) you have successfully downloaded the corresponding GH repository and (2) you have successfully added the data files you are trying to analyze to the `data/` subfolder of your local repo following instructions in the README over there. 
+Welcome to the analysis script for informative toddlers (version `v2jan2024`)! This script is designed to be runnable on any computer so long as (1) you have successfully downloaded the corresponding GH repository and (2) you have successfully added the data files you are trying to analyze to the `data/` subfolder of your local repo following instructions in the README over there. 
 
 Note that the resulting HTML file will *not* get committed when you commit changes, while updates to this Rmd file *will* be committed. We set up the GH repo on purpose this way to minimize version control issues. 
 
@@ -30,9 +30,9 @@ In the next chunk, update the exact set of data we want to analyze.
 
 ```{r choose-version-and-folder}
 # study version
-study_version = 'v1_jan2024'
+study_version = 'v2_jan2024'
 # data subfolder
-data_subfolder = 'v1_jan2024_complete'
+data_subfolder = 'v2_jan2024_complete'
 ```
 
 Attempt to load the resulting data files and report on what was found. Before doing this for the first time, make sure that your R session working directory is set to the informative-toddlers directory on your computer! In the menu choose Session>Set Working Directory>To Source File Location. If you knit again and get errors/are still in your default user directory, restart R, reset your working directory, and try knitting again. 
