@@ -1,10 +1,10 @@
 function generateProtocol(child, pastSessions) {
     // Lookit uses version ECMA 5 of JavaScript
-    // base frames that do not change btwn or within participants
 
 	// we are taking the data hog approach
 	// original Experiment runner version (commit SHA): afb2fda97f9325476da70e2bc0e4602816011c60
 
+	// base frames that do not change btwn or within participants
 	let frame_sequence = [];
      let frames = {
     	"video-consent": {
