@@ -2,7 +2,7 @@ function generateProtocol(child, pastSessions) {
     // Lookit uses version ECMA 5 of JavaScript
 
 	// we are taking the data hog approach
-	// original Experiment runner version (commit SHA): afb2fda97f9325476da70e2bc0e4602816011c60
+	// original Experiment runner version (commit SHA): bd01dd882db5f6f1ca873dced8223f79ae325693
 
 	// base frames that do not change btwn or within participants
 	let frame_sequence = [];
@@ -12,12 +12,12 @@ function generateProtocol(child, pastSessions) {
         	"template": "consent_005",
         	"PIName": "Laura Schulz",
         	"institution": "MIT",
-        	"PIContact": " Lia Washington at bw18@mit.edu",
+        	"PIContact": "Laura Schulz (contact: lschulz@mit.edu)",
         	"purpose": "This study is about whether children who are just beginning to talk tend to refer to things their audience doesn't already know.",
         	"procedures": "Today we are going to show your child four 30 second animated movies about ordinary events (e.g., animals entering a park). There will be a part of the movie where we ask you to cover your eyes and ears. We don't mind if you peek ;) and we know you will probably be able to hear. The idea is just to have your child believe that you don't know what happened during this part of the movie. Then we will ask your child to tell you what happened when you weren't looking.",
         	"risk_statement": "There are no expected risks if you participate in the study.",
         	"voluntary_participation": "You and your child are free to choose whether to be in this study. If you and your child choose to participate, it's okay to stop at any point during the session. Please do pause or stop the session if your child becomes very fussy or does not want to participate! If this is a study with multiple sessions, it's okay not to complete all the sessions.",
-        	"payment": "After you finish the study, we will email you a $5 Amazon gift card within three days. To be eligible for the gift card your child must be in the age range for this study, you need to submit a valid consent statement, and we need to see that there is a child with you. But we will send a gift card even if you do not finish the whole study or we are not able to use your child's data! There are no other direct benefits to you or your child from participating, but we hope you will enjoy the experience.",
+        	"payment": "After you finish the study, we will email you a $5 Amazon.com gift card within seven days. To be eligible for the gift card your child must be in the age range for this study, you need to submit a valid consent statement, and we need to see that there is a child with you.",
         	"datause": "During the session, you and your child will be recorded by your computer's webcam and microphone. These webcam recordings, and other data like answers you enter in forms, are sent securely to the Lookit platform. You can view your past recordings on Lookit at any time.Data are stored securely on Lookit servers and by researchers, and are only shared as described in this document. However, there is always a small risk that data transmitted over the internet may be intercepted or that the security of stored data may be compromised.",
         	"include_databrary": true,
         	"additional_video_privacy_statement": "We will also ask your permission to use your videos as stimuli for other parents.",
