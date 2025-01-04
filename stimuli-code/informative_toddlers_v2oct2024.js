@@ -17,7 +17,7 @@ function generateProtocol(child, pastSessions) {
         	"procedures": "Today we are going to show your child four 30 second animated movies about ordinary events (e.g., animals entering a park). There will be a part of the movie where we ask you to cover your eyes and ears. We don't mind if you peek ;) and we know you will probably be able to hear. The idea is just to have your child believe that you don't know what happened during this part of the movie. Then we will ask your child to tell you what happened when you weren't looking.",
         	"risk_statement": "There are no expected risks if you participate in the study.",
         	"voluntary_participation": "You and your child are free to choose whether to be in this study. If you and your child choose to participate, it's okay to stop at any point during the session. Please do pause or stop the session if your child becomes very fussy or does not want to participate! If this is a study with multiple sessions, it's okay not to complete all the sessions.",
-        	"payment": "After you finish the study, we will email you a $5 Amazon.com gift card within seven days. To be eligible for the gift card your child must be in the age range for this study, you need to submit a valid consent statement, and we need to see that there is a child with you.",
+        	"payment": "After you finish the study, we will email you a $5 Amazon.com gift card within seven business days. To be eligible for the gift card (1) your child must be in the age range for this study, (2) you need to submit a valid consent statement, and (3) we need to see that there is a child with you.",
         	"datause": "During the session, you and your child will be recorded by your computer's webcam and microphone. These webcam recordings, and other data like answers you enter in forms, are sent securely to the Lookit platform. You can view your past recordings on Lookit at any time.Data are stored securely on Lookit servers and by researchers, and are only shared as described in this document. However, there is always a small risk that data transmitted over the internet may be intercepted or that the security of stored data may be compromised.",
         	"include_databrary": true,
         	"additional_video_privacy_statement": "We will also ask your permission to use your videos as stimuli for other parents.",
@@ -31,8 +31,22 @@ function generateProtocol(child, pastSessions) {
         "exit-survey": {
         	"kind": "exp-lookit-exit-survey",
         	"debriefing": {
-            	"text": "Thank you for your participation!",
-            	"title": "Exit Survey"
+				"title": "Thank you for your participation!",
+				"blocks": [
+					{
+						"title": "Study Debrief",
+						"text": "As adults, we communicate information selectively: We mostly tell people things they don’t already know, and we avoid referring to topics that are common knowledge. What about when children first learn to speak? Young toddlers start with very limited vocabularies. At first, they only produce one or two words in each utterance. Many things might affect what toddlers decide to say, including how familiar a word is, or how interested the child is in the topic. Still, we wondered if even toddlers just learning to talk might, like adults, try  to communicate information their audience does not know."
+					},
+					{
+						"text": "Here we showed your child scenes where both you and your child both knew some things about the scene, but something interesting always happened when your eyes were closed. In those stories, we wanted to know if on average, children would refer to the new event rather than the parts of the scene you already knew (i.e, the events that took place while your eyes were open)."
+					},
+					{
+						"text": "Depending on your child's age and mood, they might have been very quiet for all of these movies, spoken in full sentences throughout, or said something else we didn’t predict. All of that is perfectly fine! There is no one \“right\“ answer in these studies and however your child responded could make perfect sense. One of the things we often learn from studying children is that our ideas are wrong and need to change them! Thank you so much for your participation! Research on child development would be impossible without your support and we are very grateful for your time!"
+					},
+					{
+						"text": "We will email you a $5 Amazon.com gift card within seven business days if (1) your child is in the age range for this study, (2) you submited a valid consent statement, and (3) we saw that there was a child with you."
+					}
+				]
         	}
     	}, 
         "study-intro": {
@@ -120,21 +134,6 @@ function generateProtocol(child, pastSessions) {
 				}
     		},
 			"backgroundColor": "white"
-		},
-		"study-debrief" : {
-			"kind": "exp-lookit-text",
-			"blocks":[
-				{
-					"title": "Study Debrief",
-					"text": "As adults, we communicate information selectively: We mostly tell people things they don’t already know, and we avoid referring to topics that are common knowledge. What about when children first learn to speak? Young toddlers start with very limited vocabularies. At first, they only produce one or two words in each utterance. Many things might affect what toddlers decide to say, including how familiar a word is, or how interested the child is in the topic. Still, we wondered if even toddlers just learning to talk might, like adults, try  to communicate information their audience does not know."
-				},
-				{
-					"text": "Here we showed your child scenes where both you and your child both knew some things about the scene, but something interesting always happened when your eyes were closed. In those stories, we wanted to know if on average, children would refer to the new event rather than the parts of the scene you already knew (i.e, the events that took place while your eyes were open)."
-				},
-				{
-					"text": "Depending on your child's age and mood, they might have been very quiet for all of these movies, spoken in full sentences throughout, or said something else we didn’t predict. All of that is perfectly fine! There is no one \“right\“ answer in these studies and however your child responded could make perfect sense. One of the things we often learn from studying children is that our ideas are wrong and need to change them! Thank you so much for your participation! Research on child development would be impossible without your support and we are very grateful for your time!"
-				}
-			]
 		}		
 	}; // closing bracket for frames list object
 	frame_sequence.push('video-config');
@@ -391,7 +390,6 @@ function generateProtocol(child, pastSessions) {
 	} // closing bracket for for loop
 
 	frame_sequence = frame_sequence.concat(['thank-you']);
-	frame_sequence = frame_sequence.concat(['study-debrief']);
 	frame_sequence = frame_sequence.concat(['exit-survey']);
 	var protocol = {
 		frames: frames,
