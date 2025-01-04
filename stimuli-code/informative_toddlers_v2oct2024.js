@@ -4,8 +4,9 @@ function generateProtocol(child, pastSessions) {
 	// we are taking the data hog approach
 	// original Experiment runner version (commit SHA): bd01dd882db5f6f1ca873dced8223f79ae325693
 
-	// base frames that do not change btwn or within participants
 	let frame_sequence = [];
+	
+	// base frames that do not change btwn or within participants
      let frames = {
     	"video-consent": {
         	"kind": "exp-lookit-video-consent",
@@ -31,17 +32,19 @@ function generateProtocol(child, pastSessions) {
         "exit-survey": {
         	"kind": "exp-lookit-exit-survey",
         	"debriefing": {
-				"title": "Thank you for your participation!",
+				"title": "Study Debrief",
 				"blocks": [
 					{
-						"title": "Study Debrief",
 						"text": "As adults, we communicate information selectively: We mostly tell people things they don’t already know, and we avoid referring to topics that are common knowledge. What about when children first learn to speak? Young toddlers start with very limited vocabularies. At first, they only produce one or two words in each utterance. Many things might affect what toddlers decide to say, including how familiar a word is, or how interested the child is in the topic. Still, we wondered if even toddlers just learning to talk might, like adults, try  to communicate information their audience does not know."
 					},
 					{
 						"text": "Here we showed your child scenes where both you and your child both knew some things about the scene, but something interesting always happened when your eyes were closed. In those stories, we wanted to know if on average, children would refer to the new event rather than the parts of the scene you already knew (i.e, the events that took place while your eyes were open)."
 					},
 					{
-						"text": "Depending on your child's age and mood, they might have been very quiet for all of these movies, spoken in full sentences throughout, or said something else we didn’t predict. All of that is perfectly fine! There is no one \“right\“ answer in these studies and however your child responded could make perfect sense. One of the things we often learn from studying children is that our ideas are wrong and need to change them! Thank you so much for your participation! Research on child development would be impossible without your support and we are very grateful for your time!"
+						"text": "Depending on your child's age and mood, they might have been very quiet for all of these movies, spoken in full sentences throughout, or said something else we didn’t predict. All of that is perfectly fine! There is no one \“right\“ answer in these studies and however your child responded could make perfect sense. One of the things we often learn from studying children is that our ideas are wrong and need to change them!"
+					},
+					{
+						"text": "Thank you so much for your participation! Research on child development would be impossible without your support and we are very grateful for your time!"
 					},
 					{
 						"text": "We will email you a $5 Amazon.com gift card within seven business days if (1) your child is in the age range for this study, (2) you submited a valid consent statement, and (3) we saw that there was a child with you."
@@ -141,20 +144,19 @@ function generateProtocol(child, pastSessions) {
 	frame_sequence.push('study-intro');	
    
 	
-	//mvp1 frames and variables
+	// training frames
 
-	// images for mvp1Train1
-	let mvp1Train1Images = [
+	// images for training trials
+	let trainingImages = [
 		'training_bunny.png',
 		'training_apple.png'
 	];
 
-	// 2 mvp1-train frames 
-	
+	// training frames 	
 	for (iTrial = 0; iTrial < 2; iTrial++){
 
 		// parse out nono words using the file names
-		let image_name = mvp1Train1Images[iTrial];
+		let image_name = trainingImages[iTrial];
 		let first_clean = image_name.split(".");
 		let second_clean = first_clean[0].split("_");
 		let word = second_clean[1];
@@ -176,7 +178,7 @@ function generateProtocol(child, pastSessions) {
 			"images": [
 				{
 					"id": "train1-image",
-					"src": mvp1Train1Images[iTrial],
+					"src": trainingImages[iTrial],
 					"position": "fill"
 				}
 			],
@@ -233,10 +235,10 @@ function generateProtocol(child, pastSessions) {
 		};
 
 		// make frame ids for each frame in above sequence
-		startRecordingFrameId = 'startRecordingTrain1-' + (iTrial + 1);
+		startRecordingFrameId = 'startRecordingTrain-' + (iTrial + 1);
 		frameId = 'train1-' + (iTrial + 1);
-		stopRecordingFrameId = 'stopRecordingTrain1-' + (iTrial + 1);
-		parentTranscriptFrameId = 'parentTranscript1-' + (iTrial + 1);
+		stopRecordingFrameId = 'stopRecordingTrain-' + (iTrial + 1);
+		parentTranscriptFrameId = 'parentTranscript-' + (iTrial + 1);
 		
 		// insert the frames into the frame list using the frame ids
 		frames[startRecordingFrameId] = startRecordingTrial;
