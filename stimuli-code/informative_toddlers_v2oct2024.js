@@ -253,36 +253,71 @@ function generateProtocol(child, pastSessions) {
 		frame_sequence.push(parentTranscriptFrameId);
 	} // closing bracket of for loop
 
+	// assigning the condition!
+	let currentCondtion;
+
+	try{
+		// has this child done a session and been assigned a condition (and therefore made it to test trials) before?
+		if (pastSessions && pastSessions.length > 0 && pastSessions[1].conditionAssigned){
+			// get conditon from previous session
+			const lastCondition = pastSessions[1].conditionAssigned;
+			// if child has done a session before, assign them to the next condition (i.e., if you did order2 go to order3)
+			currentCondtion = (lastCondition % 4) + 1;
+			
+			//debugging vibes
+			console.log("Past session detected! Assiging to condition ", currentCondtion);
+
+		} else {
+			// child has never done a session so we're just going to randomize the session!
+			currentCondtion =  Math.floor(Math.random() * 4) + 1;
+			//debugging vibes
+			console.log("No past session was dectected, randomly assgning to condition ", currentCondtion);
+		}
+		
+		// attach condition to child for analysis sake
+		child.conditionAssigned = currentCondtion;
+		// attach condition to current session for future assignment sake
+		pastSessions[0].conditionAssigned = currentCondtion;
+
+	} catch (error){ 
+		console.error("A whoopsie ocurred during condition assignment: ", error);
+
+		// if all else fails just assign the child to a random session
+        child.conditionAssigned = Math.floor(Math.random() * 4) + 1;
+
+        // print to dev tool
+        console.log("Defaulting to Random Condition: ", currentCondition);
+	}
+
 	// stimuli for actual trials
-	let order1 = [
-		'bear_cow_bear_before_cow',
-		'ball_hat_hat_after_ball',
-		'cat_dog_cat_before_dog',
-		'balloon_car_car_after_balloon'
-	];
-	let order2 = [
-		'hat_ball_hat_before_ball',
-		'dog_cat_cat_after_dog',
-		'car_balloon_car_before_balloon',
-		'cow_bear_bear_after_cow'
-	];
-	let order3 = [ // contrast to order1
+	let orders = [
+		[ // order1
+			'bear_cow_bear_before_cow',
+			'ball_hat_hat_after_ball',
+			'cat_dog_cat_before_dog',
+			'balloon_car_car_after_balloon'
+		],
+		[ // order2
+			'hat_ball_hat_before_ball',
+			'dog_cat_cat_after_dog',
+			'car_balloon_car_before_balloon',
+			'cow_bear_bear_after_cow'
+		],
+		[// order3, contrast to order1
 		'cow_bear_cow_before_bear',
 		'hat_ball_ball_after_hat',
 		'dog_cat_dog_before_cat',
 		'car_balloon_balloon_after_car'
+		],
+		[ // order4, contrast to order2
+			'ball_hat_ball_before_hat',
+			'cat_dog_dog_after_cat',
+			'balloon_car_balloon_before_car',
+			'bear_cow_cow_after_bear'
+		]
 	];
-	let order4 = [ // contrast to order2
-		'ball_hat_ball_before_hat',
-		'cat_dog_dog_after_cat',
-		'balloon_car_balloon_before_car',
-		'bear_cow_cow_after_bear'
-	];
-	
-	// pick an order at random
-	let orders = [order1, order2, order3, order4];
-	let num =  Math.floor(Math.random() * 4);
-	let order_selected = orders[num];
+
+	let order_selected = orders[currentCondtion - 1];
 	
 	// for loop for actual trials
 	for (iTrial = 0; iTrial < 4; iTrial++){
