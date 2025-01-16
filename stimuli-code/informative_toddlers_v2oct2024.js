@@ -254,40 +254,7 @@ function generateProtocol(child, pastSessions) {
 	} // closing bracket of for loop
 
 	// assigning the condition!
-	let currentCondtion;
-
-	try{
-		// has this child done a session and been assigned a condition (and therefore made it to test trials) before?
-		if (pastSessions && pastSessions.length > 0 && pastSessions[1].conditionAssigned){
-			// get conditon from previous session
-			const lastCondition = pastSessions[1].conditionAssigned;
-			// if child has done a session before, assign them to the next condition (i.e., if you did order2 go to order3)
-			currentCondtion = (lastCondition % 4) + 1;
-			
-			//debugging vibes
-			console.log("Past session detected! Assiging to condition ", currentCondtion);
-
-		} else {
-			// child has never done a session so we're just going to randomize the session!
-			currentCondtion =  Math.floor(Math.random() * 4) + 1;
-			//debugging vibes
-			console.log("No past session was dectected, randomly assgning to condition ", currentCondtion);
-		}
-		
-		// attach condition to child for analysis sake
-		child.conditionAssigned = currentCondtion;
-		// attach condition to current session for future assignment sake
-		pastSessions[0].conditionAssigned = currentCondtion;
-
-	} catch (error){ 
-		console.error("A whoopsie ocurred during condition assignment: ", error);
-
-		// if all else fails just assign the child to a random session
-        child.conditionAssigned = Math.floor(Math.random() * 4) + 1;
-
-        // print to dev tool
-        console.log("Defaulting to Random Condition: ", currentCondition);
-	}
+	let currentCondtion = Math.floor(Math.random() * 4) + 1;
 
 	// stimuli for actual trials
 	let orders = [
