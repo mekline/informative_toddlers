@@ -28,14 +28,14 @@ This script implements the pre-processing steps written by Melissa Kline Struhl 
 ## Step 1
 
 First, we must choose set the working directory to be wherever the data is. You can make sure you're in the right directory by executing the line `print(list.files(general_location, recursive=FALSE))`. _**Note: ** if you set `recursive` to `TRUE` then R will print out all the files in all the subfolders of the directory as well._ 
-Also, since I keep all the raw data on Dropbox instead of GitHub (subject to change), **you need to insert the specific path as it appears on your computer anytime you want to read or write as csv **.
+Also, since I keep all the raw data on Dropbox instead of GitHub (subject to change), **you need to insert the specific path as it appears on your computer anytime you want to read or write as csv**.
 
 ```{r set and check directory}
 # set directories
-general_location = "C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1_jan2024_complete_dataset"
+general_location = "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_sept2024/v2_sept2024_first_90_kids"
 
-raw_location = paste0(general_location, "/raw_data/framedata")
-processed_location = paste0(general_location, "/processed_data/v1_jan2024_step1/framedata")
+raw_location = paste0(general_location, "/raw_data")
+processed_location = paste0(general_location, "/processed_data/v2_sept2024_step1/framedata")
 
 # use a counter variable to make sure the expected number of files has been moved
 files_moved <- 0
@@ -43,12 +43,12 @@ files_moved <- 0
 # make a function that copies the raw data, places it in the processed_data folder, and renames all the files to the proper names
 copy_and_rename <- function(src_dir, dst_dir) {
   # List all CSV files in the source directory
-  files <- list.files(path = src_dir, pattern = "\\.csv$", full.names = TRUE)
+  files <- list.files(path = src_dir, pattern = "\\.csv$", full.names = TRUE, recursive = TRUE)
   
   for (file in files) {
     # Extract the file name and replace "Tell-Me-About-It" with "v1jan2024"
     file_name <- basename(file)
-    out_name <- sub("Tell-Me-About-It-", "v1_jan2024_step1", file_name)
+    out_name <- sub("Tell-Me-About-It-Too-", "v2_sept2024_step1", file_name)
     
     # Construct the destination file path
     dst_file <- file.path(dst_dir, out_name)
@@ -67,6 +67,7 @@ copy_and_rename(raw_location, processed_location)
 
 ```
 
+**NOTE**: At this point you may be tempted to look for the all-sessions file and remove it from the `processed_location`, don't! There is code for that later on and you will just give yourself a headache.
 
 ## Step 2
 
@@ -74,7 +75,7 @@ Now that we have copied, renamed, and relocated the files, we can begin editing 
 
 ```{r read in files and rename them}
 # read in all the files as dataframes
-files <- list.files(path = processed_location, pattern = "\\.csv$", full.names = TRUE)
+files <- list.files(path = processed_location, pattern = "\\.csv$", full.names = TRUE, recursive = TRUE)
 
 for (file in files){
   df <- read_csv(file)
@@ -83,13 +84,14 @@ for (file in files){
 }
 ```
 
+
 Now we will edit the session-all file. This file will be used to keep track of all the sessions that have been done (completed or otherwise). If you are anything like me (or you are me), you will feel the urge to delete the original all_sessions/demographics data frames. DO NOT DO THAT!! It makes it harder if you want to change anything about the revised data frames.
+
 
 ```{r session-all}
 # rename the session-all and demographic data frames
-all_sessions <- `v1jan2024-step1_all-responses-identifiable`
+all_sessions <- `v2_sept2024_step1_all-responses-identifiable`
 # it is important to wrap the df names in `` as the - and _ throw R off
-demographics <- `v1jan2024-step1_all-demographic-snapshots`
 
 # select (and rename) the relevant columns from all_sessions
 all_sessions <- all_sessions %>% 
@@ -117,15 +119,18 @@ all_sessions <- all_sessions %>%
          is_coded = '',
          notes = '')
 
-# turn the new data frame into a csv located in the step2 folder
-write.csv(all_sessions, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v1_jan2024_complete_dataset/processed_data/v1_jan2024_step2_TOCODE/v1_jan2024_step2_all-sessions.csv")
+# turn the new data frame into a csv located in the step2 folder, don't forget to include the file name and extension in the path!!!
+write.csv(all_sessions, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_sept2024/v2_sept2024_first_90_kids/processed_data/v2_sept2024_step1/v2_sept2024_step1_all-responses-identifiable.csv")
 ```
 
-After deciding what sessions should not be cleaned (and later coded) and editing the v1jan2024-step2_all-responses-identifiable file, we will update the files list by removing the files of sessions that were excluded from the files list.
+
+## Step 3
+
+After deciding what sessions should not be cleaned (and later coded) and editing the all-responses file, we will update the files list by removing the files of sessions that were excluded from the files list.
 
 ```{r remove excluded sessions}
 # read in updated all sessions file
-updated_all_sessions_file <- read_csv("C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1_jan2024_complete_dataset/processed_data/v1_jan2024_step3_CODED/v1_jan2024_step3_all-sessions.csv")
+updated_all_sessions_file <- read_csv("C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_sept2024/v2_sept2024_first_90_kids/processed_data/v2_sept2024_step2_TOCODE/v2_sept2024_step2_all-responses.csv")
 
 # make a df of all sessions that will not be coded (just because I think it's handy to have, not very necessary)
 uncodable_sessions <- updated_all_sessions_file %>% 
@@ -138,13 +143,13 @@ codable_sessions <- codable_sessions$session_id
 
 # update the strings in codable_sessions so that they match the dataframes that were loaded in
 for (i in seq_along(codable_sessions)) {
-  codable_sessions[i] <- paste0("v1_jan2024_step1_", codable_sessions[i], "_frames")
+  codable_sessions[i] <- paste0("v2_sept2024_step2_", codable_sessions[i], "_frames")
 }
 
 ```
 
 
-## Step 3
+## Step 4
 
 With the all_session file ready, we can now create the individual step2_TOCODE files by parring the file down, rearranging old rows, and adding new rows.
 First, we will make blank data frames for the 4 session orders. This code should only really be run if this is the first time you're using the script.
@@ -289,6 +294,8 @@ for(session in codable_sessions){
 }
 ```
 
+## Step 5
+
 Now we just need to save the dataframes as csv files for coding!
 
 ```{r}
@@ -303,6 +310,9 @@ all_orders <- bind_rows(all_orders, Order4)
 write.csv(all_orders, "C:/Users/Lia Washington/Downloads/ECCL/ECCL/Informative Toddlers/Data/data/v1_jan2024_complete_dataset/processed_data/v1_jan2024_step2_TOCODE/v1_jan2024_step2_all-orders_TOCODE.csv")
 
 ```
+
+
+
 
 
 Here are some defunct and/or unrelated chunks of code that I am keeping for funsies!
