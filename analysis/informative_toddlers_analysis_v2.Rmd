@@ -1,5 +1,5 @@
 ---
-title: "analysis-informative-toddlers"
+title: "analysis-informative-toddlers-v2"
 author: "Melissa Kline Struhl & Lia Washington"
 date: "10/16/2024"
 output:
@@ -30,9 +30,9 @@ In the next chunk, update the exact set of data we want to analyze.
 
 ```{r choose-version-and-folder}
 # study version
-study_version = 'v2_jan2024'
+study_version = 'v2_oct2024'
 # data subfolder
-data_subfolder = 'v2_jan2024_complete'
+data_subfolder = 'v2_oct2024_complete'
 ```
 
 Attempt to load the resulting data files and report on what was found. Before doing this for the first time, make sure that your R session working directory is set to the informative-toddlers directory on your computer! In the menu choose Session>Set Working Directory>To Source File Location. If you knit again and get errors/are still in your default user directory, restart R, reset your working directory, and try knitting again. 
@@ -52,11 +52,8 @@ raw_df <- read_csv(paste0(data_location, '/', study_version,'_step3_all-orders_C
 trial_data_all <- raw_df %>%
   rename(session_id = response_uuid,
          child_id = child_hashed_id,
-         age_in_days = child__age_rounded,
-         gender = child__gender,
-         visual_shown = visualShown, 
-         audio_played = audioPlayed, 
-         stimulus_target_utterance = stimulus_targetutterance)
+         age_in_days = age,
+         visual_shown = visualShown)
 
 ```
 
@@ -182,12 +179,8 @@ Next, trim down the version of the dataset we're working with to relevant column
 ```{r get-useful-columns}
 trial_data_toanalyze <- trial_data_toanalyze %>%
   select(session_id, family_id, child_id, age_in_days, gender, coder, visual_shown,
-         session_order, trial_num, trial_type, testtrial_type, stimulus_set, 
-         stimulus_subject, stimulus_subject, stimulus_verb, stimulus_object, stimulus_distractor, 
-         stimulus_target_utterance, stimulus_condition, informative_entities, uninformative_entities,
-         response_exact_utterance, parent_transcription, response_attempted_target, 
-         response_included_subject, response_included_verb, response_included_object, response_included_distractor,
-         response_included_informative, response_included_uninformative,
+         session_order, trial_num, stimulus_set, test_trial_type, stimulus_target_utterance, informative_entities, cg_entities,
+         response_exact_utterance, parent_transcription, response_attempted_target, response_included_informative, response_included_cg,
          include_trial, exclusion_reason, trial_notes)
 
 # replace all NAs in the "included..." columns with just "n"
@@ -205,10 +198,10 @@ trial_data_toanalyze <- trial_data_toanalyze %>%
 
 yesno_tf = function(mystring){
   newstring = case_when(
-    mystring == "yes" ~ "TRUE", 
-    mystring == "y" ~ "TRUE", 
-    mystring == "no" ~ "FALSE", 
-    mystring == "n" ~ "FALSE", 
+    mystring == "YES" ~ "TRUE", 
+    mystring == "Y" ~ "TRUE", 
+    mystring == "NO" ~ "FALSE", 
+    mystring == "N" ~ "FALSE", 
     TRUE ~ as.character(mystring))
   
   return(newstring)
@@ -216,36 +209,14 @@ yesno_tf = function(mystring){
 
 trial_data_toanalyze <- trial_data_toanalyze %>%
   mutate(response_attempted_target = yesno_tf(response_attempted_target),
-         response_included_subject = yesno_tf(response_included_subject), 
-         response_included_verb = yesno_tf(response_included_verb),  
-         response_included_object = yesno_tf(response_included_object), 
          response_included_informative = yesno_tf(response_included_informative), 
-         response_included_uninformative = yesno_tf(response_included_uninformative), 
-         include_trial = yesno_tf(include_trial),
-         response_included_distractor = yesno_tf(response_included_distractor))
+         response_included_uninformative = yesno_tf(response_included_cg), 
+         include_trial = yesno_tf(include_trial))
 ```
 
 Column definitions can all be found in the Data Coding Manual!
 
 ## Trial-level exclusions and descriptive statistics
-
-For fun, here is a spreadsheet of all the utterances produced (warmup and critical), plus the way we would code them according to the coding manual!
-
-```{r show-utterances}
-utterance_summary_table = trial_data_toanalyze %>%
-  select(stimulus_target_utterance, stimulus_condition, informative_entities, uninformative_entities, response_exact_utterance, response_attempted_target, include_trial)
-
-kable(head(utterance_summary_table, col.names = c("target", "condition", "informative", "uninformative", "utterance", "attempted_target", "include")))
-```
-
-
-```{r show-utterance-coding}
-utterance_coding_table = trial_data_toanalyze %>%
-  filter(response_attempted_target == "TRUE") %>%
-  select(stimulus_target_utterance, stimulus_condition, response_exact_utterance, response_included_subject, response_included_object, response_included_informative, response_included_uninformative, trial_notes, include_trial)
-
-kable(head(utterance_coding_table, col.names = c("target", "condition", "utterance", "subject", "object", "informative", "uninformative", "notes", "include")))
-```
 
 Trial-level exclusions: Trials are excluded from analysis only if there is a reason that those trials should not be considered a successful measurement. That is, the CONTENT of what the child says (or doesn't say) does not determine this, only adult speech (e.g. that gave away the right answer) or child behavior (inattentive for this trial).  These decisions are made during coding and the full list of preregistered reasons can be found in the coding manual. There should be a reason listed below for every trial that is excluded!
 
@@ -462,14 +433,12 @@ summary(h2c_kids_model)
 ```
 
 # Visuals!
+
 ### It is now time to visualize all of our data! We we be plotting count data as well as the models shown above.
+
 ## Count Data Graphs
 
 ### Graph for H1
-```{r}
-
-
-```
 
 ```{r}
 # all of the distinct kids that apply to this hypothesis
