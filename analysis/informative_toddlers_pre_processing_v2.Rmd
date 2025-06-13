@@ -126,13 +126,19 @@ write.csv(all_sessions, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative 
 
 ## Step 3
 
-At this point you should stop running the script, go apply the session-level inclusion criteria, and come back (unless you did that before you even started).
+If this isn't your first batch of data coding, use this chunk to fill in the new all-responses file with the coded version of the most recent all-responses file!
 
+```{r fill in all-responses}
+
+```
+
+
+At this point you should STOP running the script, go apply the session-level inclusion criteria, and come back (unless you did that before you even started).
 After deciding what sessions should not be cleaned (and later coded) and editing the all-responses file, we will update the files list by removing the files of sessions that were excluded from the files list.
 
 ```{r remove excluded sessions}
 # read in updated all sessions file
-updated_all_sessions_file <- read_csv("C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_first_90_kids/processed_data/v2_oct2024_step2_TOCODE/v2_oct2024_step2_all-responses.csv")
+updated_all_sessions_file <- read_csv("C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_first_90_kids/processed_data/v2_oct2024_step2_TOCODE/v2_oct2024_step2_all-sessions.csv")
 
 # make a df of all sessions that will not be coded (just because I think it's handy to have, not very necessary)
 uncodable_sessions <- updated_all_sessions_file %>% 
@@ -154,7 +160,7 @@ for (i in seq_along(codable_sessions)) {
 ## Step 4
 
 With the all_session file ready, we can now create the individual step2_TOCODE files by parring the file down, rearranging old rows, and adding new rows.
-First, we will make blank data frames for the 4 session orders. This code should only really be run if this is the first time you're using the script.
+First, we will make blank data frames for the 4 session orders.
 
 ```{r make orders}
 orders = c("Order1", "Order2", "Order3", "Order4")
@@ -304,6 +310,15 @@ write.csv(all_orders, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative To
 
 ```
 
+If this isn't your first batch of data coding, use this chunk to fill in the new all-orders file with the CODED version of the most recent all-order file!
+
+```{r fill in all orders file}
+
+```
+
+------------------------------------------------------------------------------------------------------------------
+
+Here are some extra chunks of code that may prove useful!
 
 Here is a chunk of code to run through the above transformations, but only for one file (so that we can see what it's doing). This is helpful for when we need to change the transformations for new data, but are slightly unsure of where.
 ```{r individual session tester}
@@ -425,14 +440,6 @@ if (sum(str_detect(Order1$response_uuid, df3$response_uuid[1])) == 0 &
 }
 ```
 
-------------------------------------------------------------------------------------------------------------------
-
-Here are some defunct and/or unrelated chunks of code that I am keeping for funsies!
-
-```{r sandbox}
-
-```
-
 ```{r wanna delete all the data?}
 # List all objects in the environment
 objects <- ls()
@@ -494,6 +501,10 @@ for (f in original_files) {
 
 # all the stuff above is stuff max and i did to diagnose and eliminate the files that were breaking the code!
  
+
+```
+
+```{r sandbox}
 
 ```
 

@@ -29,16 +29,14 @@ Note that the resulting HTML file will *not* get committed when you commit chang
 In the next chunk, update the exact set of data we want to analyze.
 
 ```{r choose-version-and-folder}
-# study version
 study_version = 'v2_oct2024'
-# data subfolder
-data_subfolder = 'v2_oct2024_complete'
+data_subfolder = 'v2_oct2024_first_90_kids'
 ```
 
 Attempt to load the resulting data files and report on what was found. Before doing this for the first time, make sure that your R session working directory is set to the informative-toddlers directory on your computer! In the menu choose Session>Set Working Directory>To Source File Location. If you knit again and get errors/are still in your default user directory, restart R, reset your working directory, and try knitting again. 
 
 ```{r find-data-files, echo = FALSE}
-data_location = paste0(here::here(),'/data/',data_subfolder)
+data_location = paste0(here::here(),'/data/',study_version,'/',data_subfolder)
 print(list.files(data_location, recursive=TRUE))
 ```
 
@@ -52,7 +50,6 @@ raw_df <- read_csv(paste0(data_location, '/', study_version,'_step3_all-orders_C
 trial_data_all <- raw_df %>%
   rename(session_id = response_uuid,
          child_id = child_hashed_id,
-         age_in_days = age,
          visual_shown = visualShown)
 
 ```
@@ -70,7 +67,7 @@ If these numbers get smaller below, we should always know why! (i.e. because we 
 
 How many sessions do we actually see in the trial-level data?
 
-* There are `r length(unique(trial_data_all$session_id))` unique responses are in the trial-level data.
+* There are `r length(unique(trial_data_all$session_id))` unique sessions in the trial-level data.
 * These come from `r length(unique(trial_data_all$child_id))` unique children.
 
 It is *okay* and *expected* for the trial-level data to have fewer responses than the session-level data at this point, because we haven't yet dealt with exclusion or not-yet-coded sessions. 
@@ -165,6 +162,13 @@ If the merge went as expected, the numbers below should match.
 ```{r merge-data}
 # doing a merge to add family_id into the mix
 trial_data_toanalyze <- left_join(trial_data_all, session_data_toanalyze %>% select(session_id, family_id), by = "session_id")
+
+# this little bit is only temporary bc i'm gonna fill out age in gender and in the preprocessing script moving forward
+trial_data_toanalyze <- left_join(trial_data_toanalyze, session_data_toanalyze %>% 
+  select(session_id, gender, age_in_days), by = "session_id") %>% 
+  mutate(gender.x = gender.y,) %>% 
+  select(-gender.y) %>% 
+  rename(gender = gender.x)
   
 # did we do an unreasonable inflation? these 2 numbers should be the same
 print(nrow(trial_data_all))
@@ -210,7 +214,7 @@ yesno_tf = function(mystring){
 trial_data_toanalyze <- trial_data_toanalyze %>%
   mutate(response_attempted_target = yesno_tf(response_attempted_target),
          response_included_informative = yesno_tf(response_included_informative), 
-         response_included_uninformative = yesno_tf(response_included_cg), 
+         response_included_cg = yesno_tf(response_included_cg), 
          include_trial = yesno_tf(include_trial))
 ```
 
@@ -237,7 +241,7 @@ Here is a summary of how much children spoke during the study:
 ```{r summarize-utterances}
 summarize_utterances <- trial_data_toanalyze %>%
   group_by(session_id) %>%
-  mutate(response_child_spoke = !is.na(response_exact_utterance)) %>%
+  mutate(response_child_spoke =!is.na(response_exact_utterance)) %>%
   summarize(n_trials = n(), 
             n_spoke = sum(response_child_spoke == "TRUE"),
             n_attempted_target = sum(response_attempted_target == "TRUE"))
@@ -245,9 +249,6 @@ summarize_utterances <- trial_data_toanalyze %>%
 kable(head(summarize_utterances, col.names = c("session", "included trials", "spoke", "attempted description")))
 
 ```
-
-
-NOTE: Something I did *not* do in any of the above was look at either parent transcriptions, OR sanity checking programmatically on whether the listed utterances in fact have the expected strings for e.g. `response_included_subject`. This would be a good error-checking section to add. 
 
 ## Inductive statistics (hypothesis tests!) 
 
