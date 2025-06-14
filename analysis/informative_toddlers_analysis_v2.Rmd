@@ -215,7 +215,8 @@ trial_data_toanalyze <- trial_data_toanalyze %>%
   mutate(response_attempted_target = yesno_tf(response_attempted_target),
          response_included_informative = yesno_tf(response_included_informative), 
          response_included_cg = yesno_tf(response_included_cg), 
-         include_trial = yesno_tf(include_trial))
+         include_trial = yesno_tf(include_trial)) %>% 
+  filter(stimulus_set == 'test_trial')
 ```
 
 Column definitions can all be found in the Data Coding Manual!
@@ -268,38 +269,39 @@ Hypothesis 1 will be tested across all trials in the study (two Common-Ground sc
 # choose the columns and observations needed for these statistical tests
 trial_data_h1 <- trial_data_toanalyze %>%
   filter(response_attempted_target == "TRUE") %>% #Only include trials where child tried to describe some part of the trial vignette
-  filter(stimulus_condition %in% c("commonground","agent_ambig","patient_ambig")) %>% # Include commonground, agent-ambiguous, and patient-ambiguous trials, but not warmups
-  select(session_id, child_id, stimulus_condition, trial_num, stimulus_set, uninformative_entities, response_exact_utterance, response_included_informative, response_included_uninformative, age_in_days) %>% 
-  mutate(trial_id = paste0(session_id, trial_num))
+  select(session_id, child_id, age_in_days, gender, session_order, test_trial_type, trial_num, response_exact_utterance, response_included_informative,
+         response_included_cg) %>% 
+  mutate(trial_id = paste0(session_id, '_trial-',trial_num))
 ```
 
-What we actually want to do is compare the `include_informative` rate to the `include_uninformative` rate - this is a test of difference between two dependent proportions (whether a child who can only speak a few words at a time says a CG word in the utterance is NOT independent of whether they say an INF word!), where the discordant observations are the ones that are informative about the question we're interested in. Given this table:
+What we actually want to do is compare the `include_informative` rate to the `include_cg` rate - this is a test of difference between two dependent proportions (whether a child who can only speak a few words at a time says a CG word in the utterance is NOT independent of whether they say an INF word!), where the discordant observations are the ones that are informative about the question we're interested in. Given this table:
 
 ```{r describe-h1}
-h1_xtabs_table <- table(select(trial_data_h1, response_included_informative, response_included_uninformative))
+h1_xtabs_table <- table(select(trial_data_h1, response_included_informative, response_included_cg))
 print(h1_xtabs_table)
 ```
  
-We want to test the hypothesis that the number of cases where CG=FALSE and Informative=TRUE is greater than the number of cases where CG=TRUE and Informative=FALSE. 
+We want to test the hypothesis that the number of cases where CG=TRUE and Informative=FALSE is greater than the number of cases where CG=FALSE and Informative=TRUE. 
 
 The 'classical' approach MKS knows for this is McNemar's Exact Test, and we can construct a closely related LMM test (per this question: https://stats.stackexchange.com/questions/560142/replacing-mcnemar-test-with-regression). We will report both outcomes for robustness; in case they disagree, we will prioritize the results of the LMM, which are able to account for nesting effects of child, session, stimulus, etc. 
+
+It is important to note that the McNemar's may not be suitable for data sets where there is a 0 in any of the cells (which should be the case here).
 
 ```{r h1-mcnemar, echo=TRUE}
 mcnemar.test(h1_xtabs_table)
 ```
-For the first version of this study our preregistered analyses is different from what we are about to do for this second version. If you would like to see the original analysis plan, look at the "informative_toddlers_analysis.rmd" file on GitHub. The analyses included here were used in tandem with the original analysis plan for the final CogSci submission. 
-
 **We're going to use this method in order to compare of the log-odds of being informative to 0, where log-odds of 0 is the same as probability = .5. A significant result here tells you that the probability of being informative is not .5. _This pertains to the intercept_**
 
 _Log odds explained:_
+
 * Probability is essentially just "odds" expressed in slightly different ways with probability being a number between 0 and 1 and odds being any number above 0. 
 * Linear regression functions on the assumption that your metric response can range from negative infinity to positive infinity. 
 * We use log odds as it ranges from negative infinity to positive infinity, with numbers approaching 0 having a more negative log (ex: ln(0.00000000001) = -25)
 * Log odds is essentially a transformation
 * A negative log-odds result just means that there is a _less than 50% chance_ of "the thing" happening
 * (in the case of our study) the intercept represents baseline performance (AKA when our independent variables are not in play)
-* the slope/value of an IV in the summary indicates the amount change in DV as a result/function of the IV
-* the slope can't be easily translated as it is a **rate** (as opposed to the intercept which is a singular stationary number) which is why we need the log odds ratio
+* The slope/value of an IV in the summary indicates the amount change in DV as a result/function of the IV
+* The slope can't be easily translated as it is a **rate** (as opposed to the intercept which is a singular stationary number) which is why we need the log odds ratio
 
 ```{r A secret mousekatool for later}
 log.odds.to.prob <- function(x){
@@ -312,130 +314,24 @@ For the LMM, we need to create a new variable: whether the value of `response_in
 
 ```{r h1-lmm}
 trial_data_h1 <- trial_data_h1 %>%
-  mutate(selective = case_when(response_included_informative == response_included_uninformative ~ 0,
-                                 response_included_informative != response_included_uninformative ~ 1))
+  mutate(selective = case_when(response_included_informative == response_included_cg ~ 0,
+                                 response_included_informative != response_included_cg ~ 1))
 
 h1_kids <- trial_data_h1 %>%
   select(child_id,
          inform = response_included_informative, 
-         uninform = response_included_uninformative,
+         cg = response_included_cg,
          selective) %>%
   filter(selective == 1)
 
-h1_kids$inform <- as.factor(h1_kids$inform) # we have to do this so we can use the binomial family - no idea why we didn't need to do this previously but whatever ig? ask brain
+h1_kids$inform <- as.factor(h1_kids$inform) # we have to do this so we can use the binomial family
 h1_kids_model <- glmer(inform ~ 1 + (1|child_id), family = "binomial", data = h1_kids)
 summary(h1_kids_model)
 ```
 
-#### Hypothesis 2
-
-Hypothesis 2 focuses on the production of the specific nouns in the target utterances, and is tested only in the Agent-Patient scenes.
-
-Prediction: Participants will be more likely to mention the ambiguous referent (Agent-ambiguous: DOG; Patient-ambiguous: APPLE) than the unambiguous referent (Agent-ambiguous: APPLE; Patient-ambiguous: DOG)
-
-In parallel to H1, we will first focus on inclusion of ambiguous (informative) versus unambiguous (commonground) referents. However, we will also include follow-up tests for each different class of words, since for a variety of reason production of subjects (agents) might vary from production of objects (patients) 
-
-- Mention of the agent referent will be more likely in the Agent-ambiguous condition than the Patient-ambiguous condition
-- Mention of the patient referent will be more likely in the Patient-ambiguous condition than the Agent-ambiguous condition
-
-#### Implement H2
-
-Select the columns and rows for testing Hypothesis 2: 
-
-```{r columns-and-obs-h2}
-#Choose the columns and observations needed for these statistical tests
-
-trial_data_h2 <- trial_data_toanalyze %>%
-  filter(response_attempted_target == "TRUE") %>% # Only include trials where child tried to describe some part of the trial vignette
-  filter(stimulus_condition %in% c("agent_ambig","patient_ambig")) %>% # Include agent-ambiguous, and patient-ambiguous trials only for 2b
-  select(session_id, child_id, trial_num, stimulus_condition, stimulus_set, uninformative_entities, response_exact_utterance, response_included_subject, response_included_object, age_in_days) %>% 
-  mutate(trial_id = paste0(session_id, trial_num))
-
-```
-
-In parallel to H1, we add new columns that re-code (agent, patient) into (informative, uninformative) depending on the condition present, and then create the table for the McNemar test. (NOTE: This differs from H1 by focusing on just the nouns of the target utterance, not the verb or distractor entity.)
-
-```{r recode-h2}
-trial_data_h2 <- trial_data_h2 %>%
-  mutate(response_included_info_noun = case_when(stimulus_condition == "agent_ambig" ~ response_included_subject,
-                                                  stimulus_condition == "patient_ambig" ~ response_included_object),
-         response_included_uninformative_noun = case_when(stimulus_condition == "agent_ambig" ~ response_included_object,
-                                                  stimulus_condition == "patient_ambig" ~ response_included_subject))
-```
-
-Here is the 2x2 table!
-
-```{r describe-h2}
-h2_xtabs_table <- table(select(trial_data_h2, response_included_info_noun, response_included_uninformative_noun))
-print(h2_xtabs_table)
-```
-
-We want to test the hypothesis that the number of cases where CG=FALSE and Informative=TRUE is greater than the number of cases where CG=TRUE and Informative=FALSE. 
-
-McNemar's Exact Test:
-
-```{r h2-mcnemar, echo=TRUE}
-mcnemar.test(h2_xtabs_table)
-```
-
-The LMM for this test is constructed in the same way as H1.
-
-```{r h2-lmm}
-trial_data_h2 <- trial_data_h2 %>%
-  mutate(selective = case_when(response_included_info_noun == response_included_uninformative_noun ~ 0,
-                                 response_included_info_noun != response_included_uninformative_noun ~ 1))
-
-h2a_kids <- trial_data_h2 %>%
-  select(child_id,
-         inform = response_included_info_noun,
-         uninform = response_included_uninformative_noun,
-         selective) %>%
-  filter(selective == 1)
-
-h2a_kids$inform <- as.factor(h2a_kids$inform)
-h2a_kids_model <- glmer(inform ~ 1 + (1|child_id), family = "binomial", data = h2a_kids)
-summary(h2a_kids_model)
-```
-
-And here is the specification for the follow-up tests, which we use LMMs for. 
-
-- Mention of the agent referent will be more likely in the Agent-ambiguous condition than the Patient-ambiguous condition
-
-```{r h2-agent}
-h2b_kids <- trial_data_h2 %>%
-  select(child_id,
-         inform = response_included_info_noun,
-         uninform = response_included_uninformative_noun,
-         selective,
-         response_included_subject,
-         stimulus_condition) %>%
-  filter(selective == 1)
-
-h2b_kids$response_included_subject <- as.factor(h2b_kids$response_included_subject)
-h2b_kids_model <- glmer(response_included_subject ~ 1 + stimulus_condition + (1|child_id), family = "binomial", data = h2b_kids)
-summary(h2b_kids_model)
-```
-
-- Mention of the patient referent will be more likely in the Patient-ambiguous condition than the Agent-ambiguous condition
-
-```{r h2-patient}
-h2c_kids <- trial_data_h2 %>% 
-  select(child_id,
-         inform = response_included_info_noun,
-         uninform = response_included_uninformative_noun,
-         selective,
-         response_included_object,
-         stimulus_condition) %>%
-  filter(selective == 1)
-
-h2c_kids$response_included_object <- as.factor(h2c_kids$response_included_object)
-h2c_kids_model <- glmer(response_included_object ~ 1 + stimulus_condition + (1|child_id), family = "binomial", data = h2c_kids)
-summary(h2c_kids_model)
-```
-
 # Visuals!
 
-### It is now time to visualize all of our data! We we be plotting count data as well as the models shown above.
+It is now time to visualize all of our data! We we be plotting count data as well as the models shown above.
 
 ## Count Data Graphs
 
@@ -446,15 +342,15 @@ summary(h2c_kids_model)
 # we do not use this for analysis/charts - we're using this to determine N, mean age, and age range!!!
  h1_kids<- trial_data_h1 %>% 
   filter(!(response_included_informative == TRUE & 
-         response_included_uninformative == TRUE)) %>% 
+         response_included_cg == TRUE)) %>% 
   distinct(child_id, .keep_all = TRUE)
 
 # only informative utterances
 informative_only_count <- sum(trial_data_h1$response_included_informative == TRUE & 
-                                trial_data_h1$response_included_uninformative == FALSE)
+                                trial_data_h1$response_included_cg == FALSE)
 # only cg utterances
 cg_only_count <- sum(trial_data_h1$response_included_informative == FALSE & 
-                       trial_data_h1$response_included_uninformative == TRUE)
+                       trial_data_h1$response_included_cg == TRUE)
 
 # make a graph
 # make a data frame containing the stuff we want to turn into a graph
@@ -478,86 +374,6 @@ ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
       axis.ticks.x = element_blank())
 ```
 
-### Making a graph for H1b 
-
-```{r}
-# all of the distinct kids that apply to this hypothesis
-# we do not use this for analysis/charts - we're using this to determine N, mean age, and age range!!!
-h1b_kids<- trial_data_h1 %>% 
-  filter(!(response_included_informative == TRUE & 
-         response_included_uninformative == TRUE)) %>% 
-   filter(!grepl('common', stimulus_condition)) %>% 
-  distinct(child_id, .keep_all = TRUE)
-
-# make a new df to hold H1b data
-trial_data_h1b <- trial_data_h1 %>% 
-  # remove common ground trials
-  filter(!grepl('common', stimulus_condition))
-
-# only informative utterances
-h1b_informative_only_count <- sum(trial_data_h1b$response_included_informative == TRUE & 
-                       trial_data_h1b$response_included_uninformative == FALSE)
-# only cg utterances
-h1b_cg_only_count <- sum(trial_data_h1b$response_included_informative == FALSE & 
-                       trial_data_h1b$response_included_uninformative == TRUE)
-
-# make a graph
-# make a data frame containing the stuff we want to turn into a graph
-inf_vs_cg_data <- data.frame(
-  Category = c("Only Informative", "Only Common Ground"),
-  counts = c(h1b_informative_only_count, h1b_cg_only_count)
-)
-# had to do this bc for whatever reason the graph kept coming out with the "relevant" bar first and I hate it
-inf_vs_cg_data$Category <- factor(inf_vs_cg_data$Category, levels = c("Only Informative", "Only Common Ground"))
-
-# make a da graph
-ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
-  geom_bar(stat = "identity") +
-  labs(y = "Number of Utterances", x = "Utterance Type") + 
-  theme_bw() +
-   theme(panel.border = element_blank()) +
-  scale_y_continuous(
-    breaks = seq(0, 100, by = 10),
-    limits = c(0, 100)) + 
-  theme(axis.text.x = element_blank(),
-      axis.ticks.x = element_blank())
-```
-
-### Graph for H2a - Nothing came out of this hypothesis so we didn't do graphs for H2b or H2c
-
-```{r}
-# all of the distinct kids that apply to this hypothesis
-# we do not use this for analysis/charts - we're using this to determine N, mean age, and age range!!!
- h2_kids<- trial_data_h2 %>% 
-  filter(!(response_included_info_noun == TRUE & 
-         response_included_uninformative_noun == TRUE)) %>% 
-  filter(!(response_included_info_noun == FALSE & 
-         response_included_uninformative_noun == FALSE)) %>% 
-  distinct(child_id, .keep_all = TRUE)
-
-# prepare dat for graph
-inf_noun_count <- sum(trial_data_h2$response_included_info_noun == TRUE & 
-                        trial_data_h2$response_included_uninformative_noun == FALSE)
-cg_noun_count <- sum(trial_data_h2$response_included_uninformative_noun == TRUE &
-                       trial_data_h2$response_included_info_noun == FALSE)
-# make graph
-inf_vs_cg_nouns_data <- data.frame(
-  Category = c("Mentioned only ambiguous referent", "Mentioned only unambiguous referent"),
-  counts = c(inf_noun_count, cg_noun_count)
-)
-
-ggplot(inf_vs_cg_nouns_data, aes(x = Category, y = counts, fill = Category)) +
-  geom_bar(stat = "identity") +
-  labs(y = "Number of Utterances", x = "Utterance Type") + 
-  theme_bw() +
-   theme(panel.border = element_blank()) +
-  scale_y_continuous(
-    breaks = seq(0, 100, by = 10),
-    limits = c(0, 100)) + 
-  theme(axis.text.x = element_blank(),
-      axis.ticks.x = element_blank())
-
-```
 
 ### Bonus graph of all kids
 
@@ -565,15 +381,15 @@ ggplot(inf_vs_cg_nouns_data, aes(x = Category, y = counts, fill = Category)) +
 # all the info only kids in h1
 all_kids_inf <- trial_data_h1 %>% 
   filter(response_included_informative == TRUE,
-         response_included_uninformative == FALSE)
+         response_included_cg == FALSE)
 # all the cg kids in h1
 all_kids_cg <- trial_data_h1 %>% 
   filter(response_included_informative == FALSE,
-         response_included_uninformative == TRUE)
+         response_included_cg == TRUE)
 # the non-selective kids
 all_kids_unselective <- trial_data_h1 %>% 
   filter(response_included_informative == TRUE,
-         response_included_uninformative == TRUE)
+         response_included_cg == TRUE)
 
 # identify all the unique kids of those sets
 all_kids_inf_unique <- unique(all_kids_inf$child_id)
@@ -585,13 +401,13 @@ all_graph_kids = length(unique(c(all_kids_inf_unique, all_kids_cg_unique, all_ki
 
 # only informative utterances
 informative_only_count <- sum(trial_data_h1$response_included_informative == TRUE & 
-                                trial_data_h1$response_included_uninformative == FALSE)
+                                trial_data_h1$response_included_cg == FALSE)
 # only cg utterances
 cg_only_count <- sum(trial_data_h1$response_included_informative == FALSE & 
-                       trial_data_h1$response_included_uninformative == TRUE)
+                       trial_data_h1$response_included_cg == TRUE)
 # unselective responses
 unselective_count <- sum(trial_data_h1$response_included_informative == TRUE &
-                           trial_data_h1$response_included_uninformative == TRUE)
+                           trial_data_h1$response_included_cg == TRUE)
 
 # make a data frame containing the stuff we want to turn into a graph
 inf_vs_cg_data <- data.frame(
@@ -640,79 +456,9 @@ ggplot(plot_data_h1, aes(x = val, y = estimate)) +
   labs(x = "", y = "Probability of being informative (among selective kids)") +
   theme(text = element_text(size = 14))
 ```
-### H2a
-
-```{r h2a model plot}
-h2a_ci <- confint(h2a_kids_model, method = "Wald") 
-h2a_intercept_ci <- h2a_ci["(Intercept)", ]
-
-plot_data_h2a <- tibble(val = "Selective kids",
-                        estimate = log.odds.to.prob(fixef(h2a_kids_model)["(Intercept)"]),
-                        lower.ci = log.odds.to.prob(h2a_intercept_ci[1]),
-                        upper.ci = log.odds.to.prob(h2a_intercept_ci[2]))
-
-ggplot(plot_data_h2a, aes(x = val, y = estimate)) +
-  geom_errorbar(aes(ymin = lower.ci,
-                    ymax = upper.ci), width = .05) +
-  geom_point(size = 5, shape = 23, fill = "white") +
-  ylim(0,1) +
-  theme_bw() +
-  labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
-  theme(text = element_text(size = 14))
-```
-
-### H2b
-```{r h2b model plot}
-h2b.kids.plot <- emmeans(h2b_kids_model, specs = "stimulus_condition", type = "response") %>%
-  as_tibble()
-
-ggplot(h2b.kids.plot %>% filter(stimulus_condition == "agent_ambig"), aes(x = stimulus_condition, y = prob)) +
-  geom_errorbar(aes(ymin = asymp.LCL,
-                    ymax = asymp.UCL), width = .05) +
-  geom_point(size = 5, shape = 23, fill = "white") +
-  ylim(0,1) +
-  theme_bw() +
-  labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
-  theme(text = element_text(size = 14))
-```
-### Older H2b
-```{r}
-h2b.kids.plot <- emmeans(h2b_kids_model, specs = "stimulus_condition", type = "response") %>%
-  as_tibble()
-
-ggplot(h2b.kids.plot %>% filter(stimulus_condition == "patient_ambig"), aes(x = stimulus_condition, y = prob)) +
-  geom_errorbar(aes(ymin = asymp.LCL,
-                    ymax = asymp.UCL), width = .05) +
-  geom_point(size = 5, shape = 23, fill = "white") +
-  ylim(0,1) +
-  theme_bw() +
-  labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
-  theme(text = element_text(size = 14))
-```
-
-
-### H2c
-```{r}
-h2c_ci <- confint(h2c_kids_model, method = "Wald") 
-h2c_intercept_ci <- h2c_ci["(Intercept)", ]
-
-plot_data_h2c <- tibble(val = "Selective kids",
-                        estimate = log.odds.to.prob(fixef(h2c_kids_model)["(Intercept)"]),
-                        lower.ci = log.odds.to.prob(h2c_intercept_ci[1]),
-                        upper.ci = log.odds.to.prob(h2c_intercept_ci[2]))
-
-ggplot(plot_data_h2c, aes(x = val, y = estimate)) +
-  geom_errorbar(aes(ymin = lower.ci,
-                    ymax = upper.ci), width = .05) +
-  geom_point(size = 5, shape = 23, fill = "white") +
-  ylim(0,1) +
-  theme_bw() +
-  labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
-  theme(text = element_text(size = 14))
-```
-
 
 # Troubleshooting!
+
 In this section I have included some code to help diagnose the most common issues I ran into.
 
 Number of session ids not matching between trial_data_all and session_data_to_analyze? Use this code to investigate!
@@ -754,24 +500,22 @@ non_unique_sessionids <- session_data_toanalyze %>%
 
 Some numbers not making sense in the 2x2 table? Let's extract the session ids of the trouble makers!
 
-```{r}
-# let's check why there are three false informative false uninformative (if this existed)
-trial_data_toanalyze[(trial_data_toanalyze$response_attempted_target == 'TRUE') & (trial_data_toanalyze$stimulus_condition %in% c("commonground","agent_ambig","patient_ambig")) & (trial_data_toanalyze$response_included_informative == FALSE) & (trial_data_toanalyze$response_included_uninformative == FALSE),]
+```{r checking for trials that mess with the mc nemars}
+# let's check why there are false informative false uninformative (if this existed)
+trial_data_toanalyze[(trial_data_toanalyze$response_attempted_target == 'TRUE') &
+                       (trial_data_toanalyze$response_included_informative == FALSE) &
+                       (trial_data_toanalyze$response_included_cg == FALSE),]
 ```
 
 Need to look for kids who said something about a specific scene? Here!
 
-```{r}
-# gather all the test trials where the kids says something about the stimuli
-test_trials_to_analyze <- trial_data_toanalyze %>% 
-  filter(trial_type == "test_trial")
-
+```{r searching for kids based on specific scene}
 # SEARCHING FOR SPECIFIC UTTERANCES
-specific_utterances <- test_trials_to_analyze %>% 
+specific_utterances <- trial_data_toanalyze %>% 
   filter(
-    stimulus_target_utterance == "The cat ate the banana",
-    stimulus_condition == "patient_ambig",
-    #response_included_uninformative == TRUE
-    response_attempted_target == FALSE
+    stimulus_target_utterance == '[INSERT UTTERANCE HERE]', # this determines which scene we're looking for
+    response_included_cg == '[VALUE]',
+    response_included_informative == '[VALUE]',
+    response_attempted_target == '[VALUE]'
     )
 ```
