@@ -3,8 +3,8 @@ title: "analysis-informative-toddlers-v2"
 author: "Melissa Kline Struhl & Lia Washington"
 date: "10/16/2024"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -135,9 +135,9 @@ Let's take a gander at the demographics of these participants!
 
 ```{r descriptive stats}
 # done on raw coding file data
-raw_mean_age = mean_age = mean(trial_data_all$age_in_days)/30
-raw_gender_counts = table(trial_data_all$gender)
-raw_percent_female <- (raw_gender_counts["f"] / sum(raw_gender_counts)) * 100
+# raw_mean_age = mean_age = mean(trial_data_all$age_in_days)/30
+# raw_gender_counts = table(trial_data_all$gender)
+# raw_percent_female <- (raw_gender_counts["f"] / sum(raw_gender_counts)) * 100
 ```
 
 Of these `r length(unique(session_data_toreport$session_id))` sessions, `r length(unique(trial_data_all$session_id))` have had their responses coded so far.
@@ -310,7 +310,7 @@ log.odds.to.prob <- function(x){
 ```
 
 
-For the LMM, we need to create a new variable: whether the value of `response_included_informative` matches or mismatches `response_included_cg`. Then, we will model whether a mismatch existing is a function of the response having mentioned the informative entity; IE whether mentioning *just* the informative entity is in fact more likely than mentioning *just* common-ground information.  Let's look at H1 first.
+For the GLMM, we need to create a new variable: whether the value of `response_included_informative` matches or mismatches `response_included_cg`. Then, we will model whether a mismatch existing is a function of the response having mentioned the informative entity; IE whether mentioning *just* the informative entity is in fact more likely than mentioning *just* common-ground information.  Let's look at H1 first.
 
 ```{r h1-lmm}
 trial_data_h1 <- trial_data_h1 %>%
@@ -325,8 +325,11 @@ h1_kids <- trial_data_h1 %>%
   filter(selective == 1)
 
 h1_kids$inform <- as.factor(h1_kids$inform) # we have to do this so we can use the binomial family
-h1_kids_model <- glmer(inform ~ 1 + (1|child_id), family = "binomial", data = h1_kids)
-summary(h1_kids_model)
+h1_kids$cg <- as.factor(h1_kids$cg)
+h1_kids_inform_model <- glmer(inform ~ 1 + (1|child_id), family = "binomial", data = h1_kids)
+h1_kids_cg_model <- glmer(cg ~ 1 + (1|child_id), family = "binomial", data = h1_kids)
+
+summary(h1_kids_cg_model)
 ```
 
 # Visuals!
@@ -519,3 +522,62 @@ specific_utterances <- trial_data_toanalyze %>%
     response_attempted_target == '[VALUE]'
     )
 ```
+
+
+# Demographics
+
+```{r histogram & density graph tings}
+# convert age to months
+all_kids_in_months = session_data_all %>% 
+  mutate(age_in_months = round((age_in_days / 365) * 12)) %>% 
+   select(session_id, age_in_months, gender)
+
+session_kids_in_months = session_data_toanalyze %>%
+  mutate(age_in_months = round((age_in_days / 365) * 12)) %>% 
+  select(session_id, age_in_months, gender)
+
+trial_kids_in_months = trial_data_h1 %>% 
+  mutate(age_in_months = round((age_in_days / 365) * 12)) %>% 
+  select(session_id, age_in_months, gender)
+
+trial_kids_in_months = distinct(trial_kids_in_months, session_id, .keep_all = TRUE)
+
+
+
+# histogram of all participants in the batch
+ggplot(all_kids_in_months, aes(x = age_in_months)) +
+  geom_histogram(binwidth = 1, color = "black", fill = "white") +
+  labs(title = "All Participants by Months", y = "Number of Children", x = "Age in Months") +
+  geom_vline(aes(xintercept = mean(age_in_months)),
+            color="pink", linetype = "dotted", linewidth = 2)
+# a density plot bc I can
+ggplot(all_kids_in_months, aes(x = age_in_months)) +
+  geom_density(fill = "pink", color = "#e9ecef", alpha = 0.8) + 
+  labs(title = "All Participants by Months", y = "Number of Children", x = "Age in Months")
+
+
+# histogram of all the participants post-session level exclusion
+ggplot(session_kids_in_months, aes(x = age_in_months)) +
+  geom_histogram(binwidth = 1, color = "black", fill = "white") +
+  labs(title = "All Participants by Months (Post-Session Level Exclusions)", y = "Number of Children", x = "Age in Months") +
+  geom_vline(aes(xintercept = mean(age_in_months)),
+            color="skyblue", linetype = "dotted", linewidth = 2)
+# and a density plot
+ggplot(session_kids_in_months, aes(x = age_in_months)) +
+  geom_density(fill = "skyblue", color = "#e9ecef", alpha = 0.8) + 
+  labs(title = "All Participants by Months (Post-Session Level Exclusions)", y = "Number of Children", x = "Age in Months")
+
+# histogram of all participants that actually make it into the model
+ggplot(trial_kids_in_months, aes(x = age_in_months)) +
+  geom_histogram(binwidth = 1, color = "black", fill = "white") +
+  labs(title = "All Participants by Months (That Made it into the Model)", y = "Number of Children", x = "Age in Months") +
+  geom_vline(aes(xintercept = mean(age_in_months)),
+            color="violet", linetype = "dotted", linewidth = 2)
+# and a density plot
+ggplot(trial_kids_in_months, aes(x = age_in_months)) +
+  geom_density(fill = "violet", color = "#e9ecef", alpha = 0.8) + 
+  labs(title = "All Participants by Months (That Made it into the Model)", y = "Number of Children", x = "Age in Months")
+
+
+```
+
