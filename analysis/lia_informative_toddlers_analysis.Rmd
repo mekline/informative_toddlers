@@ -1,0 +1,885 @@
+---More actions
+title: "analysis-informative-toddlers"
+author: "Melissa Kline Struhl"
+date: "1/16/2024"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(kableExtra)
+library(lme4)
+library(lmerTest)
+library(ggplot2)
+library(emmeans)
+```
+
+## Intro
+
+Welcome to the analysis script for informative toddlers (version `v1jan2024`)! This script is designed to be runnable on any computer so long as (1) you have successfully downloaded the corresponding GH repository and (2) you have successfully added the data files you are trying to analyze to the `data/` subfolder of your local repo following instructions in the README over there. 
+
+Note that the resulting HTML file will *not* get committed when you commit changes, while updates to this Rmd file *will* be committed. We set up the GH repo on purpose this way to minimize version control issues. 
+
+## Set up and read in data files
+
+In the next chunk, update the exact set of data we want to analyze.
+
+```{r choose-version-and-folder}
+# study version
+study_version = 'v1_jan2024'
+# data subfolder
+data_subfolder = 'v1_jan2024_complete'
+```
+
+Attempt to load the resulting data files and report on what was found. Before doing this for the first time, make sure that your R session working directory is set to the informative-toddlers directory on your computer! In the menu choose Session>Set Working Directory>To Source File Location. If you knit again and get errors/are still in your default user directory, restart R, reset your working directory, and try knitting again. 
+
+```{r find-data-files, echo = FALSE}
+data_location = paste0(here::here(),'/data/',study_version,'/',data_subfolder)
+print(list.files(data_location, recursive=TRUE))
+```
+
+We tried to list all files in this directory: ``r data_location``. If it worked, you should see the actual contents of that data subfolder above. Now let's load the files in!
+
+```{r loading-in-files}
+session_data_all = read_csv(paste0(data_location, '/', study_version,'_step3_all-sessions.csv'), show_col_types = FALSE)
+raw_df <- read_csv(paste0(data_location, '/', study_version,'_step3_all-orders_CODED.csv'), show_col_types = FALSE)
+
+# do some variable renaming for convenience/clarity - this only applies to v1_jan2024
+trial_data_all <- raw_df %>%
+  rename(session_id = response_uuid,
+         child_id = child_hashed_id,
+         age_in_days = child__age_rounded,
+         gender = child__gender,
+         visual_shown = visualShown, 
+         audio_played = audioPlayed, 
+         stimulus_target_utterance = stimulus_targetutterance)
+
+```
+
+Did it work? There are `r nrow(session_data_all)` rows in the session data, and `r nrow(trial_data_all)` rows in the trial data. If either of those numbers is 0 or undefined, go back and check before proceeding. These numbers should not match! 
+
+#### Preliminary dataset summary
+
+How many sessions do we expect to find in the session-level data? 
+
+* There are `r length(unique(session_data_all$session_id))` unique responses in the session-level data.
+* These come from `r length(unique(session_data_all$child_id))` unique children from `r length(unique(session_data_all$family_id))` unique families. 
+
+If these numbers get smaller below, we should always know why! (i.e. because we have dropped them from the analyzed dataset on purpose.)
+
+How many sessions do we actually see in the trial-level data?
+
+* There are `r length(unique(trial_data_all$session_id))` unique responses are in the trial-level data.
+* These come from `r length(unique(trial_data_all$child_id))` unique children.
+
+It is *okay* and *expected* for the trial-level data to have fewer responses than the session-level data at this point, because we haven't yet dealt with exclusion or not-yet-coded sessions. 
+
+## Exclude sessions from analysis
+
+It's time to intentionally exclude observations from the dataset, based exactly on the information contained in your data files after initial data processing & coding. 
+
+As of Jan 17, this list of exclusions is considered the preregistered set of reasons (this will be copied into the prereg written document as well) to exclude data from our analysis *at the session level* (versus at the trial level). 
+
+PROCESS NOTE: It should be possible to make this determination before coding the data. Reviewing for session exclusion might require *viewing* the trial data, and determining e.g. the child isn't present for the study, but if the *results* of coding the data reveal a reason for excluding some/all trials, those would be trial-level exclusions! We are not doing those right now!
+
+PROCESS NOTE 2: 
+
+(Normal Lookit Reasons)
+
+* Ineligible for study filter criteria ('drive-by' family who clicked thru despite seeing messages they weren't elegible)
+* Data withdrawn by parent.
+* Birthdate reported at exit survey doesn't match birthdate reported in family's account; AND this couldn't be resolved by correspondence with the family. (This should *not* be modified in the data processing that happened prior to now, but instead updated in this next code chunk.)
+* Atypical development or some other criteria reported by the family that isn't captured in the age criteria statement. 
+
+(Manually applied/decided reasons)
+
+* "Behavioral"/human-observed reasons that the session does not represent good-faith and successful participation by the family appearing in the video. This judgement should be made sparingly and with good documentation. The full procedure for deciding on these behavioral criteria is in the Coding Manual document. 
+
+Every session that is excluded should have a reason listed below justified by least one of the preregistered criteria. If any lines are blank/NA, go back and find out why this participant is being session-level excluded from analysis!
+
+```{r human-exclusions}
+session_data_manually_excluded <- session_data_all %>%
+  filter(to_code == 'n')
+
+print(session_data_manually_excluded$exclusion_reason)
+
+# drop the observations we aren't going to care about further! Take this part out if you want to report more details on why sessions get excluded
+session_data_toreport <- session_data_all %>%
+  filter(is.na(to_code)) # we left the to_code col blank if it was good to code 
+
+```
+
+#### Post-exclusion dataset summary
+
+After session-level exclusions, how many sessions do we NOW expect to find in the session-level data? 
+
+* There are `r length(unique(session_data_toreport$session_id))` unique responses remain in the session data that we will report on.
+* These come from `r length(unique(session_data_toreport$child_id))` unique children from `r length(unique(session_data_toreport$family_id))` unique families. 
+* `r length(unique(session_data_all$session_id)) - length(unique(session_data_toreport$session_id))` sessions were excluded for the reasons shown above, out of `r length(unique(session_data_all$session_id))` original sessions. These sessions will not be coded or included below. 
+
+Does this match the number of sessions in the trial-level data? 
+
+* `r length(unique(trial_data_all$session_id))` unique responses are in the trial-level data.
+* These come from `r length(unique(trial_data_all$child_id))` unique children.
+
+...Possibly not, if we haven't finished coding all the trial-level data yet. That's okay! Next, report on our progress.
+
+TODO: Add report on family choices about data sharing - publicity level and Databrary. 
+
+(NOTE for Lia - this next part is probably what Laura will want to see/be updated on regularly.)
+
+## Informative Toddlers - Descriptives and coding progress
+### `r data_subfolder` data from the `r study_version` version
+
+After session-level exclusions for ineligibility (kid too old or too young for the sample; kid playing in background and not attending at any point during study session; etc.), there are **`r length(unique(session_data_toreport$session_id))` unique responses from `r length(unique(session_data_toreport$child_id))` unique children.** This includes children who may or may not have spoken on key trials, but who otherwise meet all criteria for inclusion at the session level. 
+
+Let's take a gander at the demographics of these participants!
+
+```{r descriptive stats}
+# done on raw coding file data
+raw_mean_age = mean_age = mean(trial_data_all$age_in_days)/30
+raw_gender_counts = table(trial_data_all$gender)
+raw_percent_female <- (raw_gender_counts["f"] / sum(raw_gender_counts)) * 100
+```
+
+Of these `r length(unique(session_data_toreport$session_id))` sessions, `r length(unique(trial_data_all$session_id))` have had their responses coded so far.
+
+(Note on the dummy dataset - I've simulated a dataset for the case where we are planning to code 5 responses, but haven't gotten around to coding OR preparing the coder sheets for 3 of those responses.)
+
+## Prepare trial-level data for exclusions and statistics
+
+Make sure the same sessions exist in both session-level and trial-level data. If this is not the case, the data merge will go poorly! If there is some issue, see the session trouble shooting chunk at the bottom!
+
+```{r check-sessions}
+session_data_toanalyze <- session_data_toreport %>%
+  filter(is.na(is_coded))
+
+# note: these are asymmetrical set differences! You need both lines to find mismatches in both directions
+print(setdiff(trial_data_all$session_id, session_data_toanalyze$session_id)) # session ids in trial_data_all but not in session_data_to_analyze
+print(setdiff(session_data_toanalyze$session_id, trial_data_all$session_id)) # session ids in session_data_to_analyze but not trial_data_all
+```
+
+If the merge went as expected, the numbers below should match.
+
+```{r merge-data}
+# doing a merge to add family_id into the mix
+trial_data_toanalyze <- left_join(trial_data_all, session_data_toanalyze %>% select(session_id, family_id), by = "session_id")
+  
+# did we do an unreasonable inflation? these 2 numbers should be the same
+print(nrow(trial_data_all))
+print(nrow(trial_data_toanalyze))
+
+print(length(unique(trial_data_all$session_id)))
+print(length(unique(session_data_toanalyze$session_id)))
+```
+
+Next, trim down the version of the dataset we're working with to relevant columns, to make the data easier to examine (remember, this is just what's happening inside R, the data files are unaffected unless you `write_csv` to a specific file!)
+
+```{r get-useful-columns}
+trial_data_toanalyze <- trial_data_toanalyze %>%
+  select(session_id, family_id, child_id, age_in_days, gender, coder, visual_shown,
+         session_order, trial_num, trial_type, testtrial_type, stimulus_set, 
+         stimulus_subject, stimulus_subject, stimulus_verb, stimulus_object, stimulus_distractor, 
+         stimulus_target_utterance, stimulus_condition, informative_entities, uninformative_entities,
+         response_exact_utterance, parent_transcription, response_attempted_target, 
+         response_included_subject, response_included_verb, response_included_object, response_included_distractor,
+         response_included_informative, response_included_uninformative,
+         include_trial, exclusion_reason, trial_notes)
+
+# replace all NAs in the "included..." columns with just "n"
+trial_data_toanalyze <- trial_data_toanalyze %>%
+  mutate_at(vars(contains("included")), ~replace_na(na_if(., NA), "n"))
+
+# use mutate_all() and str_replace_all() to rename all occurrences
+string_to_replace <- "\\[NA\\]"
+trial_data_toanalyze <- trial_data_toanalyze %>%
+  mutate_all(~ifelse(str_detect(., string_to_replace), NA, .))
+
+
+
+# do some data cleaning to recode e.g. yes/no into values that R can coerce later. But leave weird business so we catch oddly coded things!, don't force to T/F eyet
+
+yesno_tf = function(mystring){
+  newstring = case_when(
+    mystring == "yes" ~ "TRUE", 
+    mystring == "y" ~ "TRUE", 
+    mystring == "no" ~ "FALSE", 
+    mystring == "n" ~ "FALSE", 
+    TRUE ~ as.character(mystring))
+  
+  return(newstring)
+} 
+
+trial_data_toanalyze <- trial_data_toanalyze %>%
+  mutate(response_attempted_target = yesno_tf(response_attempted_target),
+         response_included_subject = yesno_tf(response_included_subject), 
+         response_included_verb = yesno_tf(response_included_verb),  
+         response_included_object = yesno_tf(response_included_object), 
+         response_included_informative = yesno_tf(response_included_informative), 
+         response_included_uninformative = yesno_tf(response_included_uninformative), 
+         include_trial = yesno_tf(include_trial),
+         response_included_distractor = yesno_tf(response_included_distractor))
+```
+
+Column definitions can all be found in the Data Coding Manual!
+
+## Trial-level exclusions and descriptive statistics
+
+For fun, here is a spreadsheet of all the utterances produced (warmup and critical), plus the way we would code them according to the coding manual!
+
+```{r show-utterances}
+utterance_summary_table = trial_data_toanalyze %>%
+  select(stimulus_target_utterance, stimulus_condition, informative_entities, uninformative_entities, response_exact_utterance, response_attempted_target, include_trial)
+
+kable(head(utterance_summary_table, col.names = c("target", "condition", "informative", "uninformative", "utterance", "attempted_target", "include")))
+```
+
+
+```{r show-utterance-coding}
+utterance_coding_table = trial_data_toanalyze %>%
+  filter(response_attempted_target == "TRUE") %>%
+  select(stimulus_target_utterance, stimulus_condition, response_exact_utterance, response_included_subject, response_included_object, response_included_informative, response_included_uninformative, trial_notes, include_trial)
+
+kable(head(utterance_coding_table, col.names = c("target", "condition", "utterance", "subject", "object", "informative", "uninformative", "notes", "include")))
+```
+
+Trial-level exclusions: Trials are excluded from analysis only if there is a reason that those trials should not be considered a successful measurement. That is, the CONTENT of what the child says (or doesn't say) does not determine this, only adult speech (e.g. that gave away the right answer) or child behavior (inattentive for this trial).  These decisions are made during coding and the full list of preregistered reasons can be found in the coding manual. There should be a reason listed below for every trial that is excluded!
+
+```{r drop-excluded-trials}
+trial_data_manually_excluded <- trial_data_toanalyze %>%
+  filter(include_trial == 'FALSE')
+
+print(trial_data_manually_excluded$exclusion_reason)
+
+trial_data_toanalyze <- trial_data_toanalyze %>%
+  filter(include_trial == "TRUE")
+```
+
+* Out of `r nrow(raw_df)` trials, `r nrow(trial_data_toanalyze)` trials will be analyzed
+
+Here is a summary of how much children spoke during the study:
+
+```{r summarize-utterances}
+summarize_utterances <- trial_data_toanalyze %>%
+  group_by(session_id) %>%
+  mutate(response_child_spoke = !is.na(response_exact_utterance)) %>%
+  summarize(n_trials = n(), 
+            n_spoke = sum(response_child_spoke == "TRUE"),
+            n_attempted_target = sum(response_attempted_target == "TRUE"))
+
+kable(head(summarize_utterances, col.names = c("session", "included trials", "spoke", "attempted description")))
+
+```
+
+
+NOTE: Something I did *not* do in any of the above was look at either parent transcriptions, OR sanity checking programmatically on whether the listed utterances in fact have the expected strings for e.g. `response_included_subject`. This would be a good error-checking section to add. 
+
+## Inductive statistics (hypothesis tests!) 
+
+Here are the hypotheses we are preregistering:
+
+#### Hypothesis 1
+
+Given that the child produces an utterance relating to the trial vignette, they will be more likely to mention some informative element that is NOT derivable from the context scene (BALL, BOUNCE in the common-ground scene; DOG, EAT in the appropriate Ambiguous Patient condition) than to mention an uninformative element available in the context scene (DUCK, LAKE in the common-ground scene; APPLE, CAT in the appropriate Ambiguous Patient condition.) 
+
+For Hypothesis 1, we focus on mention of the entity or verb using *any descriptor* (e.g. ball, basketball, toy, red thing; fruit, apple, food, tasting, swallowing) intended to convey reference to that entity/event. 
+
+Hypothesis 1 will be tested across all trials in the study (two Common-Ground scenes and four Agent-Patient scenes, two in the Agent-ambiguous condition and two in the Patient-ambiguous condition.)
+
+#### Implement H1
+
+```{r columns-and-obs-h1}
+# choose the columns and observations needed for these statistical tests
+trial_data_h1 <- trial_data_toanalyze %>%
+  filter(response_attempted_target == "TRUE") %>% #Only include trials where child tried to describe some part of the trial vignette
+  filter(stimulus_condition %in% c("commonground","agent_ambig","patient_ambig")) %>% # Include commonground, agent-ambiguous, and patient-ambiguous trials, but not warmups
+  select(session_id, child_id, stimulus_condition, trial_num, stimulus_set, uninformative_entities, response_exact_utterance, response_included_informative, response_included_uninformative, age_in_days, gender) %>% 
+  mutate(trial_id = paste0(session_id, trial_num))
+```
+
+What we actually want to do is compare the `include_informative` rate to the `include_uninformative` rate - this is a test of difference between two dependent proportions (whether a child who can only speak a few words at a time says a CG word in the utterance is NOT independent of whether they say an INF word!), where the discordant observations are the ones that are informative about the question we're interested in. Given this table:
+
+```{r describe-h1}
+h1_xtabs_table <- table(select(trial_data_h1, response_included_informative, response_included_uninformative))
+print(h1_xtabs_table)
+```
+
+We want to test the hypothesis that the number of cases where CG=FALSE and Informative=TRUE is greater than the number of cases where CG=TRUE and Informative=FALSE. 
+
+The 'classical' approach MKS knows for this is McNemar's Exact Test, and we can construct a closely related LMM test (per this question: https://stats.stackexchange.com/questions/560142/replacing-mcnemar-test-with-regression). We will report both outcomes for robustness; in case they disagree, we will prioritize the results of the LMM, which are able to account for nesting effects of child, session, stimulus, etc. 
+
+```{r h1-mcnemar, echo=TRUE}
+mcnemar.test(h1_xtabs_table)
+```
+For the first version of this study our preregistered analyses is different from what we are about to do for this second version. If you would like to see the original analysis plan, look at the "informative_toddlers_analysis.rmd" file on GitHub. The analyses included here were used in tandem with the original analysis plan for the final CogSci submission. 
+
+**We're going to use this method in order to compare of the log-odds of being informative to 0, where log-odds of 0 is the same as probability = .5. A significant result here tells you that the probability of being informative is not .5. _This pertains to the intercept_**
+
+_Log odds explained:_
+* Probability is essentially just "odds" expressed in slightly different ways with probability being a number between 0 and 1 and odds being any number above 0. 
+* Linear regression functions on the assumption that your metric response can range from negative infinity to positive infinity. 
+* We use log odds as it ranges from negative infinity to positive infinity, with numbers approaching 0 having a more negative log (ex: ln(0.00000000001) = -25)
+* Log odds is essentially a transformation
+* A negative log-odds result just means that there is a _less than 50% chance_ of "the thing" happening
+* (in the case of our study) the intercept represents baseline performance (AKA when our independent variables are not in play)
+* the slope/value of an IV in the summary indicates the amount change in DV as a result/function of the IV
+* the slope can't be easily translated as it is a **rate** (as opposed to the intercept which is a singular stationary number) which is why we need the log odds ratio
+
+```{r A secret mousekatool for later}
+log.odds.to.prob <- function(x){
+  exp(x) / (1 + exp(x))
+}
+```
+
+
+For the LMM, we need to create a new variable: whether the value of `response_included_informative` matches or mismatches `response_included_cg`. Then, we will model whether a mismatch existing is a function of the response having mentioned the informative entity; IE whether mentioning *just* the informative entity is in fact more likely than mentioning *just* common-ground information.  Let's look at H1 first.
+
+```{r h1-lmm}
+trial_data_h1 <- trial_data_h1 %>%
+  mutate(selective = case_when(response_included_informative == response_included_uninformative ~ 0,
+                                 response_included_informative != response_included_uninformative ~ 1))
+
+h1_kids <- trial_data_h1 %>%
+  select(child_id,
+         inform = response_included_informative, 
+         uninform = response_included_uninformative,
+         selective) %>%
+  filter(selective == 1)
+
+h1_kids$inform <- as.factor(h1_kids$inform) # we have to do this so we can use the binomial family - no idea why we didn't need to do this previously but whatever ig? ask brain
+h1_kids_model <- glmer(inform ~ 1 + (1|child_id), family = "binomial", data = h1_kids)
+summary(h1_kids_model)
+```
+
+#### Hypothesis 2
+
+Hypothesis 2 focuses on the production of the specific nouns in the target utterances, and is tested only in the Agent-Patient scenes.
+
+Prediction: Participants will be more likely to mention the ambiguous referent (Agent-ambiguous: DOG; Patient-ambiguous: APPLE) than the unambiguous referent (Agent-ambiguous: APPLE; Patient-ambiguous: DOG)
+
+In parallel to H1, we will first focus on inclusion of ambiguous (informative) versus unambiguous (commonground) referents. However, we will also include follow-up tests for each different class of words, since for a variety of reason production of subjects (agents) might vary from production of objects (patients) 
+
+- Mention of the agent referent will be more likely in the Agent-ambiguous condition than the Patient-ambiguous condition
+- Mention of the patient referent will be more likely in the Patient-ambiguous condition than the Agent-ambiguous condition
+
+#### Implement H2
+
+Select the columns and rows for testing Hypothesis 2: 
+
+```{r columns-and-obs-h2}
+#Choose the columns and observations needed for these statistical tests
+
+trial_data_h2 <- trial_data_toanalyze %>%
+  filter(response_attempted_target == "TRUE") %>% # Only include trials where child tried to describe some part of the trial vignette
+  filter(stimulus_condition %in% c("agent_ambig","patient_ambig")) %>% # Include agent-ambiguous, and patient-ambiguous trials only for 2b
+  select(session_id, child_id, trial_num, stimulus_condition, stimulus_set, uninformative_entities, response_exact_utterance, response_included_subject, response_included_object, age_in_days) %>% 
+  mutate(trial_id = paste0(session_id, trial_num))
+
+```
+
+In parallel to H1, we add new columns that re-code (agent, patient) into (informative, uninformative) depending on the condition present, and then create the table for the McNemar test. (NOTE: This differs from H1 by focusing on just the nouns of the target utterance, not the verb or distractor entity.)
+
+```{r recode-h2}
+trial_data_h2 <- trial_data_h2 %>%
+  mutate(response_included_info_noun = case_when(stimulus_condition == "agent_ambig" ~ response_included_subject,
+                                                  stimulus_condition == "patient_ambig" ~ response_included_object),
+         response_included_uninformative_noun = case_when(stimulus_condition == "agent_ambig" ~ response_included_object,
+                                                  stimulus_condition == "patient_ambig" ~ response_included_subject))
+```
+
+Here is the 2x2 table!
+
+```{r describe-h2}
+h2_xtabs_table <- table(select(trial_data_h2, response_included_info_noun, response_included_uninformative_noun))
+print(h2_xtabs_table)
+```
+
+We want to test the hypothesis that the number of cases where CG=FALSE and Informative=TRUE is greater than the number of cases where CG=TRUE and Informative=FALSE. 
+
+McNemar's Exact Test:
+
+```{r h2-mcnemar, echo=TRUE}
+mcnemar.test(h2_xtabs_table)
+```
+
+The LMM for this test is constructed in the same way as H1.
+
+```{r h2-lmm}
+trial_data_h2 <- trial_data_h2 %>%
+  mutate(selective = case_when(response_included_info_noun == response_included_uninformative_noun ~ 0,
+                                 response_included_info_noun != response_included_uninformative_noun ~ 1))
+
+h2a_kids <- trial_data_h2 %>%
+  select(child_id,
+         inform = response_included_info_noun,
+         uninform = response_included_uninformative_noun,
+         selective) %>%
+  filter(selective == 1)
+
+h2a_kids$inform <- as.factor(h2a_kids$inform)
+h2a_kids_model <- glmer(inform ~ 1 + (1|child_id), family = "binomial", data = h2a_kids)
+summary(h2a_kids_model)
+```
+
+And here is the specification for the follow-up tests, which we use LMMs for. 
+
+- Mention of the agent referent will be more likely in the Agent-ambiguous condition than the Patient-ambiguous condition
+
+```{r h2-agent}
+h2b_kids <- trial_data_h2 %>%
+  select(child_id,
+         inform = response_included_info_noun,
+         uninform = response_included_uninformative_noun,
+         selective,
+         response_included_subject,
+         stimulus_condition) %>%
+  filter(selective == 1)
+
+h2b_kids$response_included_subject <- as.factor(h2b_kids$response_included_subject)
+h2b_kids_model <- glmer(response_included_subject ~ 1 + stimulus_condition + (1|child_id), family = "binomial", data = h2b_kids)
+summary(h2b_kids_model)
+```
+
+- Mention of the patient referent will be more likely in the Patient-ambiguous condition than the Agent-ambiguous condition
+
+```{r h2-patient}
+h2c_kids <- trial_data_h2 %>% 
+  select(child_id,
+         inform = response_included_info_noun,
+         uninform = response_included_uninformative_noun,
+         selective,
+         response_included_object,
+         stimulus_condition) %>%
+  filter(selective == 1)
+
+h2c_kids$response_included_object <- as.factor(h2c_kids$response_included_object)
+h2c_kids_model <- glmer(response_included_object ~ 1 + stimulus_condition + (1|child_id), family = "binomial", data = h2c_kids)
+summary(h2c_kids_model)
+```
+
+# Visuals!
+
+### It is now time to visualize all of our data! We we be plotting count data as well as the models shown above.
+
+## Demographic Graphs
+
+```{r histogram & density graph tings}
+# convert age to months
+all_kids_in_months = session_data_all %>% 
+  mutate(age_in_months = round((age_in_days / 365) * 12)) %>% 
+   select(session_id, age_in_months, gender)
+
+session_kids_in_months = session_data_toanalyze %>%
+  mutate(age_in_months = round((age_in_days / 365) * 12)) %>% 
+  select(session_id, age_in_months, gender)
+
+trial_kids_in_months = trial_data_h1 %>% 
+  mutate(age_in_months = round((age_in_days / 365) * 12)) %>% 
+  select(session_id, age_in_months, gender)
+
+trial_kids_in_months = distinct(trial_kids_in_months, session_id, .keep_all = TRUE)
+
+
+
+# histogram of all participants in the batch
+ggplot(all_kids_in_months, aes(x = age_in_months)) +
+  geom_histogram(binwidth = 1, color = "black", fill = "white") +
+  labs(title = "V1 All Participants by Months", y = "Number of Children", x = "Age in Months") +
+  geom_vline(aes(xintercept = mean(age_in_months)),
+            color="red", linetype = "dotted", linewidth = 2)
+# a density plot bc I can
+ggplot(all_kids_in_months, aes(x = age_in_months)) +
+  geom_density(fill = "red", color = "#e9ecef", alpha = 0.8) + 
+  labs(title = "V1 All Participants by Months", y = "Number of Children", x = "Age in Months")
+
+
+# histogram of all the participants post-session level exclusion
+ggplot(session_kids_in_months, aes(x = age_in_months)) +
+  geom_histogram(binwidth = 1, color = "black", fill = "white") +
+  labs(title = "V1 All Participants by Months (Post-Session Level Exclusions)", y = "Number of Children", x = "Age in Months") +
+  geom_vline(aes(xintercept = mean(age_in_months)),
+            color="blue", linetype = "dotted", linewidth = 2)
+# and a density plot
+ggplot(session_kids_in_months, aes(x = age_in_months)) +
+  geom_density(fill = "blue", color = "#e9ecef", alpha = 0.8) + 
+  labs(title = "V1 All Participants by Months (Post-Session Level Exclusions)", y = "Number of Children", x = "Age in Months")
+
+# histogram of all participants that actually make it into the model
+ggplot(trial_kids_in_months, aes(x = age_in_months)) +
+  geom_histogram(binwidth = 1, color = "black", fill = "white") +
+  labs(title = "V1 All Participants by Months (That Made it into the Model)", y = "Number of Children", x = "Age in Months") +
+  geom_vline(aes(xintercept = mean(age_in_months)),
+            color="purple", linetype = "dotted", linewidth = 2)
+# and a density plot
+ggplot(trial_kids_in_months, aes(x = age_in_months)) +
+  geom_density(fill = "purple", color = "#e9ecef", alpha = 0.8) + 
+  labs(title = "V1 All Participants by Months (That Made it into the Model)", y = "Number of Children", x = "Age in Months")
+
+
+```
+
+## Count Data Graphs
+
+### Graph for H1
+
+```{r}
+# all of the distinct kids that apply to this hypothesis
+# we do not use this for analysis/charts - we're using this to determine N, mean age, and age range!!!
+ h1_kids<- trial_data_h1 %>% 
+  filter(!(response_included_informative == TRUE & 
+         response_included_uninformative == TRUE)) %>% 
+  distinct(child_id, .keep_all = TRUE)
+
+
+
+
+# only informative utterances
+informative_only_count <- sum(trial_data_h1$response_included_informative == TRUE & 
+                                trial_data_h1$response_included_uninformative == FALSE)
+# only cg utterances
+cg_only_count <- sum(trial_data_h1$response_included_informative == FALSE & 
+                       trial_data_h1$response_included_uninformative == TRUE)
+
+# make a graph
+# make a data frame containing the stuff we want to turn into a graph
+inf_vs_cg_data <- data.frame(
+  Category = c("Only Informative", "Only Common Ground"),
+  counts = c(informative_only_count, cg_only_count)
+)
+# had to do this bc for whatever reason the graph kept coming out with the "relevant" bar first and I hate it
+inf_vs_cg_data$Category <- factor(inf_vs_cg_data$Category, levels = c("Only Informative", "Only Common Ground"))
+
+# make a da graph
+ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(y = "Number of Utterances", x = "Utterance Type") + 
+  theme_bw() +
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank())
+```
+
+### Making a graph for H1b 
+
+```{r}
+# all of the distinct kids that apply to this hypothesis
+# we do not use this for analysis/charts - we're using this to determine N, mean age, and age range!!!
+h1b_kids<- trial_data_h1 %>% 
+  filter(!(response_included_informative == TRUE & 
+         response_included_uninformative == TRUE)) %>% 
+   filter(!grepl('common', stimulus_condition)) %>% 
+  distinct(child_id, .keep_all = TRUE)
+
+# make a new df to hold H1b data
+trial_data_h1b <- trial_data_h1 %>% 
+  # remove common ground trials
+  filter(!grepl('common', stimulus_condition))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# only informative utterances
+h1b_informative_only_count <- sum(trial_data_h1b$response_included_informative == TRUE & 
+                       trial_data_h1b$response_included_uninformative == FALSE)
+# only cg utterances
+h1b_cg_only_count <- sum(trial_data_h1b$response_included_informative == FALSE & 
+                       trial_data_h1b$response_included_uninformative == TRUE)
+
+# make a graph
+# make a data frame containing the stuff we want to turn into a graph
+inf_vs_cg_data <- data.frame(
+  Category = c("Only Informative", "Only Common Ground"),
+  counts = c(h1b_informative_only_count, h1b_cg_only_count)
+)
+# had to do this bc for whatever reason the graph kept coming out with the "relevant" bar first and I hate it
+inf_vs_cg_data$Category <- factor(inf_vs_cg_data$Category, levels = c("Only Informative", "Only Common Ground"))
+
+# make a da graph
+ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(y = "Number of Utterances", x = "Utterance Type") + 
+  theme_bw() +
+   theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank())
+```
+
+### Graph for H2a - Nothing came out of this hypothesis so we didn't do graphs for H2b or H2c
+
+```{r}
+# all of the distinct kids that apply to this hypothesis
+# we do not use this for analysis/charts - we're using this to determine N, mean age, and age range!!!
+ h2_kids<- trial_data_h2 %>% 
+  filter(!(response_included_info_noun == TRUE & 
+         response_included_uninformative_noun == TRUE)) %>% 
+  filter(!(response_included_info_noun == FALSE & 
+         response_included_uninformative_noun == FALSE)) %>% 
+  distinct(child_id, .keep_all = TRUE)
+
+
+
+
+
+
+# prepare dat for graph
+inf_noun_count <- sum(trial_data_h2$response_included_info_noun == TRUE & 
+                        trial_data_h2$response_included_uninformative_noun == FALSE)
+cg_noun_count <- sum(trial_data_h2$response_included_uninformative_noun == TRUE &
+                       trial_data_h2$response_included_info_noun == FALSE)
+# make graph
+inf_vs_cg_nouns_data <- data.frame(
+  Category = c("Mentioned only ambiguous referent", "Mentioned only unambiguous referent"),
+  counts = c(inf_noun_count, cg_noun_count)
+)
+
+ggplot(inf_vs_cg_nouns_data, aes(x = Category, y = counts, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(y = "Number of Utterances", x = "Utterance Type") + 
+  theme_bw() +
+   theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank())
+
+```
+
+### Bonus graph of all kids
+
+```{r}
+# all the info only kids in h1
+all_kids_inf <- trial_data_h1 %>% 
+  filter(response_included_informative == TRUE,
+         response_included_uninformative == FALSE)
+# all the cg kids in h1
+all_kids_cg <- trial_data_h1 %>% 
+  filter(response_included_informative == FALSE,
+         response_included_uninformative == TRUE)
+# the non-selective kids
+all_kids_unselective <- trial_data_h1 %>% 
+  filter(response_included_informative == TRUE,
+         response_included_uninformative == TRUE)
+
+# identify all the unique kids of those sets
+all_kids_inf_unique <- unique(all_kids_inf$child_id)
+all_kids_cg_unique <- unique(all_kids_cg$child_id)
+all_kids_unselective_unique <- unique(all_kids_unselective$child_id)
+
+# combine the vectors and count all the unique kids in this new 'mega' vector
+all_graph_kids = length(unique(c(all_kids_inf_unique, all_kids_cg_unique, all_kids_unselective_unique)))
+
+# only informative utterances
+informative_only_count <- sum(trial_data_h1$response_included_informative == TRUE & 
+                                trial_data_h1$response_included_uninformative == FALSE)
+# only cg utterances
+cg_only_count <- sum(trial_data_h1$response_included_informative == FALSE & 
+                       trial_data_h1$response_included_uninformative == TRUE)
+# unselective responses
+unselective_count <- sum(trial_data_h1$response_included_informative == TRUE &
+                           trial_data_h1$response_included_uninformative == TRUE)
+
+# make a data frame containing the stuff we want to turn into a graph
+inf_vs_cg_data <- data.frame(
+  Category = c("Only Informative", "Only Common Ground", "Informative and Common Ground"),
+  counts = c(informative_only_count, cg_only_count, unselective_count)
+)
+# had to do this bc for whatever reason the graph kept coming out with the "relevant" bar first and I hate it
+inf_vs_cg_data$Category <- factor(inf_vs_cg_data$Category, levels = c("Only Informative", "Only Common Ground", "Informative and Common Ground"))
+
+# make a da graph
+ggplot(inf_vs_cg_data, aes(x = Category, y = counts, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(y = "Number of Utterances", x = "Utterance Type") + 
+  theme_bw() +
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank())
+```
+
+## Model Graphs
+
+### H1
+
+```{r h1 model plot}
+# getting error bars for the confidence intervals
+h1_ci <- confint(h1_kids_model, method = "Wald") 
+# saving the intercepts of that confint data
+h1_intercept_ci <- h1_ci["(Intercept)", ]
+
+# making some plot data slay
+plot_data_h1 <- tibble(val = "Selective kids",
+                    estimate = log.odds.to.prob(fixef(h1_kids_model)["(Intercept)"]),
+                    lower.ci = log.odds.to.prob(h1_intercept_ci[1]),
+                    upper.ci = log.odds.to.prob(h1_intercept_ci[2]))
+
+# plotting, scheeming even
+ggplot(plot_data_h1, aes(x = val, y = estimate)) +
+  geom_errorbar(aes(ymin = lower.ci,
+                    ymax = upper.ci), width = .05) +
+  geom_point(size = 5, shape = 23, fill = "white") +
+  ylim(0,1) +
+  theme_bw() +
+  labs(x = "", y = "Probability of being informative (among selective kids)") +
+  theme(text = element_text(size = 14))
+```
+### H2a
+
+```{r h2a model plot}
+h2a_ci <- confint(h2a_kids_model, method = "Wald") 
+h2a_intercept_ci <- h2a_ci["(Intercept)", ]
+
+plot_data_h2a <- tibble(val = "Selective kids",
+                        estimate = log.odds.to.prob(fixef(h2a_kids_model)["(Intercept)"]),
+                        lower.ci = log.odds.to.prob(h2a_intercept_ci[1]),
+                        upper.ci = log.odds.to.prob(h2a_intercept_ci[2]))
+
+ggplot(plot_data_h2a, aes(x = val, y = estimate)) +
+  geom_errorbar(aes(ymin = lower.ci,
+                    ymax = upper.ci), width = .05) +
+  geom_point(size = 5, shape = 23, fill = "white") +
+  ylim(0,1) +
+  theme_bw() +
+  labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
+  theme(text = element_text(size = 14))
+```
+
+### H2b
+```{r h2b model plot}
+h2b.kids.plot <- emmeans(h2b_kids_model, specs = "stimulus_condition", type = "response") %>%
+  as_tibble()
+
+ggplot(h2b.kids.plot %>% filter(stimulus_condition == "agent_ambig"), aes(x = stimulus_condition, y = prob)) +
+  geom_errorbar(aes(ymin = asymp.LCL,
+                    ymax = asymp.UCL), width = .05) +
+  geom_point(size = 5, shape = 23, fill = "white") +
+  ylim(0,1) +
+  theme_bw() +
+  labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
+  theme(text = element_text(size = 14))
+```
+### Older H2b
+```{r}
+h2b.kids.plot <- emmeans(h2b_kids_model, specs = "stimulus_condition", type = "response") %>%
+  as_tibble()
+
+ggplot(h2b.kids.plot %>% filter(stimulus_condition == "patient_ambig"), aes(x = stimulus_condition, y = prob)) +
+  geom_errorbar(aes(ymin = asymp.LCL,
+                    ymax = asymp.UCL), width = .05) +
+  geom_point(size = 5, shape = 23, fill = "white") +
+  ylim(0,1) +
+  theme_bw() +
+  labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
+  theme(text = element_text(size = 14))
+```
+
+
+### H2c
+```{r}
+h2c_ci <- confint(h2c_kids_model, method = "Wald") 
+h2c_intercept_ci <- h2c_ci["(Intercept)", ]
+
+plot_data_h2c <- tibble(val = "Selective kids",
+                        estimate = log.odds.to.prob(fixef(h2c_kids_model)["(Intercept)"]),
+                        lower.ci = log.odds.to.prob(h2c_intercept_ci[1]),
+                        upper.ci = log.odds.to.prob(h2c_intercept_ci[2]))
+
+ggplot(plot_data_h2c, aes(x = val, y = estimate)) +
+  geom_errorbar(aes(ymin = lower.ci,
+                    ymax = upper.ci), width = .05) +
+  geom_point(size = 5, shape = 23, fill = "white") +
+  ylim(0,1) +
+  theme_bw() +
+  labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
+  theme(text = element_text(size = 14))
+```
+
+
+# Troubleshooting!
+In this section I have included some code to help diagnose the most common issues I ran into.
+
+Number of session ids not matching between trial_data_all and session_data_to_analyze? Use this code to investigate!
+
+```{r checking that everything matches and is up to code}
+reportable_session_ids <- session_data_toanalyze$session_id
+trial_data_all_session_ids <- trial_data_all$session_id
+
+# finds all ids presnt in session data but not trial data
+in_reportable_session_not_in_raw_df <- setdiff(reportable_session_ids, trial_data_all_session_ids)
+#finds all ids present in trial data but not session data, i am expecting this to be empty
+in_raw_df_not_in_reportable_sessions <- setdiff(trial_data_all_session_ids, reportable_session_ids)
+
+print("Here are all the sessions in session_to_analyze but not trial_data_all")
+print(in_reportable_session_not_in_raw_df)
+print("Here are all the sessions that are in trial_data_all but not in sessions_to_analyze")
+print(in_raw_df_not_in_reportable_sessions)
+
+
+session_kids <- session_data_toanalyze$child_id
+trial_kids <- unique(trial_data_all$child_id)
+
+# finds all kids present in reportable sessions but not in raw df
+kids_in_reportable_sessions_not_in_raw_df <- setdiff(session_kids, trial_kids)
+# finds all kids in raw df but not in sessions
+kids_in_raw_df_not_in_reportable_sessions <- setdiff(trial_kids, session_kids)
+
+print("Kids in session file but now raw coding file (probably fine)")
+print(kids_in_reportable_sessions_not_in_raw_df)
+print("Kids in raw coding file but not in session file (this is weird)")
+print(kids_in_raw_df_not_in_reportable_sessions)
+
+# finds all the session ids in the all-sessions file that are NOT unique
+non_unique_sessionids <- session_data_toanalyze %>%
+  group_by(session_id) %>%
+  summarise(count = n()) %>%
+  filter(count > 1)
+```
+
+Some numbers not making sense in the 2x2 table? Let's extract the session ids of the trouble makers!
+
+```{r}
+# let's check why there are three false informative false uninformative (if this existed)
+trial_data_toanalyze[(trial_data_toanalyze$response_attempted_target == 'TRUE') & (trial_data_toanalyze$stimulus_condition %in% c("commonground","agent_ambig","patient_ambig")) & (trial_data_toanalyze$response_included_informative == FALSE) & (trial_data_toanalyze$response_included_uninformative == FALSE),]
+```
+
+Need to look for kids who said something about a specific scene? Here!
+
+```{r}
+# gather all the test trials where the kids says something about the stimuli
+test_trials_to_analyze <- trial_data_toanalyze %>% 
+  filter(trial_type == "test_trial")
+
+# SEARCHING FOR SPECIFIC UTTERANCES
+specific_utterances <- test_trials_to_analyze %>% 
+  filter(
+    stimulus_target_utterance == "The cat ate the banana",
+    stimulus_condition == "patient_ambig",
+    #response_included_uninformative == TRUE
+    response_attempted_target == FALSE
+    )
+```
