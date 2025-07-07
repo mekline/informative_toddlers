@@ -17,7 +17,7 @@ library(knitr)
 
 # Informative Toddlers Pre-Processing Script
 
-This script implements the pre-processing steps written by Melissa Kline Struhl in the Coding Manual from the pre-registration. It is important to note that there are some minor elements from the manual that are either modified or dropped; there are also completely new elements add by me (Lia Washington). It is also important to note that each of these steps produces a new file/dataframe, THE ORIGINAL FILES ARE TO BE UNEDITED.
+This script implements the pre-processing steps written by Melissa Kline Struhl in the Coding Manual from the pre-registration. It is important to note that there are some minor elements from the manual that are either modified or dropped; there are also completely new elements add by me (Lia Washington). It is also important to note that each of these steps produces a new file/dataframe, THE ORIGINAL FILES ARE TO BE UNEDITED. There will be a warning before any data chunk where file paths need to be updated.
 
 ## The pre-processing steps are as follows:
 
@@ -28,11 +28,13 @@ This script implements the pre-processing steps written by Melissa Kline Struhl 
 ## Step 1
 
 First, we must choose set the working directory to be wherever the data is. You can make sure you're in the right directory by executing the line `print(list.files(general_location, recursive=FALSE))`. _**Note: ** if you set `recursive` to `TRUE` then R will print out all the files in all the subfolders of the directory as well._ 
-Also, since I keep all the raw data on Dropbox instead of GitHub (subject to change), **you need to insert the specific path as it appears on your computer anytime you want to read or write as csv**.
+Also, since I keep all the raw data on Dropbox instead of GitHub (subject to change), **you need to insert the specific path as it appears on your computer anytime you want to read or write as csv**. Also, you will probably need to create a "framedata" folder in the "v_date_step1" folder. I saw probably, because I don't remember having to do it for previous iterations of data, but I can't be sure.
+
+*WARNING: make sure (some) file paths are updated prior to running this chunk*
 
 ```{r set and check directory}
 # set directories
-general_location = "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_first_90_kids"
+general_location = "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_150_kids"
 
 raw_location = paste0(general_location, "/raw_data")
 processed_location = paste0(general_location, "/processed_data/v2_oct2024_step1/framedata")
@@ -85,8 +87,9 @@ for (file in files){
 ```
 
 
-Now we will edit the session-all file. This file will be used to keep track of all the sessions that have been done (completed or otherwise). If you are anything like me (or you are me), you will feel the urge to delete the original all_sessions/demographics data frames. DO NOT DO THAT!! It makes it harder if you want to change anything about the revised data frames.
+Now we will edit the session-all file. This file will be used to keep track of all the sessions that have been done (completed or otherwise). If you are anything like me (or you are me), you will feel the urge to delete the original all_sessions data frames. DO NOT DO THAT!! It makes it harder if you want to change anything about the revised data frames.
 
+*WARNING: make sure file paths are updated prior to running this chunk*
 
 ```{r session-all}
 # rename the session-all and demographic data frames
@@ -120,25 +123,25 @@ all_sessions <- all_sessions %>%
          notes = '')
 
 # turn the new data frame into a csv located in the step2 folder, don't forget to include the file name and extension in the path!!!
-write.csv(all_sessions, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_first_90_kids/processed_data/v2_oct2024_step1/v2_oct2024_step1_all-responses-identifiable.csv")
+write.csv(all_sessions, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_150_kids/processed_data/v2_oct2024_step1/v2_oct2024_step1_all-sessions.csv")
 ```
 
 
 ## Step 3
 
-If this isn't your first batch of data coding, use this chunk to fill in the new all-responses file with the coded version of the most recent all-responses file!
+At this point you should STOP running the script, go apply the session-level inclusion criteria, and come back (unless you did that before you even started). If this is not your first batch of data, you need to:
 
-```{r fill in all-responses}
+* copy and paste step1_all-sessions to the step2 folder and rename it step2_all-sessions
+* take the step3 version of the previous batch's all-sessions and use it to update the current all-sessions (ex: batch 1 had 90 participants, batch 2 has 150 participants, copy and paste all of batch 1 onto cols 2-91 of batch 2)
+* look at the new sessions from the current batch and apply exclusions
 
-```
-
-
-At this point you should STOP running the script, go apply the session-level inclusion criteria, and come back (unless you did that before you even started).
 After deciding what sessions should not be cleaned (and later coded) and editing the all-responses file, we will update the files list by removing the files of sessions that were excluded from the files list.
+
+*WARNING: make sure file paths are updated prior to running this chunk*
 
 ```{r remove excluded sessions}
 # read in updated all sessions file
-updated_all_sessions_file <- read_csv("C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_first_90_kids/processed_data/v2_oct2024_step2_TOCODE/v2_oct2024_step2_all-sessions.csv")
+updated_all_sessions_file <- read_csv("C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_150_kids/processed_data/v2_oct2024_step2_TOCODE/v2_oct2024_step2_all-sessions.csv")
 
 # make a df of all sessions that will not be coded (just because I think it's handy to have, not very necessary)
 uncodable_sessions <- updated_all_sessions_file %>% 
@@ -170,7 +173,7 @@ for (i in seq_along(orders)){
 }
 ```
 
-Now we will iterate of the files and transform them for coding! Warning: this is quite a large code chunk, but we're also doing a lot of transformations so...
+Now we will iterate of the files and transform them for coding! This is quite a large code chunk, but we're also doing a lot of transformations so...
 
 ```{r individual file cleaning}
 for(session in codable_sessions){
@@ -297,6 +300,8 @@ for(session in codable_sessions){
 
 Now we just need to save the dataframes as csv files for coding!
 
+*WARNING: make sure file paths are updated prior to running this chunk*
+
 ```{r add all orders to all_orders}
 # make a file that contains all the orders just for funsies
 all_orders <- data.frame(matrix(ncol = 0, nrow = 0))
@@ -306,13 +311,7 @@ all_orders <- bind_rows(all_orders, Order3)
 all_orders <- bind_rows(all_orders, Order4)
 
 # turn all_orders into a single csv
-write.csv(all_orders, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_first_90_kids/processed_data/v2_oct2024_step2_TOCODE/v2_oct2024_step2_all-orders_TOCODE.csv")
-
-```
-
-If this isn't your first batch of data coding, use this chunk to fill in the new all-orders file with the CODED version of the most recent all-order file!
-
-```{r fill in all orders file}
+write.csv(all_orders, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_150_kids/processed_data/v2_oct2024_step2_TOCODE/v2_oct2024_step2_all-orders_TOCODE.csv")
 
 ```
 
