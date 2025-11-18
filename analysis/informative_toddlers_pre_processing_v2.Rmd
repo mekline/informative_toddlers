@@ -28,13 +28,13 @@ This script implements the pre-processing steps written by Melissa Kline Struhl 
 ## Step 1
 
 First, we must choose set the working directory to be wherever the data is. You can make sure you're in the right directory by executing the line `print(list.files(general_location, recursive=FALSE))`. _**Note: ** if you set `recursive` to `TRUE` then R will print out all the files in all the subfolders of the directory as well._ 
-Also, since I keep all the raw data on Dropbox instead of GitHub (subject to change), **you need to insert the specific path as it appears on your computer anytime you want to read or write as csv**. Also, you will probably need to create a "framedata" folder in the "v_date_step1" folder. I saw probably, because I don't remember having to do it for previous iterations of data, but I can't be sure.
+Also, since I keep all the raw data on Dropbox instead of GitHub (subject to change), **you need to insert the specific path as it appears on your computer anytime you want to read or write as csv**. Also, you will probably need to create a "framedata" folder in the "v_date_step1" folder. I say probably, because I don't remember having to do it for previous iterations of data, but I can't be sure.
 
 *WARNING: make sure (some) file paths are updated prior to running this chunk*
 
 ```{r set and check directory}
 # set directories
-general_location = "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_150_kids"
+general_location = "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_full_dataset"
 
 raw_location = paste0(general_location, "/raw_data")
 processed_location = paste0(general_location, "/processed_data/v2_oct2024_step1/framedata")
@@ -123,7 +123,7 @@ all_sessions <- all_sessions %>%
          notes = '')
 
 # turn the new data frame into a csv located in the step2 folder, don't forget to include the file name and extension in the path!!!
-write.csv(all_sessions, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_150_kids/processed_data/v2_oct2024_step1/v2_oct2024_step1_all-sessions.csv")
+write.csv(all_sessions, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_full_dataset/processed_data/v2_oct2024_step1/v2_oct2024_step1_all-sessions.csv")
 ```
 
 
@@ -141,15 +141,15 @@ After deciding what sessions should not be cleaned (and later coded) and editing
 
 ```{r remove excluded sessions}
 # read in updated all sessions file
-updated_all_sessions_file <- read_csv("C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_150_kids/processed_data/v2_oct2024_step2_TOCODE/v2_oct2024_step2_all-sessions.csv")
+updated_all_sessions_file <- read_csv("C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_full_dataset/processed_data/v2_oct2024_step2_TOCODE/v2_oct2024_step2_all-sessions.csv")
 
 # make a df of all sessions that will not be coded (just because I think it's handy to have, not very necessary)
 uncodable_sessions <- updated_all_sessions_file %>% 
   filter(to_code == "n")
 
-# make a vector of all the codable sessions
+# make a vector of all the codable sessions that have not yet been coded
 codable_sessions <-  updated_all_sessions_file %>% 
-  filter(is.na(to_code))
+  filter(is.na(is_coded))
 codable_sessions <- codable_sessions$session_id
 
 # update the strings in codable_sessions so that they match the dataframes that were loaded in
@@ -311,11 +311,15 @@ all_orders <- bind_rows(all_orders, Order3)
 all_orders <- bind_rows(all_orders, Order4)
 
 # turn all_orders into a single csv
-write.csv(all_orders, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_150_kids/processed_data/v2_oct2024_step2_TOCODE/v2_oct2024_step2_all-orders_TOCODE.csv")
+write.csv(all_orders, "C:/Users/babyg/Dropbox/MIT Work Files/ECCL/Informative Toddlers/Data/data/v2_oct2024/v2_oct2024_full_dataset/processed_data/v2_oct2024_step2_TOCODE/v2_oct2024_step2_all-orders_TOCODE.csv")
 
 ```
 
+
+
 ------------------------------------------------------------------------------------------------------------------
+
+
 
 Here are some extra chunks of code that may prove useful!
 
