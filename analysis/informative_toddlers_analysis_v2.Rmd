@@ -255,7 +255,7 @@ kable(head(summarize_utterances, col.names = c("session", "included trials", "sp
 
 Here are the hypotheses we are preregistering:
 
-#### Hypothesis 1
+### Hypothesis 1
 
 Given that the child produces an utterance relating to the trial vignette, they will be more likely to mention some informative element that is NOT derivable from the context scene (BALL, BOUNCE in the common-ground scene; DOG, EAT in the appropriate Ambiguous Patient condition) than to mention an uninformative element available in the context scene (DUCK, LAKE in the common-ground scene; APPLE, CAT in the appropriate Ambiguous Patient condition.) 
 
@@ -347,7 +347,7 @@ summary(h1_kids_cg_model)
 
 # Visuals!
 
-It is now time to visualize all of our data! We we be plotting demographics, count data, as well as the model shown above.
+### It is now time to visualize all of our data! We we be plotting demographics, count data, as well as the model shown above.
 First we are going to go ahead and make a few mini data frames that will come in handy later.
 
 ```{r extra data frames for graphs}
