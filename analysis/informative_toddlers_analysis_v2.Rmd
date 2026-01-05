@@ -510,9 +510,9 @@ ggplot(trial_data_h1, aes(x = utterance_type, fill = utterance_type)) +
 
 ```
 
-```{r utterances x age, utterances x gender}
+```{r utterance type x age, utterance type x gender}
 
-# utterance x age line graph
+# utterance type x age line graph
 ggplot(line_data_h1_basic, aes(x = age_in_months, y = n,  color = utterance_type)) +
   geom_line(linewidth = 1.5) + 
   labs(title = "Utterance Type by Age in Months", x = "Age in Months", y = "Number of Utterances", color = "Utterance Type\n") +
@@ -524,7 +524,7 @@ ggplot(line_data_h1_basic, aes(x = age_in_months, y = n,  color = utterance_type
   # these are a bit of a "custom" command to ggplot so always add it at the end or it won't come out right
   theme(plot.title = element_text(hjust = 0.5))
 
-# utterance x age bar graph 
+# utterance type x age bar graph 
 ggplot(trial_data_h1, aes(x = age_in_months, fill = utterance_type)) +
   geom_bar(position = "dodge") + 
   labs(title = "Utterance Type by Age in Months", x = "Age in Months", y = "Number of Utterances", fill = "Utterance Type") +
@@ -536,7 +536,7 @@ ggplot(trial_data_h1, aes(x = age_in_months, fill = utterance_type)) +
   # these are a bit of a "custom" command to ggplot so always add it at the end or it won't come out right
   theme(plot.title = element_text(hjust = 0.5))
 
-# utterance x gender bar graph
+# utterance type x gender bar graph
 ggplot(trial_data_h1, aes(x = utterance_type, fill = gender)) +
   geom_bar(position = "dodge") + 
   labs(title = "Utterance Type by Gender", x = "Utterance Type", y = "Number of Utterances", fill = "Gender\n") +
@@ -552,9 +552,9 @@ ggplot(trial_data_h1, aes(x = utterance_type, fill = gender)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-```{r utterance x trial type, utterance x trial x age}
+```{r utterance type x trial type, utterance type x trial x age}
 
-# utterance x trial
+# utterance type x trial
 ggplot(trial_data_h1, aes(x = test_trial_type, fill = utterance_type)) +
   geom_bar(position = "dodge") +
   labs(title = "Utterances by Trial Type", x = "Trial Type", y = "Number of Utterances", fill = "Utterance Type\n") +
@@ -568,7 +568,7 @@ ggplot(trial_data_h1, aes(x = test_trial_type, fill = utterance_type)) +
   theme(axis.ticks.x = element_blank(),
       plot.title = element_text(hjust = 0.5)) 
 
-# utterance x trial x age
+# utterance type x trial x age
 ggplot(trial_data_h1, aes(x = age_in_months, fill = utterance_type)) +
   geom_bar(position = "dodge") +
   facet_wrap(~ test_trial_type)+
@@ -584,11 +584,25 @@ ggplot(trial_data_h1, aes(x = age_in_months, fill = utterance_type)) +
       plot.title = element_text(hjust = 0.5))
 ```
 
-```{r utterance x animacy, utterance x animacy x age}
-# utterance x animacy
+```{r utterance type x animacy, utterance type x animacy x age}
+
+# animacy 
+ggplot(trial_data_h1, aes(x = animacy, fill = animacy)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Utterances by Animacy", x = "Animacy", y = "Number of Utterances", fill = "Animacy\n") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  scale_fill_manual(values = c("lightgoldenrod2","firebrick2", "sienna1")) +
+  theme(axis.ticks.x = element_blank(),
+      plot.title = element_text(hjust = 0.5)) 
+
+# utterance type x animacy
 ggplot(trial_data_h1, aes(x = animacy, fill = utterance_type)) +
   geom_bar(position = "dodge") +
-  labs(title = "Utterances by Scene Subject", x = "Scene Subject", y = "Number of Utterances", fill = "Utterance Type\n") +
+  labs(title = "Utterances by Utterance Type and Animacy", x = "Animacy", y = "Number of Utterances", fill = "Utterance Type\n") +
   theme_bw() + 
   theme(panel.border = element_blank()) +
   scale_y_continuous(
@@ -598,11 +612,24 @@ ggplot(trial_data_h1, aes(x = animacy, fill = utterance_type)) +
   theme(axis.ticks.x = element_blank(),
       plot.title = element_text(hjust = 0.5)) 
 
-# utterance x animacy x age
+# animacy x age
+ggplot(trial_data_h1, aes(x = age_in_months, fill = animacy)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Utterances by Animacy and Age", x = "Animacy", y = "Number of Utterances", fill = "Animacy\n") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 50, by = 5),
+    limits = c(0, 50)) + 
+  scale_fill_manual(values = c("lightgoldenrod2","firebrick2", "sienna1")) +
+  theme(axis.ticks.x = element_blank(),
+      plot.title = element_text(hjust = 0.5)) 
+
+# utterance type x animacy x age
 ggplot(trial_data_h1, aes(x = age_in_months, fill = utterance_type)) +
   geom_bar(position = "dodge") +
   facet_wrap(~ animacy)+
-  labs(title = "Utterances by Age and Scene Subject", x = "Age in Months", y = "Number of Utterances", fill = "Utterance Type\n") +
+  labs(title = "Utterances by Utterance Type, Animacy, and Age", x = "Age in Months", y = "Number of Utterances", fill = "Utterance Type\n") +
   theme_bw() + 
   theme(panel.border = element_blank()) +
   scale_y_continuous(

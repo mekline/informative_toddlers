@@ -364,7 +364,7 @@ h1_kids_model <- glmer(inform ~ 1 + (1|child_id), family = "binomial", data = h1
 summary(h1_kids_model)
 ```
 
-### Hypothesis 2
+## Hypothesis 2
 
 Hypothesis 2 focuses on the production of the specific nouns in the target utterances, and is tested only in the Agent-Patient scenes.
 
@@ -516,6 +516,9 @@ line_data_h1_basic <- trial_data_h1 %>%
 # age, gender, utterance type
 line_data_h1_gender <- trial_data_h1 %>% 
   count(age_in_months, utterance_type, gender)
+# needed to answer a specific laura question about the bear shoes scenes
+bear_shoes_duck_ball <- trial_data_h1 %>% 
+  filter(stimulus_condition == "commonground")
 ```
 ## Demographic Graphs
 
@@ -557,7 +560,9 @@ ggplot(trial_data_h1, aes(x = age_in_months)) +
 ```
 
 ## Count Data Graphs
- 
+
+### Graphs for H1
+
 ```{r relevant utterances by type - selective and unselective}
 # selective kids
 ggplot(selective_h1_kids, aes(x = utterance_type, fill = utterance_type)) +
@@ -587,11 +592,27 @@ ggplot(trial_data_h1, aes(x = utterance_type, fill = utterance_type)) +
       axis.ticks.x = element_blank(),
       plot.title = element_text(hjust = 0.5)) 
 
+# responses specifically for the "commonground" scenes
+ggplot(bear_shoes_duck_ball, aes(x = utterance_type, fill = utterance_type)) +
+  geom_bar() +
+  labs(title = "Relevant Utterances by Type in Bear-Shoes and Duck-Ball Scenes", x = "Utterance Type", y = "Number of Utterances", fill = "Utterance Type\n") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  scale_fill_manual(values = c("violetred3", "royalblue3", "mediumpurple3")) +
+  theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      plot.title = element_text(hjust = 0.5)) 
+
 ```
 
-```{r utterances x age, utterances x gender}
+### Exploratory Graphs
 
-# utterance x age line graph
+```{r utterance type x age, utterance type x gender}
+
+# utterance type x age line graph
 ggplot(line_data_h1_basic, aes(x = age_in_months, y = n,  color = utterance_type)) +
   geom_line(linewidth = 1.5) + 
   labs(title = "Utterance Type by Age in Months", x = "Age in Months", y = "Number of Utterances", color = "Utterance Type\n") +
@@ -603,7 +624,7 @@ ggplot(line_data_h1_basic, aes(x = age_in_months, y = n,  color = utterance_type
   # these are a bit of a "custom" command to ggplot so always add it at the end or it won't come out right
   theme(plot.title = element_text(hjust = 0.5))
 
-# utterance x age bar graph 
+# utterance type x age bar graph 
 ggplot(trial_data_h1, aes(x = age_in_months, fill = utterance_type)) +
   geom_bar(position = "dodge") + 
   labs(title = "Utterance Type by Age in Months", x = "Age in Months", y = "Number of Utterances", fill = "Utterance Type") +
@@ -615,14 +636,14 @@ ggplot(trial_data_h1, aes(x = age_in_months, fill = utterance_type)) +
   # these are a bit of a "custom" command to ggplot so always add it at the end or it won't come out right
   theme(plot.title = element_text(hjust = 0.5))
 
-# utterance x gender bar graph - something is wrong with this graph but that is so not my problem right now
+# utterance type x gender bar graph 
 ggplot(trial_data_h1, aes(x = utterance_type, fill = gender)) +
   geom_bar(position = "dodge") + 
   labs(title = "Utterance Type by Gender", x = "Utterance Type", y = "Number of Utterances", fill = "Gender\n") +
   theme_bw() +
   scale_y_continuous(
-    breaks = seq(0, 50, by = 5),
-    limits = c(0, 50)) +
+    breaks = seq(0,100, by = 10),
+      limits = c(0, 100)) +
   # these are a bit of a "custom" command to ggplot so always add it at the end or it won't come out right
   scale_fill_manual(labels = c("f" = "Female",
                                   "m" = "Male"),
@@ -631,53 +652,84 @@ ggplot(trial_data_h1, aes(x = utterance_type, fill = gender)) +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-```{r utterance x animacy, utterance x animacy x age}
+```{r animacy, utterance type x animacy, animacy x age, animacy x trial type}
 
 # adding a special animacy column right here
 h1_animacy = trial_data_h1 %>% 
   mutate(
     animacy = case_when(
-      (response_included_subject == TRUE | (response_included_distractor == TRUE & stimulus_condition == "agent_ambig")) ~ "animate",
-      .default = "inanimate"
+      # when kids mention both animate and inanimate features
+      
+      # kids mention subject OR the distractor when the trial is agent ambig
+      (response_included_subject == TRUE | (response_included_distractor == TRUE & stimulus_condition == "agent_ambig")) & 
+        # kids mention the object OR the distractor in patient ambig trials 
+        (response_included_object == TRUE | (response_included_distractor == TRUE & stimulus_condition == "patient_ambig")) ~ "both",
+       
+      # kids mention subject OR the distractor when the trial is agent ambig
+      response_included_subject == TRUE | (response_included_distractor == TRUE & stimulus_condition == "agent_ambig") ~ "animate",
+      
+      # kids mention object OR the distractor in patient ambig trials
+      response_included_object == TRUE | (response_included_distractor == TRUE & stimulus_condition == "patient_ambig") ~ "inanimate"
     )
   )
 
-# utterance x animacy
-ggplot(h1_animacy, aes(x = animacy, fill = utterance_type)) +
+# animacy
+ggplot(h1_animacy, aes(x = animacy, fill = animacy)) +
   geom_bar(position = "dodge") +
-  labs(title = "Utterances by Scene Subject", x = "Scene Subject", y = "Number of Utterances", fill = "Utterance Type\n") +
+  labs(title = "Utterances by Animacy", x = "Animacy", y = "Number of Utterances") +
   theme_bw() + 
   theme(panel.border = element_blank()) +
   scale_y_continuous(
-    breaks = seq(0, 50, by = 5),
-    limits = c(0, 50)) + 
-  scale_fill_manual(values = c("lightgoldenrod2","firebrick2", "sienna1")) +
+    breaks = seq(0, 110, by = 10),
+    limits = c(0, 110)) + 
+  scale_fill_manual(values = c("darkgoldenrod","darkred", "darkorange")) +
+  theme(axis.ticks.x = element_blank(),
+      plot.title = element_text(hjust = 0.5))
+
+# utterance type x animacy
+ggplot(h1_animacy, aes(x = animacy, fill = utterance_type)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Utterances by Type and Animacy", x = "Animacy", y = "Number of Utterances", fill = "Utterance Type\n") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  scale_fill_manual(values = c("darkgoldenrod","darkred", "darkorange")) +
   theme(axis.ticks.x = element_blank(),
       plot.title = element_text(hjust = 0.5)) 
 
-# utterance x animacy x age
-ggplot(h1_animacy, aes(x = age_in_months, fill = utterance_type)) +
+# animacy x age
+ggplot(h1_animacy, aes(x = age_in_months, fill = animacy)) +
   geom_bar(position = "dodge") +
   facet_wrap(~ animacy)+
-  labs(title = "Utterances by Age and Scene Subject", x = "Age in Months", y = "Number of Utterances", fill = "Utterance Type\n") +
+  labs(title = "Utterances by Age and Animacy", x = "Age in Months", y = "Number of Utterances", fill = "Animacy\n") +
   theme_bw() + 
   theme(panel.border = element_blank()) +
   scale_y_continuous(
     breaks = seq(0, 50, by = 5),
     limits = c(0, 50)) + 
   scale_x_discrete(labels = c("Chronological Order", "Reverse Order")) +
-  scale_fill_manual(values = c("lightgoldenrod2","firebrick2", "sienna1")) +
+  scale_fill_manual(values = c("darkgoldenrod","darkred", "darkorange")) +
   theme(axis.ticks.x = element_blank(),
       plot.title = element_text(hjust = 0.5))
 
+# animacy x trial type
+ggplot(h1_animacy, aes(x = animacy, fill = stimulus_condition)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Utterances by Animacy and Trial Type", x = "Animacy", y = "Number of Utterances", fill = "Trial Type\n") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  scale_fill_manual(values = c("darkgoldenrod","darkred", "darkorange")) +
+  theme(axis.ticks.x = element_blank(),
+      plot.title = element_text(hjust = 0.5)) 
 
 ```
  
-### Graph for H1
 
-```{r}
-
-```
 
 ### Making a graph for H1b 
 
