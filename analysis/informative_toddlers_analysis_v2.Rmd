@@ -46,8 +46,16 @@ We tried to list all files in this directory: ``r data_location``. If it worked,
 session_data_all = read_csv(paste0(data_location, '/', study_version,'_step3_all-sessions.csv'), show_col_types = FALSE)
 raw_df <- read_csv(paste0(data_location, '/', study_version,'_step3_all-orders_CODED.csv'), show_col_types = FALSE)
 
-# do some variable renaming for convenience/clarity - this only applies to v1_jan2024
+# temp step to add in the awareness coding
+UROP_df <-  read_csv(paste0(data_location, '/UROP_', study_version,'_step3_all-speakers_CODED.csv'), show_col_types = FALSE)
+
+# do some variable renaming for convenience/clarity
 trial_data_all <- raw_df %>%
+  rename(session_id = response_uuid,
+         child_id = child_hashed_id,
+         visual_shown = visualShown)
+
+UROP_trial_data_all <- UROP_df %>% 
   rename(session_id = response_uuid,
          child_id = child_hashed_id,
          visual_shown = visualShown)
@@ -131,15 +139,6 @@ TODO: Add report on family choices about data sharing - publicity level and Data
 
 After session-level exclusions for ineligibility (kid too old or too young for the sample; kid playing in background and not attending at any point during study session; etc.), there are **`r length(unique(session_data_toreport$session_id))` unique responses from `r length(unique(session_data_toreport$child_id))` unique children.** This includes children who may or may not have spoken on key trials, but who otherwise meet all criteria for inclusion at the session level. 
 
-Let's take a gander at the demographics of these participants!
-
-```{r descriptive stats}
-# done on raw coding file data
-# raw_mean_age = mean_age = mean(trial_data_all$age_in_days)/30
-# raw_gender_counts = table(trial_data_all$gender)
-# raw_percent_female <- (raw_gender_counts["f"] / sum(raw_gender_counts)) * 100
-```
-
 Of these `r length(unique(session_data_toreport$session_id))` sessions, `r length(unique(trial_data_all$session_id))` have had their responses coded so far.
 
 (Note on the dummy dataset - I've simulated a dataset for the case where we are planning to code 5 responses, but haven't gotten around to coding OR preparing the coder sheets for 3 of those responses.)
@@ -163,7 +162,13 @@ If the merge went as expected, the numbers below should match.
 # doing a merge to add family_id into the mix
 trial_data_toanalyze <- left_join(trial_data_all, session_data_toanalyze %>% select(session_id, family_id), by = "session_id")
 
-# this little bit is only temporary bc i'm gonna fill out age in gender and in the preprocessing script moving forward
+# doing a merge to add awareness coding to the file - might change this flow later idk
+trial_data_toanalyze <- trial_data_toanalyze %>%
+  left_join(UROP_trial_data_all %>% select(session_id, frame_id, aware),
+            by = c("session_id", "frame_id"))
+
+
+# adding age and gender to the trial dataset from the session data set
 trial_data_toanalyze <- left_join(trial_data_toanalyze, session_data_toanalyze %>% 
   select(session_id, gender, age_in_days), by = "session_id") %>% 
   mutate(gender.x = gender.y,) %>% 
@@ -176,6 +181,7 @@ print(nrow(trial_data_toanalyze))
 
 print(length(unique(trial_data_all$session_id)))
 print(length(unique(session_data_toanalyze$session_id)))
+
 ```
 
 Next, trim down the version of the dataset we're working with to relevant columns, to make the data easier to examine (remember, this is just what's happening inside R, the data files are unaffected unless you `write_csv` to a specific file!)
@@ -184,12 +190,14 @@ Next, trim down the version of the dataset we're working with to relevant column
 trial_data_toanalyze <- trial_data_toanalyze %>%
   select(session_id, family_id, child_id, age_in_days, gender, coder, visual_shown,
          session_order, trial_num, stimulus_set, test_trial_type, stimulus_target_utterance, informative_entities, cg_entities,
-         response_exact_utterance, parent_transcription, response_attempted_target, response_included_informative, response_included_cg,
+         response_exact_utterance, parent_transcription, response_attempted_target, response_included_informative, response_included_cg, aware,
          include_trial, exclusion_reason, trial_notes)
 
 # replace all NAs in the "included..." columns with just "n"
 trial_data_toanalyze <- trial_data_toanalyze %>%
-  mutate_at(vars(contains("included")), ~replace_na(na_if(., NA), "n"))
+  mutate_at(
+    vars(contains("included")), ~replace_na(na_if(., NA), "n")
+  )
 
 # use mutate_all() and str_replace_all() to rename all occurrences
 string_to_replace <- "\\[NA\\]"
@@ -198,14 +206,16 @@ trial_data_toanalyze <- trial_data_toanalyze %>%
 
 
 
-# do some data cleaning to recode e.g. yes/no into values that R can coerce later. But leave weird business so we catch oddly coded things!, don't force to T/F eyet
+# do some data cleaning to recode e.g. yes/no into values that R can coerce later. But leave weird business so we catch oddly coded things!, don't force to T/F yet
 
 yesno_tf = function(mystring){
   newstring = case_when(
     mystring == "YES" ~ "TRUE", 
     mystring == "Y" ~ "TRUE", 
+    mystring == "y" ~ "TRUE",
     mystring == "NO" ~ "FALSE", 
     mystring == "N" ~ "FALSE", 
+    mystring == "n" ~ "FALSE",
     TRUE ~ as.character(mystring))
   
   return(newstring)
@@ -215,6 +225,7 @@ trial_data_toanalyze <- trial_data_toanalyze %>%
   mutate(response_attempted_target = yesno_tf(response_attempted_target),
          response_included_informative = yesno_tf(response_included_informative), 
          response_included_cg = yesno_tf(response_included_cg), 
+         aware = yesno_tf(aware),
          include_trial = yesno_tf(include_trial)) %>% 
   filter(stimulus_set == 'test_trial')
 ```
@@ -283,7 +294,7 @@ trial_data_h1 <- trial_data_toanalyze %>%
           response_included_informative == TRUE & response_included_cg == TRUE ~ "Both"),
          # i don't use age in days for the graphs or anything saurrr
          age_in_months = round((age_in_days / 365) * 12)) %>% 
-  select(session_id, child_id, trial_id, age_in_months, gender, session_order, test_trial_type, trial_num, animacy, response_exact_utterance, response_included_informative,response_included_cg, utterance_type)
+  select(session_id, child_id, trial_id, age_in_months, gender, session_order, test_trial_type, trial_num, animacy, response_exact_utterance, response_included_informative,response_included_cg, aware, utterance_type)
 
 ```
 
@@ -640,6 +651,35 @@ ggplot(trial_data_h1, aes(x = age_in_months, fill = utterance_type)) +
   theme(axis.ticks.x = element_blank(),
       plot.title = element_text(hjust = 0.5))
 
+
+```
+
+```{r awareness, utterance type x awareness}
+# general awareness
+ggplot(trial_data_h1, aes(x = aware, fill = aware)) +
+  geom_bar() +
+  labs(title = "Utterances by Child Awareness", x = "Awareness", y = "Number of Utterances") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  scale_fill_manual(values = c("red3", "blue3")) +
+  theme(axis.ticks.x = element_blank(),
+      plot.title = element_text(hjust = 0.5)) 
+
+# utterance type x awareness
+ggplot(trial_data_h1, aes(x = aware, fill = utterance_type)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Utterances by Child Awareness and Type", x = "Child Awareness", y = "Number of Utterances", fill = "Utterance Type\n") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  scale_fill_manual(values = c("red3", "blue3", "purple3")) +
+  theme(axis.ticks.x = element_blank(),
+      plot.title = element_text(hjust = 0.5)) 
 
 ```
 
