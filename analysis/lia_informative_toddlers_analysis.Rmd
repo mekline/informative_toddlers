@@ -187,7 +187,7 @@ trial_data_toanalyze <- trial_data_toanalyze %>%
          stimulus_target_utterance, stimulus_condition, informative_entities, uninformative_entities,
          response_exact_utterance, parent_transcription, response_attempted_target, 
          response_included_subject, response_included_verb, response_included_object, response_included_distractor,
-         response_included_informative, response_included_uninformative,
+         response_included_informative, response_included_uninformative, aware,
          include_trial, exclusion_reason, trial_notes)
 
 # replace all NAs in the "included..." columns with just "n"
@@ -219,15 +219,16 @@ trial_data_toanalyze <- trial_data_toanalyze %>%
          response_included_subject = yesno_tf(response_included_subject), 
          response_included_verb = yesno_tf(response_included_verb),  
          response_included_object = yesno_tf(response_included_object), 
+         response_included_distractor = yesno_tf(response_included_distractor),
          response_included_informative = yesno_tf(response_included_informative), 
          response_included_uninformative = yesno_tf(response_included_uninformative), 
-         include_trial = yesno_tf(include_trial),
-         response_included_distractor = yesno_tf(response_included_distractor))
+         aware = yesno_tf(aware),
+         include_trial = yesno_tf(include_trial))
 ```
 
 Column definitions can all be found in the Data Coding Manual!
 
-## Trial-level exclusions and descriptive statistics
+## Utterance Summaries!
 
 For fun, here is a spreadsheet of all the utterances produced (warmup and critical), plus the way we would code them according to the coding manual!
 
@@ -307,7 +308,7 @@ trial_data_h1 <- trial_data_toanalyze %>%
            response_included_informative == FALSE & response_included_uninformative == TRUE ~ "Common Ground",
            response_included_informative == TRUE & response_included_uninformative == TRUE ~ "Both")
          ) %>% 
-  select(session_id, child_id, trial_id, age_in_months, gender, stimulus_condition, trial_num, stimulus_set, uninformative_entities, response_exact_utterance, response_included_subject, response_included_object, response_included_distractor, response_included_informative, response_included_uninformative, utterance_type)
+  select(session_id, child_id, trial_id, age_in_months, gender, stimulus_condition, trial_num, stimulus_set, uninformative_entities, response_exact_utterance, response_included_subject, response_included_object, response_included_distractor, response_included_informative, response_included_uninformative, aware, utterance_type)
 ```
 
 What we actually want to do is compare the `include_informative` rate to the `include_uninformative` rate - this is a test of difference between two dependent proportions (whether a child who can only speak a few words at a time says a CG word in the utterance is NOT independent of whether they say an INF word!), where the discordant observations are the ones that are informative about the question we're interested in. Given this table:
@@ -729,6 +730,35 @@ ggplot(h1_animacy, aes(x = animacy, fill = stimulus_condition)) +
 
 ```
  
+```{r awareness, utterance type x awareness}
+# general awareness
+ggplot(trial_data_h1, aes(x = aware, fill = aware)) +
+  geom_bar() +
+  labs(title = "Utterances by Child Awareness", x = "Awareness", y = "Number of Utterances") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  scale_fill_manual(values = c("red3", "blue3")) +
+  theme(axis.ticks.x = element_blank(),
+      plot.title = element_text(hjust = 0.5)) 
+
+# utterance type x awareness
+ggplot(trial_data_h1, aes(x = aware, fill = utterance_type)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Utterances by Child Awareness and Type", x = "Child Awareness", y = "Number of Utterances", fill = "Utterance Type\n") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  scale_fill_manual(values = c("red3", "blue3", "purple3")) +
+  theme(axis.ticks.x = element_blank(),
+      plot.title = element_text(hjust = 0.5)) 
+
+```
+ 
 
 
 ### Making a graph for H1b 
@@ -996,3 +1026,12 @@ specific_utterances <- test_trials_to_analyze %>%
     response_attempted_target == FALSE
     )
 ```
+
+```{r}
+speakers <- trial_data_h1 %>% 
+  select(session_id, child_id, age_in_months, gender) %>% 
+  distinct(session_id, .keep_all = TRUE)
+ 
+write.csv(speakers,"C:/Users/babyg/MIT Dropbox/Lia Washington/MIT Work Files/ECCL/Informative Toddlers/Data/data/v1_jan2024/v1_jan2024_complete_dataset/processed_data/v1_jan2024_step2_TOCODE/speakers.csv")
+```
+
