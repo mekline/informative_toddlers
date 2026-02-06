@@ -232,6 +232,22 @@ trial_data_toanalyze <- trial_data_toanalyze %>%
 
 Column definitions can all be found in the Data Coding Manual!
 
+Before continuing on to trial level exclusions, let's get some info about our sample pool.
+
+```{r}
+# how many unique children are there?
+pre_trial_exclusion_kids <- trial_data_toanalyze %>% 
+  distinct(child_id, .keep_all = TRUE)
+
+# what is the average age of these children?
+(mean(pre_trial_exclusion_kids$age_in_days) / 365) * 12
+
+# what is the gender breakdown?
+pre_trial_exclusion_kids %>% count(gender)
+
+```
+
+
 ## Trial-level exclusions and descriptive statistics
 
 Trial-level exclusions: Trials are excluded from analysis only if there is a reason that those trials should not be considered a successful measurement. That is, the CONTENT of what the child says (or doesn't say) does not determine this, only adult speech (e.g. that gave away the right answer) or child behavior (inattentive for this trial).  These decisions are made during coding and the full list of preregistered reasons can be found in the coding manual. There should be a reason listed below for every trial that is excluded!
@@ -489,6 +505,59 @@ ggplot(trial_data_h1, aes(x = gender, fill = gender)) +
 ```
 
 ## Count Data Graphs
+
+```{r production x age, production x gender, production x age x gender}
+
+# production x age
+ggplot(trial_data_h1, aes(x = age_in_months)) +
+  geom_bar(fill = "forestgreen") +
+  labs(title = "Utterance Production by Age", x = "Age in Months", y = "Number of Utterances") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_x_continuous(
+    breaks = seq(0, 25, by = 5),
+    limits = c(13, 25)) +
+  scale_y_continuous(
+    breaks = seq(0, 50, by = 5),
+    limits = c(0, 50)) + 
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+# production x gender
+ggplot(trial_data_h1, aes(x = gender, fill = gender)) +
+  geom_bar() +
+  labs(title = "Utterance Production by Gender", x = "Gender", y = "Number of Utterances", fill = "Gender\n") +
+  theme_bw() +
+  theme(panel.border = element_blank()) +
+  scale_x_discrete(labels = c("f" = "Female", "m" = "Male")) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  theme(legend.position = "none") +
+  # these are a bit of a "custom" command to ggplot so always add it at the end or it won't come out right
+  scale_fill_manual(values = c("f" = "pink",
+                               "m" = "skyblue")) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# production x age x gender
+ggplot(trial_data_h1, aes(x = age_in_months, fill = gender)) +
+  geom_bar() +
+  facet_wrap(~ gender,
+             labeller = as_labeller(c(f = "Female", m = "Male"))) +
+   scale_fill_manual(values = c("f" = "pink",
+                               "m" = "skyblue")) +
+  labs(title = "Utterance Production by Age", x = "Age in Months", y = "Number of Utterances") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_x_continuous(
+    breaks = seq(0, 25, by = 5),
+    limits = c(13, 25)) +
+  scale_y_continuous(
+    breaks = seq(0, 25, by = 5),
+    limits = c(0, 25)) + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.position = "none")
+
+```
 
 ```{r relevant utterances by type - selective and unselective}
 # selective kids
