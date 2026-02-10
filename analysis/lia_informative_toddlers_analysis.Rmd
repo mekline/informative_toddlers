@@ -520,9 +520,13 @@ line_data_h1_basic <- trial_data_h1 %>%
 # age, gender, utterance type
 line_data_h1_gender <- trial_data_h1 %>% 
   count(age_in_months, utterance_type, gender)
+
 # needed to answer a specific laura question about the bear shoes scenes
 bear_shoes_duck_ball <- trial_data_h1 %>% 
   filter(stimulus_condition == "commonground")
+# needed to ask a specific quesiton about agent/patient scenes
+agent_patient <- trial_data_h1 %>% 
+  filter(stimulus_condition != "commonground")
 ```
 ## Demographic Graphs
 
@@ -567,6 +571,59 @@ ggplot(trial_data_h1, aes(x = age_in_months)) +
 
 ### Graphs for H1
 
+```{r production x age, production x gender, production x age x gender}
+
+# production x age
+ggplot(trial_data_h1, aes(x = age_in_months)) +
+  geom_bar(fill = "darkgreen") +
+  labs(title = "Utterance Production by Age", x = "Age in Months", y = "Number of Utterances") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_x_continuous(
+    breaks = seq(0, 25, by = 5),
+    limits = c(13, 25)) +
+  scale_y_continuous(
+    breaks = seq(0, 50, by = 5),
+    limits = c(0, 50)) + 
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+# production x gender
+ggplot(trial_data_h1, aes(x = gender, fill = gender)) +
+  geom_bar() +
+  labs(title = "Utterance Production by Gender", x = "Gender", y = "Number of Utterances", fill = "Gender\n") +
+  theme_bw() +
+  theme(panel.border = element_blank()) +
+  scale_x_discrete(labels = c("f" = "Female", "m" = "Male")) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  theme(legend.position = "none") +
+  # these are a bit of a "custom" command to ggplot so always add it at the end or it won't come out right
+  scale_fill_manual(values = c("f" = "pink",
+                               "m" = "skyblue")) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# production x age x gender
+ggplot(trial_data_h1, aes(x = age_in_months, fill = gender)) +
+  geom_bar() +
+  facet_wrap(~ gender,
+             labeller = as_labeller(c(f = "Female", m = "Male"))) +
+   scale_fill_manual(values = c("f" = "pink",
+                               "m" = "skyblue")) +
+  labs(title = "Utterance Production by Age", x = "Age in Months", y = "Number of Utterances") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_x_continuous(
+    breaks = seq(0, 25, by = 5),
+    limits = c(13, 25)) +
+  scale_y_continuous(
+    breaks = seq(0, 50, by = 5),
+    limits = c(0, 50)) + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(legend.position = "none")
+
+```
+
 ```{r relevant utterances by type - selective and unselective}
 # selective kids
 ggplot(selective_h1_kids, aes(x = utterance_type, fill = utterance_type)) +
@@ -599,7 +656,21 @@ ggplot(trial_data_h1, aes(x = utterance_type, fill = utterance_type)) +
 # responses specifically for the "commonground" scenes
 ggplot(bear_shoes_duck_ball, aes(x = utterance_type, fill = utterance_type)) +
   geom_bar() +
-  labs(title = "Relevant Utterances by Type in Bear-Shoes and Duck-Ball Scenes", x = "Utterance Type", y = "Number of Utterances", fill = "Utterance Type\n") +
+  labs(title = "Relevant Utterances by Type in Novel Event Scenes", x = "Utterance Type", y = "Number of Utterances", fill = "Utterance Type\n") +
+  theme_bw() + 
+  theme(panel.border = element_blank()) +
+  scale_y_continuous(
+    breaks = seq(0, 100, by = 10),
+    limits = c(0, 100)) + 
+  scale_fill_manual(values = c("violetred3", "royalblue3", "mediumpurple3")) +
+  theme(axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      plot.title = element_text(hjust = 0.5)) 
+
+# responses specifically for the agent patient scenes
+ggplot(agent_patient, aes(x = utterance_type, fill = utterance_type)) +
+  geom_bar() +
+  labs(title = "Relevant Utterances by Type in Agent-Patient Scenes", x = "Utterance Type", y = "Number of Utterances", fill = "Utterance Type\n") +
   theme_bw() + 
   theme(panel.border = element_blank()) +
   scale_y_continuous(
@@ -893,6 +964,7 @@ ggplot(plot_data_h1, aes(x = val, y = estimate)) +
   labs(x = "", y = "Probability of being informative (among selective kids)") +
   theme(text = element_text(size = 14))
 ```
+
 ### H2a
 
 ```{r h2a model plot}
@@ -915,6 +987,7 @@ ggplot(plot_data_h2a, aes(x = val, y = estimate)) +
 ```
 
 ### H2b
+
 ```{r h2b model plot}
 h2b.kids.plot <- emmeans(h2b_kids_model, specs = "stimulus_condition", type = "response") %>%
   as_tibble()
@@ -928,7 +1001,9 @@ ggplot(h2b.kids.plot %>% filter(stimulus_condition == "agent_ambig"), aes(x = st
   labs(x = "", y = "Probability of being informative in ambiguous trials (among selective kids)") +
   theme(text = element_text(size = 14))
 ```
+
 ### Older H2b
+
 ```{r}
 h2b.kids.plot <- emmeans(h2b_kids_model, specs = "stimulus_condition", type = "response") %>%
   as_tibble()
@@ -943,8 +1018,8 @@ ggplot(h2b.kids.plot %>% filter(stimulus_condition == "patient_ambig"), aes(x = 
   theme(text = element_text(size = 14))
 ```
 
-
 ### H2c
+
 ```{r}
 h2c_ci <- confint(h2c_kids_model, method = "Wald") 
 h2c_intercept_ci <- h2c_ci["(Intercept)", ]
@@ -964,9 +1039,8 @@ ggplot(plot_data_h2c, aes(x = val, y = estimate)) +
   theme(text = element_text(size = 14))
 ```
 
-
-
 # Troubleshooting!
+
 In this section I have included some code to help diagnose the most common issues I ran into.
 
 Number of session ids not matching between trial_data_all and session_data_to_analyze? Use this code to investigate!
